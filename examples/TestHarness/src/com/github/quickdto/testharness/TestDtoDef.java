@@ -3,11 +3,11 @@ package com.github.quickdto.testharness;
 import java.util.List;
 import java.util.Set;
 
+import com.github.quickdto.EqualsHashCode;
+import com.github.quickdto.IgnoreDirty;
+import com.github.quickdto.QuickDto;
+import com.github.quickdto.ReadOnly;
 import com.github.quickdto.testharness.impl.TestImpl;
-import com.googlecode.slotted.client.quickdto.EqualsHashCode;
-import com.googlecode.slotted.client.quickdto.IgnoreDirty;
-import com.googlecode.slotted.client.quickdto.QuickDto;
-import com.googlecode.slotted.client.quickdto.ReadOnly;
 
 @QuickDto(TestImpl.class)
 abstract public class TestDtoDef {

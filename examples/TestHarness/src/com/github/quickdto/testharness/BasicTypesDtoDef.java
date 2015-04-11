@@ -1,8 +1,8 @@
 package com.github.quickdto.testharness;
 
 
+import com.github.quickdto.QuickDto;
 import com.github.quickdto.testharness.impl.TestImpl;
-import com.googlecode.slotted.client.quickdto.QuickDto;
 
 @QuickDto(TestImpl.class)
 public class BasicTypesDtoDef {

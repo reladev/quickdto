@@ -33,16 +33,9 @@ import com.github.quickdto.QuickDto;
 import com.github.quickdto.ReadOnly;
 
 
-@SupportedAnnotationTypes({"com.googlecode.slotted.client.quickdto.QuickDto"})
+@SupportedAnnotationTypes({"com.github.quickdto.QuickDto"})
 @SupportedSourceVersion(SourceVersion.RELEASE_7)
 public class QuickDtoProcessor extends AbstractProcessor {
-    int messageCount = 0;
-    private LinkedHashMap<String, DtoDef> dtoDefs = new LinkedHashMap<String, DtoDef>();
-
-    public void print(String message) {
-        processingEnv.getMessager().printMessage(Kind.NOTE, message + "_" + messageCount++);
-    }
-
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment env) {
         for (Element element : env.getElementsAnnotatedWith(QuickDto.class)) {
             if (!element.getSimpleName().toString().endsWith("DtoDef")) {
@@ -90,10 +83,6 @@ public class QuickDtoProcessor extends AbstractProcessor {
             }
         }
 
-        for (Field field : dtoDef.fields.values()) {
-            print(field.toString());
-        }
-
         writeDto(dtoDef);
         return dtoDef;
     }
@@ -123,7 +112,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
             bw.append("import java.util.List;\n");
             bw.append("import java.util.Map;\n");
             bw.append("import java.util.Set;\n");
-            bw.append("import com.googlecode.slotted.client.quickdto.Dto;\n");
+            bw.append("import com.github.quickdto.Dto;\n");
             bw.append("import ").append(dtoDef.packageString).append(".").append(dtoDef.name).append(".Fields;\n");
             bw.newLine();
             bw.append("public class ").append(dtoDef.name).append(" extends Dto<Fields> {\n");
@@ -302,7 +291,6 @@ public class QuickDtoProcessor extends AbstractProcessor {
                     } else if (t.getParameterTypes().size() == 1) {
                         field = t.getParameterTypes().get(0).accept(getType, element);
                     } else {
-                        print("exParams:" + t.getParameterTypes().size());
                         field.type = "Error";
                     }
 
@@ -315,7 +303,6 @@ public class QuickDtoProcessor extends AbstractProcessor {
                     }
                     int end = name.indexOf('(');
                     if (end == -1) {
-                        print("exName:" + name);
                         end = name.length();
                     }
                     field.fieldName = name.substring(start, end);
