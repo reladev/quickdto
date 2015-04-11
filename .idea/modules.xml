@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/examples/TestHarness/TestHarness.iml" filepath="$PROJECT_DIR$/examples/TestHarness/TestHarness.iml" />
+      <module fileurl="file://$PROJECT_DIR$/quickdto.iml" filepath="$PROJECT_DIR$/quickdto.iml" />
+    </modules>
+  </component>
+</project>
