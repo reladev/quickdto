@@ -1,7 +1,7 @@
 package com.github.quickdto.testharness;
 
 
-import com.github.quickdto.QuickDto;
+import com.github.quickdto.shared.QuickDto;
 import com.github.quickdto.testharness.impl.TestImpl;
 
 @QuickDto(TestImpl.class)

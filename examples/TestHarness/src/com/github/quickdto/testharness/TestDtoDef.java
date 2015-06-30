@@ -3,10 +3,10 @@ package com.github.quickdto.testharness;
 import java.util.List;
 import java.util.Set;
 
-import com.github.quickdto.EqualsHashCode;
-import com.github.quickdto.IgnoreDirty;
-import com.github.quickdto.QuickDto;
-import com.github.quickdto.ReadOnly;
+import com.github.quickdto.shared.EqualsHashCode;
+import com.github.quickdto.shared.IgnoreDirty;
+import com.github.quickdto.shared.QuickDto;
+import com.github.quickdto.shared.ReadOnly;
 import com.github.quickdto.testharness.impl.TestImpl;
 
 @QuickDto(TestImpl.class)

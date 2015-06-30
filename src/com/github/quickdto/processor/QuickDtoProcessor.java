@@ -28,12 +28,12 @@ import javax.lang.model.util.SimpleTypeVisitor7;
 import javax.tools.Diagnostic.Kind;
 import javax.tools.JavaFileObject;
 
-import com.github.quickdto.EqualsHashCode;
-import com.github.quickdto.QuickDto;
-import com.github.quickdto.ReadOnly;
+import com.github.quickdto.shared.EqualsHashCode;
+import com.github.quickdto.shared.QuickDto;
+import com.github.quickdto.shared.ReadOnly;
 
 
-@SupportedAnnotationTypes({"com.github.quickdto.QuickDto"})
+@SupportedAnnotationTypes({"com.github.quickdto.shared.QuickDto"})
 @SupportedSourceVersion(SourceVersion.RELEASE_7)
 public class QuickDtoProcessor extends AbstractProcessor {
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment env) {
@@ -49,7 +49,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
     }
 
     private DtoDef processDtoDef(Element defElement) {
-        processingEnv.getMessager().printMessage(Kind.NOTE, "Processing:" + defElement.getSimpleName());
+        processingEnv.getMessager().printMessage(Kind.NOTE, "QuickDto: " + defElement.getSimpleName());
         DtoDef dtoDef = new DtoDef();
         PackageElement packageElement = (PackageElement) defElement.getEnclosingElement();
         dtoDef.packageString = packageElement.getQualifiedName().toString();
@@ -112,7 +112,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
             bw.append("import java.util.List;\n");
             bw.append("import java.util.Map;\n");
             bw.append("import java.util.Set;\n");
-            bw.append("import com.github.quickdto.Dto;\n");
+            bw.append("import com.github.quickdto.shared.Dto;\n");
             bw.append("import ").append(dtoDef.packageString).append(".").append(dtoDef.name).append(".Fields;\n");
             bw.newLine();
             bw.append("public class ").append(dtoDef.name).append(" extends Dto<Fields> {\n");

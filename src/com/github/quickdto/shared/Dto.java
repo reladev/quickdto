@@ -1,4 +1,4 @@
-package com.github.quickdto;
+package com.github.quickdto.shared;
 
 import java.util.HashSet;
 import java.util.Set;

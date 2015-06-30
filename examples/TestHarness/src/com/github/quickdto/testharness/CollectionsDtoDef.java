@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.github.quickdto.QuickDto;
+import com.github.quickdto.shared.QuickDto;
 import com.github.quickdto.testharness.impl.TestImpl;
 
 @QuickDto(TestImpl.class)

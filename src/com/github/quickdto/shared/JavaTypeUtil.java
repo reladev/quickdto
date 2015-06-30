@@ -1,4 +1,4 @@
-package com.github.quickdto;
+package com.github.quickdto.shared;
 
 public class JavaTypeUtil {
     private static final String TYPE_PARSE = "avaType\"";

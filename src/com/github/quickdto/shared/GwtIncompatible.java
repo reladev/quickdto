@@ -1,4 +1,4 @@
-package com.github.quickdto;
+package com.github.quickdto.shared;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
