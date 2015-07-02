@@ -19,4 +19,16 @@ public class TestImpl {
     public void setMyString(String myString) {
         this.myString = myString;
     }
+
+    public void setReadOnly(int readOnly) {
+
+    }
+
+    public int getReadOnly() {
+        return 0;
+    }
+
+    public boolean isMyBoolean() {
+        return false;
+    }
 }

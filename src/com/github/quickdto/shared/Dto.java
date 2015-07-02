@@ -4,9 +4,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class Dto<T> {
-    private Set<T> dirtyFields = new HashSet<T>();
-    private Dto parent;
-    private Enum fieldInParent;
+    protected Set<T> dirtyFields = new HashSet<T>();
+    protected Dto parent;
+    protected Enum fieldInParent;
 
     public Dto() {
     }
@@ -33,6 +33,11 @@ public class Dto<T> {
 
     public boolean isDirty(T field) {
         return dirtyFields.contains(field);
+    }
+
+    @SuppressWarnings("unchecked")
+    public T[] getDirtyFields() {
+        return (T[]) dirtyFields.toArray();
     }
 
     public static boolean safeEquals(Object s1, Object s2) {

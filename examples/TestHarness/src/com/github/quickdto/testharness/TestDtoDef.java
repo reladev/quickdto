@@ -9,7 +9,7 @@ import com.github.quickdto.shared.QuickDto;
 import com.github.quickdto.shared.ReadOnly;
 import com.github.quickdto.testharness.impl.TestImpl;
 
-@QuickDto(TestImpl.class)
+@QuickDto(source = TestImpl.class)
 abstract public class TestDtoDef {
     @EqualsHashCode int id;
 

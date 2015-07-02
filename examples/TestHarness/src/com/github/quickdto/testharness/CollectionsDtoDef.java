@@ -8,7 +8,7 @@ import java.util.Set;
 import com.github.quickdto.shared.QuickDto;
 import com.github.quickdto.testharness.impl.TestImpl;
 
-@QuickDto(TestImpl.class)
+@QuickDto(source = TestImpl.class)
 public class CollectionsDtoDef {
     int[] intArray;
     float[] floatArray;

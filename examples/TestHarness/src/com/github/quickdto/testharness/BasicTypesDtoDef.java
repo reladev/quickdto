@@ -4,7 +4,7 @@ package com.github.quickdto.testharness;
 import com.github.quickdto.shared.QuickDto;
 import com.github.quickdto.testharness.impl.TestImpl;
 
-@QuickDto(TestImpl.class)
+@QuickDto(source = {TestImpl.class, CollectionsDtoDef.class})
 public class BasicTypesDtoDef {
     byte myByte;
     Byte objByte;
@@ -21,5 +21,6 @@ public class BasicTypesDtoDef {
     double myDouble;
     Double objDouble;
     boolean myBoolean;
+    Boolean objBoolean;
     String myString;
 }

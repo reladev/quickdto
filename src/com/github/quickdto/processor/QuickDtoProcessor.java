@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -13,8 +14,11 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ArrayType;
@@ -24,6 +28,7 @@ import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVisitor;
+import javax.lang.model.util.Elements;
 import javax.lang.model.util.SimpleTypeVisitor7;
 import javax.tools.Diagnostic.Kind;
 import javax.tools.JavaFileObject;
@@ -31,7 +36,6 @@ import javax.tools.JavaFileObject;
 import com.github.quickdto.shared.EqualsHashCode;
 import com.github.quickdto.shared.QuickDto;
 import com.github.quickdto.shared.ReadOnly;
-
 
 @SupportedAnnotationTypes({"com.github.quickdto.shared.QuickDto"})
 @SupportedSourceVersion(SourceVersion.RELEASE_7)
@@ -56,6 +60,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
         dtoDef.name = defElement.getSimpleName().toString();
         dtoDef.name = dtoDef.name.substring(0, dtoDef.name.length() - 3);
         dtoDef.qualifiedName = defElement.toString();
+
         //for (AnnotationMirror ann: defElement.getAnnotationMirrors()) {
         //    print(ann.toString());
         //}
@@ -74,17 +79,71 @@ public class QuickDtoProcessor extends AbstractProcessor {
                     field.readOnly = true;
                 }
 
-                Field existing = dtoDef.fields.get(field.fieldName);
+                Field existing = dtoDef.fields.get(field.accessorName);
                 if (existing == null) {
-                    dtoDef.fields.put(field.fieldName, field);
+                    dtoDef.fields.put(field.accessorName, field);
                 } else {
                     //merge
                 }
             }
         }
+        addSources(defElement, dtoDef);
 
         writeDto(dtoDef);
         return dtoDef;
+    }
+
+    private void addSources(Element element, DtoDef dtoDef) {
+        final String annotationName = QuickDto.class.getName();
+        element.getAnnotationMirrors();
+        for(AnnotationMirror am : element.getAnnotationMirrors() ) {
+            AnnotationValue action;
+            if(annotationName.equals(am.getAnnotationType().toString()) ) {
+                for(Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : am.getElementValues().entrySet() ) {
+                    if("source".equals(entry.getKey().getSimpleName().toString())) {
+                        action = entry.getValue();
+                        List sources = (List) action.getValue();
+                        for (Object source: sources) {
+                            Source sourceDef = new Source();
+                            dtoDef.sources.add(sourceDef);
+                            Elements elementUtils = processingEnv.getElementUtils();
+                            if (source instanceof Class) {
+                                String className = ((Class) source).getCanonicalName();
+                            }
+                            String className = source.toString();
+                            className = className.substring(0, className.length() - 6);
+                            sourceDef.type = className;
+                            TypeElement sourceType = elementUtils.getTypeElement(className);
+                            for (Element sourceSubEl: sourceType.getEnclosedElements()) {
+                                if (sourceSubEl instanceof ExecutableElement) {
+                                    String name = sourceSubEl.getSimpleName().toString();
+                                    if (name.startsWith("set")) {
+                                        String accessorName = name.substring(3);
+                                        if (dtoDef.fields.get(accessorName) != null) {
+                                            sourceDef.setters.add(accessorName);
+                                        }
+                                    }
+                                    if (name.startsWith("get")) {
+                                        String accessorName = name.substring(3);
+                                        if (dtoDef.fields.get(accessorName) != null) {
+                                            sourceDef.getters.add(accessorName);
+                                        }
+                                    }
+                                    if (name.startsWith("is")) {
+                                        String accessorName = name.substring(2);
+                                        if (dtoDef.fields.get(accessorName) != null) {
+                                            sourceDef.getters.add(accessorName);
+                                        }
+                                    }
+
+                                }
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     private void createNames(Field field) {
@@ -113,6 +172,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
             bw.append("import java.util.Map;\n");
             bw.append("import java.util.Set;\n");
             bw.append("import com.github.quickdto.shared.Dto;\n");
+            bw.append("import com.github.quickdto.shared.GwtIncompatible;\n");
             bw.append("import ").append(dtoDef.packageString).append(".").append(dtoDef.name).append(".Fields;\n");
             bw.newLine();
             bw.append("public class ").append(dtoDef.name).append(" extends Dto<Fields> {\n");
@@ -122,9 +182,8 @@ public class QuickDtoProcessor extends AbstractProcessor {
             writeFields(dtoDef, bw);
             bw.newLine();
             writeGettersSetters(dtoDef, bw);
-            bw.newLine();
             writeEqualsHash(dtoDef, bw);
-            bw.newLine();
+            writeCopyMethods(dtoDef, bw);
             bw.append("}\n");
 
             bw.flush();
@@ -157,7 +216,13 @@ public class QuickDtoProcessor extends AbstractProcessor {
 
     private void writeGettersSetters(DtoDef dtoDef, BufferedWriter bw) throws IOException {
         for (Field field: dtoDef.fields.values()) {
-            bw.append("\tpublic ").append(field.type).append(" get").append(field.accessorName).append("() {\n");
+            bw.append("\tpublic ").append(field.type);
+            if ("boolean".equals(field.type) || "java.lang.Boolean".equals(field.type)) {
+                bw.append(" is");
+            } else {
+                bw.append(" get");
+            }
+            bw.append(field.accessorName).append("() {\n");
             bw.append("\t\treturn ").append(field.fieldName).append(";\n");
             bw.append("\t}\n");
             bw.newLine();
@@ -260,6 +325,48 @@ public class QuickDtoProcessor extends AbstractProcessor {
         bw.newLine();
     }
 
+    private void writeCopyMethods(DtoDef dtoDef, BufferedWriter bw) throws IOException {
+        for (Source source: dtoDef.sources) {
+            writeCopyTo(source, dtoDef, bw);
+            writeCopyFrom(source, dtoDef, bw);
+        }
+    }
+
+    private void writeCopyTo(Source source, DtoDef dtoDef, BufferedWriter bw) throws IOException {
+        bw.append("\t@GwtIncompatible\n");
+        bw.append("\tpublic void copyTo(").append(source.type).append(" dest, Fields... fields) {\n");
+        bw.append("\t\tfor (Fields field: fields) {\n");
+        bw.append("\t\t\tswitch (field) {\n");
+        for (String setter: source.setters) {
+            Field field = dtoDef.fields.get(setter);
+            bw.append("\t\t\t\tcase ").append(field.enumName).append(":\n");
+            bw.append("\t\t\t\t\tdest.set").append(field.accessorName).append("(").append(field.fieldName).append(");\n");
+            bw.append("\t\t\t\t\tbreak;\n");
+        }
+        bw.append("\t\t\t}\n");
+        bw.append("\t\t}\n");
+        bw.append("\t}\n");
+        bw.newLine();
+    }
+
+    private void writeCopyFrom(Source source, DtoDef dtoDef, BufferedWriter bw) throws IOException {
+        bw.append("\t@GwtIncompatible\n");
+        bw.append("\tpublic void copyFrom(").append(source.type).append(" source) {\n");
+        for (String getter: source.getters) {
+            Field field = dtoDef.fields.get(getter);
+            bw.append("\t\t").append(field.fieldName).append(" = source.");
+            if ("boolean".equals(field.type) || "java.lang.Boolean".equals(field.type)) {
+                bw.append("is");
+            } else {
+                bw.append("get");
+            }
+            bw.append(field.accessorName).append("();\n");
+        }
+
+        bw.append("\t}\n");
+        bw.newLine();
+    }
+
     private final TypeVisitor<Field, Element> getType =
             new SimpleTypeVisitor7<Field, Element>() {
                 @Override public Field visitPrimitive(PrimitiveType t, Element element) {
@@ -313,28 +420,34 @@ public class QuickDtoProcessor extends AbstractProcessor {
             };
 
     public class DtoDef {
-        public String packageString;
-        public String name;
-        public String qualifiedName;
-        public Class[] sources;
-        private LinkedHashMap<String, Field> fields = new LinkedHashMap<String, Field>();
+        String packageString;
+        String name;
+        String qualifiedName;
+        LinkedList<Source> sources = new LinkedList<Source>();
+        LinkedHashMap<String, Field> fields = new LinkedHashMap<String, Field>();
     }
 
     public class Field {
-        public String type;
-        public String fieldName;
-        public String enumName;
-        public String accessorName;
-        public String importString;
-        public boolean primitive;
-        public boolean readOnly;
-        public boolean ignoreDirty;
-        public boolean equalsHashCode;
-        public Class[] jsonExclude;
-        public Class[] jsonInclude;
+        String type;
+        String fieldName;
+        String enumName;
+        String accessorName;
+        String importString;
+        boolean primitive;
+        boolean readOnly;
+        boolean ignoreDirty;
+        boolean equalsHashCode;
+        Class[] jsonExclude;
+        Class[] jsonInclude;
 
-        @Override public String toString() {
+        public String toString() {
             return type + " " + fieldName;
         }
+    }
+
+    public class Source {
+        String type;
+        LinkedList<String> getters = new LinkedList<String>();
+        LinkedList<String> setters = new LinkedList<String>();
     }
 }
