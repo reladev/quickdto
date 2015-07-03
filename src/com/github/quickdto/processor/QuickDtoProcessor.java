@@ -83,7 +83,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
                 if (existing == null) {
                     dtoDef.fields.put(field.accessorName, field);
                 } else {
-                    //merge
+                    //todo write merge
                 }
             }
         }
@@ -107,9 +107,6 @@ public class QuickDtoProcessor extends AbstractProcessor {
                             Source sourceDef = new Source();
                             dtoDef.sources.add(sourceDef);
                             Elements elementUtils = processingEnv.getElementUtils();
-                            if (source instanceof Class) {
-                                String className = ((Class) source).getCanonicalName();
-                            }
                             String className = source.toString();
                             className = className.substring(0, className.length() - 6);
                             sourceDef.type = className;
@@ -168,19 +165,20 @@ public class QuickDtoProcessor extends AbstractProcessor {
             bw.append("package ").append(dtoDef.packageString).append(";\n");
             bw.newLine();
             bw.append("import java.util.Arrays;\n");
+            bw.append("import java.util.HashSet;\n");
             bw.append("import java.util.List;\n");
             bw.append("import java.util.Map;\n");
             bw.append("import java.util.Set;\n");
-            bw.append("import com.github.quickdto.shared.Dto;\n");
+            bw.append("import com.github.quickdto.shared.DtoUtil;\n");
             bw.append("import com.github.quickdto.shared.GwtIncompatible;\n");
-            bw.append("import ").append(dtoDef.packageString).append(".").append(dtoDef.name).append(".Fields;\n");
             bw.newLine();
-            bw.append("public class ").append(dtoDef.name).append(" extends Dto<Fields> {\n");
+            bw.append("public class ").append(dtoDef.name).append(" {\n");
             bw.newLine();
             writeFieldsEnum(dtoDef, bw);
             bw.newLine();
             writeFields(dtoDef, bw);
             bw.newLine();
+            writeDirty(bw);
             writeGettersSetters(dtoDef, bw);
             writeEqualsHash(dtoDef, bw);
             writeCopyMethods(dtoDef, bw);
@@ -203,15 +201,68 @@ public class QuickDtoProcessor extends AbstractProcessor {
             } else {
                 first = false;
             }
-            bw.append("\t\t").append(field.enumName);
+            bw.append("\t\t").append(field.enumName).append("(\"").append(field.fieldName).append("\")");
         }
-        bw.append("\n\t}\n");
+        bw.append(";\n");
+        bw.newLine();
+        bw.append("\t\tprivate String name;\n");
+        bw.newLine();
+        bw.append("\t\tFields(String name) {\n");
+        bw.append("\t\t\tthis.name = name;\n");
+        bw.append("\t\t}\n");
+        bw.newLine();
+        bw.append("\t\tpublic static Fields get(String fieldName) {\n");
+        bw.append("\t\t\tfor (Fields field: Fields.values()) {\n");
+        bw.append("\t\t\t\tif (field.name.equals(fieldName)) {\n");
+        bw.append("\t\t\t\t\treturn field;\n");
+        bw.append("\t\t\t\t}\n");
+        bw.append("\t\t\t}\n");
+        bw.append("\t\t\treturn null;\n");
+        bw.append("\t\t}\n");
+        bw.append("\t}\n");
     }
 
     private void writeFields(DtoDef dtoDef, BufferedWriter bw) throws IOException {
         for (Field field: dtoDef.fields.values()) {
             bw.append("\tprivate ").append(field.type).append(" ").append(field.fieldName).append(";\n");
         }
+    }
+
+    private void writeDirty(BufferedWriter bw) throws IOException {
+        bw.append("\tprotected Set<Fields> dirtyFields = new HashSet<Fields>();\n");
+        bw.newLine();
+        bw.append("\tpublic void setDirty(Fields field, boolean dirty) {\n");
+        bw.append("\t\tif (dirty) {\n");
+        bw.append("\t\t\tdirtyFields.add(field);\n");
+        bw.append("\t\t} else {\n");
+        bw.append("\t\t\tdirtyFields.remove(field);\n");
+        bw.append("\t\t}\n");
+        // Todo handle dirty for nested
+        //bw.append("\t\tif (parent != null) {\n");
+        //bw.append("\t\t\tparent.setDirty(fieldInParent, isDirty());\n");
+        //bw.append("\t\t}\n");
+        bw.append("\t}\n");
+        bw.newLine();
+        bw.append("\tpublic boolean isDirty() {\n");
+        bw.append("\t\treturn !dirtyFields.isEmpty();\n");
+        bw.append("\t}\n");
+        bw.newLine();
+        bw.append("\tpublic boolean isDirty(Fields field) {\n");
+        bw.append("\t\treturn dirtyFields.contains(field);\n");
+        bw.append("\t}\n");
+        bw.newLine();
+        bw.append("\tpublic void setDirtyFields(Set<Fields> dirtyFields) { \n");
+        bw.append("\t\tthis.dirtyFields = dirtyFields;\n");
+        bw.append("\t}\n");
+        bw.newLine();
+        bw.append("\tpublic Set<Fields> getDirtyFields() {\n");
+        bw.append("\t\treturn dirtyFields;\n");
+        bw.append("\t}\n");
+        bw.newLine();
+        bw.append("\tpublic void resetDirty() {\n");
+        bw.append("\t\tdirtyFields.clear();\n");
+        bw.append("\t}\n");
+        bw.newLine();
     }
 
     private void writeGettersSetters(DtoDef dtoDef, BufferedWriter bw) throws IOException {
@@ -231,7 +282,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
                 if (field.primitive) {
                     bw.append("\t\tif (this.").append(field.fieldName).append(" != ").append(field.fieldName).append(") {\n");
                 } else {
-                    bw.append("\t\tif (Dto.safeEquals(this.").append(field.fieldName).append(", ").append(field.fieldName).append(")) {\n");
+                    bw.append("\t\tif (DtoUtil.safeEquals(this.").append(field.fieldName).append(", ").append(field.fieldName).append(")) {\n");
                 }
                 bw.append("\t\t\tsetDirty(Fields.").append(field.enumName).append(", true);\n");
                 bw.append("\t\t\tthis.").append(field.fieldName).append(" = ").append(field.fieldName).append(";\n");
@@ -335,6 +386,11 @@ public class QuickDtoProcessor extends AbstractProcessor {
     private void writeCopyTo(Source source, DtoDef dtoDef, BufferedWriter bw) throws IOException {
         bw.append("\t@GwtIncompatible\n");
         bw.append("\tpublic void copyTo(").append(source.type).append(" dest, Fields... fields) {\n");
+        bw.append("\t\tcopyTo(dest, Arrays.asList(fields));\n");
+        bw.append("\t}\n");
+        bw.newLine();
+        bw.append("\t@GwtIncompatible\n");
+        bw.append("\tpublic void copyTo(").append(source.type).append(" dest, Iterable<Fields> fields) {\n");
         bw.append("\t\tfor (Fields field: fields) {\n");
         bw.append("\t\t\tswitch (field) {\n");
         for (String setter: source.setters) {
