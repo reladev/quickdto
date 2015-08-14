@@ -24,6 +24,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.ExecutableType;
+import javax.lang.model.type.NoType;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
@@ -70,6 +71,9 @@ public class QuickDtoProcessor extends AbstractProcessor {
             if (subelement.getKind() != ElementKind.CONSTRUCTOR) {
                 TypeMirror mirror = subelement.asType();
                 Field field = mirror.accept(getType, subelement);
+                if (field == null) {
+                    throw new IllegalStateException(mirror + " type can't be found.  If a DtoDef references another DtoDef, don't use the create Dto, use the DtoDef");
+                }
                 createNames(field);
 
                 if (subelement.getAnnotation(EqualsHashCode.class) != null) {
@@ -111,28 +115,36 @@ public class QuickDtoProcessor extends AbstractProcessor {
                             className = className.substring(0, className.length() - 6);
                             sourceDef.type = className;
                             TypeElement sourceType = elementUtils.getTypeElement(className);
-                            for (Element sourceSubEl: sourceType.getEnclosedElements()) {
-                                if (sourceSubEl instanceof ExecutableElement) {
-                                    String name = sourceSubEl.getSimpleName().toString();
-                                    if (name.startsWith("set")) {
-                                        String accessorName = name.substring(3);
-                                        if (dtoDef.fields.get(accessorName) != null) {
-                                            sourceDef.setters.add(accessorName);
+                            while (sourceType != null) {
+                                for (Element sourceSubEl: sourceType.getEnclosedElements()) {
+                                    if (sourceSubEl instanceof ExecutableElement) {
+                                        String name = sourceSubEl.getSimpleName().toString();
+                                        if (name.startsWith("set")) {
+                                            String accessorName = name.substring(3);
+                                            if (dtoDef.fields.get(accessorName) != null) {
+                                                sourceDef.setters.add(accessorName);
+                                            }
                                         }
-                                    }
-                                    if (name.startsWith("get")) {
-                                        String accessorName = name.substring(3);
-                                        if (dtoDef.fields.get(accessorName) != null) {
-                                            sourceDef.getters.add(accessorName);
+                                        if (name.startsWith("get")) {
+                                            String accessorName = name.substring(3);
+                                            if (dtoDef.fields.get(accessorName) != null) {
+                                                sourceDef.getters.add(accessorName);
+                                            }
                                         }
-                                    }
-                                    if (name.startsWith("is")) {
-                                        String accessorName = name.substring(2);
-                                        if (dtoDef.fields.get(accessorName) != null) {
-                                            sourceDef.getters.add(accessorName);
+                                        if (name.startsWith("is")) {
+                                            String accessorName = name.substring(2);
+                                            if (dtoDef.fields.get(accessorName) != null) {
+                                                sourceDef.getters.add(accessorName);
+                                            }
                                         }
-                                    }
 
+                                    }
+                                }
+
+                                if (sourceType.getSuperclass() instanceof NoType) {
+                                    sourceType = null;
+                                } else {
+                                    sourceType = (TypeElement)((DeclaredType)sourceType.getSuperclass()).asElement();
                                 }
                             }
                         }
@@ -282,7 +294,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
                 if (field.primitive) {
                     bw.append("\t\tif (this.").append(field.fieldName).append(" != ").append(field.fieldName).append(") {\n");
                 } else {
-                    bw.append("\t\tif (DtoUtil.safeEquals(this.").append(field.fieldName).append(", ").append(field.fieldName).append(")) {\n");
+                    bw.append("\t\tif (!DtoUtil.safeEquals(this.").append(field.fieldName).append(", ").append(field.fieldName).append(")) {\n");
                 }
                 bw.append("\t\t\tsetDirty(Fields.").append(field.enumName).append(", true);\n");
                 bw.append("\t\t\tthis.").append(field.fieldName).append(" = ").append(field.fieldName).append(";\n");
@@ -443,6 +455,9 @@ public class QuickDtoProcessor extends AbstractProcessor {
                 @Override public Field visitDeclared(DeclaredType t, Element element) {
                     Field field = new Field();
                     field.type = t.toString();
+                    if (field.type.endsWith("DtoDef")) {
+                        field.type = field.type.substring(0, field.type.length() - 3);
+                    }
                     field.fieldName = element.toString();
                     return field;
                 }

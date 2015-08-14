@@ -1,6 +1,6 @@
 package com.github.quickdto.testharness.impl;
 
-public class TestImpl {
+public class TestImpl extends SuperImpl {
     private int myInt;
     private String myString;
 
