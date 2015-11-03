@@ -13,6 +13,7 @@ import com.github.quickdto.testharness.impl.TestImpl;
 abstract public class TestDtoDef {
     @EqualsHashCode int id;
 
+	@SuppressWarnings("")
     List<BasicTypesDtoDef> children;
     Set<BasicTypesDtoDef> childSet;
     BasicTypesDtoDef child;
@@ -23,11 +24,13 @@ abstract public class TestDtoDef {
     @IgnoreDirty BasicTypesDtoDef childIgnoreDirty;
 
     //This will create both a setter and getter
+	@SuppressWarnings("")
     abstract void setMethodInt(int methodInt);
     abstract void setMethodBoolean(boolean methodBoolean);
     abstract void setMethodString(String methodString);
 
     //This will create getter only
+    @SuppressWarnings("")
     abstract int getMethodReadOnly();
 
     //This will create both methods

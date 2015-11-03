@@ -83,7 +83,9 @@ public class QuickDtoProcessor extends AbstractProcessor {
                     field.readOnly = true;
                 }
 
-                Field existing = dtoDef.fields.get(field.accessorName);
+	            addAnnotations(subelement, field);
+
+	            Field existing = dtoDef.fields.get(field.accessorName);
                 if (existing == null) {
                     dtoDef.fields.put(field.accessorName, field);
                 } else {
@@ -96,6 +98,10 @@ public class QuickDtoProcessor extends AbstractProcessor {
         writeDto(dtoDef);
         return dtoDef;
     }
+
+	private boolean isQuickDtoAnntoation(AnnotationMirror an) {
+		return an.toString().startsWith("@com.github.quickdto");
+	}
 
     private void addSources(Element element, DtoDef dtoDef) {
         final String annotationName = QuickDto.class.getName();
@@ -154,6 +160,26 @@ public class QuickDtoProcessor extends AbstractProcessor {
             }
         }
     }
+
+	private void addAnnotations(Element subelement, Field field) {
+		List<? extends AnnotationMirror> annotationMirrors = subelement.getAnnotationMirrors();
+		for (AnnotationMirror am: annotationMirrors) {
+			if (!isQuickDtoAnntoation(am)) {
+				if (subelement.getKind() == ElementKind.FIELD) {
+					field.fieldAnnotations.add(am.toString());
+
+				} else if (subelement.getKind() == ElementKind.METHOD) {
+					if (subelement.getSimpleName().toString().startsWith("get")) {
+						field.getterAnnotations.add(am.toString());
+
+					} else if (subelement.getSimpleName().toString().startsWith("set")) {
+						field.setterAnnotations.add(am.toString());
+					}
+				}
+
+			}
+		}
+	}
 
     private void createNames(Field field) {
         char firstChar = field.fieldName.charAt(0);
@@ -236,6 +262,9 @@ public class QuickDtoProcessor extends AbstractProcessor {
 
     private void writeFields(DtoDef dtoDef, BufferedWriter bw) throws IOException {
         for (Field field: dtoDef.fields.values()) {
+	        for (String annotation: field.fieldAnnotations) {
+		        bw.append("\t").append(annotation).append("\n");
+	        }
             bw.append("\tprivate ").append(field.type).append(" ").append(field.fieldName).append(";\n");
         }
     }
@@ -279,6 +308,9 @@ public class QuickDtoProcessor extends AbstractProcessor {
 
     private void writeGettersSetters(DtoDef dtoDef, BufferedWriter bw) throws IOException {
         for (Field field: dtoDef.fields.values()) {
+	        for (String annotation: field.getterAnnotations) {
+		        bw.append("\t").append(annotation).append("\n");
+	        }
             bw.append("\tpublic ").append(field.type);
             if ("boolean".equals(field.type) || "java.lang.Boolean".equals(field.type)) {
                 bw.append(" is");
@@ -290,6 +322,9 @@ public class QuickDtoProcessor extends AbstractProcessor {
             bw.append("\t}\n");
             bw.newLine();
             if (!field.readOnly) {
+	            for (String annotation: field.setterAnnotations) {
+	   		        bw.append("\t").append(annotation).append("\n");
+	   	        }
                 bw.append("\tpublic void set").append(field.accessorName).append("(").append(field.type).append(" ").append(field.fieldName).append(") {\n");
                 if (field.primitive) {
                     bw.append("\t\tif (this.").append(field.fieldName).append(" != ").append(field.fieldName).append(") {\n");
@@ -510,6 +545,10 @@ public class QuickDtoProcessor extends AbstractProcessor {
         boolean equalsHashCode;
         Class[] jsonExclude;
         Class[] jsonInclude;
+	    List<String> fieldAnnotations = new LinkedList<String>();
+	    List<String> setterAnnotations = new LinkedList<String>();
+	    List<String> getterAnnotations = new LinkedList<String>();
+
 
         public String toString() {
             return type + " " + fieldName;
