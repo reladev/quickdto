@@ -114,52 +114,71 @@ public class QuickDtoProcessor extends AbstractProcessor {
                         action = entry.getValue();
                         List sources = (List) action.getValue();
                         for (Object source: sources) {
-                            Source sourceDef = new Source();
-                            dtoDef.sources.add(sourceDef);
-                            Elements elementUtils = processingEnv.getElementUtils();
-                            String className = source.toString();
-                            className = className.substring(0, className.length() - 6);
-                            sourceDef.type = className;
-                            TypeElement sourceType = elementUtils.getTypeElement(className);
-                            while (sourceType != null) {
-                                for (Element sourceSubEl: sourceType.getEnclosedElements()) {
-                                    if (sourceSubEl instanceof ExecutableElement) {
-                                        String name = sourceSubEl.getSimpleName().toString();
-                                        if (name.startsWith("set")) {
-                                            String accessorName = name.substring(3);
-                                            if (dtoDef.fields.get(accessorName) != null) {
-                                                sourceDef.setters.add(accessorName);
-                                            }
-                                        }
-                                        if (name.startsWith("get")) {
-                                            String accessorName = name.substring(3);
-                                            if (dtoDef.fields.get(accessorName) != null) {
-                                                sourceDef.getters.add(accessorName);
-                                            }
-                                        }
-                                        if (name.startsWith("is")) {
-                                            String accessorName = name.substring(2);
-                                            if (dtoDef.fields.get(accessorName) != null) {
-                                                sourceDef.getters.add(accessorName);
-                                            }
-                                        }
-
-                                    }
-                                }
-
-                                if (sourceType.getSuperclass() instanceof NoType) {
-                                    sourceType = null;
-                                } else {
-                                    sourceType = (TypeElement)((DeclaredType)sourceType.getSuperclass()).asElement();
-                                }
-                            }
+	                        addSource(dtoDef, source);
                         }
-                        break;
+                    } else if("implement".equals(entry.getKey().getSimpleName().toString())) {
+	                    action = entry.getValue();
+	                    List implementList = (List) action.getValue();
+	                    for (Object implement: implementList) {
+		                    String className = implement.toString();
+		                    className = className.substring(0, className.length() - 6);
+		                    dtoDef.implementList.add(className);
+	                    }
+                    } else if("extend".equals(entry.getKey().getSimpleName().toString())) {
+	                    action = entry.getValue();
+	                    List implementList = (List) action.getValue();
+	                    if (!implementList.isEmpty()) {
+		                    Object extend = implementList.get(0);
+		                    String className = extend.toString();
+		                    className = className.substring(0, className.length() - 6);
+		                    dtoDef.extend = className;
+	                    }
                     }
                 }
             }
         }
     }
+
+	private void addSource(DtoDef dtoDef, Object source) {Source sourceDef = new Source();
+		dtoDef.sources.add(sourceDef);
+		Elements elementUtils = processingEnv.getElementUtils();
+		String className = source.toString();
+		className = className.substring(0, className.length() - 6);
+		sourceDef.type = className;
+		TypeElement sourceType = elementUtils.getTypeElement(className);
+		while (sourceType != null) {
+		    for (Element sourceSubEl: sourceType.getEnclosedElements()) {
+		        if (sourceSubEl instanceof ExecutableElement) {
+		            String name = sourceSubEl.getSimpleName().toString();
+		            if (name.startsWith("set")) {
+		                String accessorName = name.substring(3);
+		                if (dtoDef.fields.get(accessorName) != null) {
+		                    sourceDef.setters.add(accessorName);
+		                }
+		            }
+		            if (name.startsWith("get")) {
+		                String accessorName = name.substring(3);
+		                if (dtoDef.fields.get(accessorName) != null) {
+		                    sourceDef.getters.add(accessorName);
+		                }
+		            }
+		            if (name.startsWith("is")) {
+		                String accessorName = name.substring(2);
+		                if (dtoDef.fields.get(accessorName) != null) {
+		                    sourceDef.getters.add(accessorName);
+		                }
+		            }
+
+		        }
+		    }
+
+		    if (sourceType.getSuperclass() instanceof NoType) {
+		        sourceType = null;
+		    } else {
+		        sourceType = (TypeElement)((DeclaredType)sourceType.getSuperclass()).asElement();
+		    }
+		}
+	}
 
 	private void addAnnotations(Element subelement, Field field) {
 		List<? extends AnnotationMirror> annotationMirrors = subelement.getAnnotationMirrors();
@@ -210,7 +229,17 @@ public class QuickDtoProcessor extends AbstractProcessor {
             bw.append("import com.github.quickdto.shared.DtoUtil;\n");
             bw.append("import com.github.quickdto.shared.GwtIncompatible;\n");
             bw.newLine();
-            bw.append("public class ").append(dtoDef.name).append(" {\n");
+            bw.append("public class ").append(dtoDef.name);
+	        if (dtoDef.extend != null) {
+		        bw.append(" extends ").append(dtoDef.extend);
+	        }
+	        if (!dtoDef.implementList.isEmpty()) {
+		        bw.append(" implements ");
+		        for (String implement : dtoDef.implementList) {
+			        bw.append(implement);
+		        }
+	        }
+	        bw.append(" {\n");
             bw.newLine();
             writeFieldsEnum(dtoDef, bw);
             bw.newLine();
@@ -341,7 +370,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
     }
 
     private void writeEqualsHash(DtoDef dtoDef, BufferedWriter bw) throws IOException {
-        List<Field> equalsFields = new LinkedList<Field>();
+        List<Field> equalsFields = new LinkedList<>();
         for (Field field: dtoDef.fields.values()) {
             if (field.equalsHashCode) {
                 equalsFields.add(field);
@@ -525,15 +554,17 @@ public class QuickDtoProcessor extends AbstractProcessor {
 
             };
 
-    public class DtoDef {
+    private class DtoDef {
         String packageString;
         String name;
         String qualifiedName;
         LinkedList<Source> sources = new LinkedList<Source>();
+        LinkedList<String> implementList = new LinkedList<>();
+        String extend;
         LinkedHashMap<String, Field> fields = new LinkedHashMap<String, Field>();
     }
 
-    public class Field {
+    private class Field {
         String type;
         String fieldName;
         String enumName;
@@ -545,9 +576,9 @@ public class QuickDtoProcessor extends AbstractProcessor {
         boolean equalsHashCode;
         Class[] jsonExclude;
         Class[] jsonInclude;
-	    List<String> fieldAnnotations = new LinkedList<String>();
-	    List<String> setterAnnotations = new LinkedList<String>();
-	    List<String> getterAnnotations = new LinkedList<String>();
+	    List<String> fieldAnnotations = new LinkedList<>();
+	    List<String> setterAnnotations = new LinkedList<>();
+	    List<String> getterAnnotations = new LinkedList<>();
 
 
         public String toString() {
@@ -555,9 +586,9 @@ public class QuickDtoProcessor extends AbstractProcessor {
         }
     }
 
-    public class Source {
+    private class Source {
         String type;
-        LinkedList<String> getters = new LinkedList<String>();
-        LinkedList<String> setters = new LinkedList<String>();
+        LinkedList<String> getters = new LinkedList<>();
+        LinkedList<String> setters = new LinkedList<>();
     }
 }

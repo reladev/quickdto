@@ -7,9 +7,11 @@ import com.github.quickdto.shared.EqualsHashCode;
 import com.github.quickdto.shared.IgnoreDirty;
 import com.github.quickdto.shared.QuickDto;
 import com.github.quickdto.shared.ReadOnly;
+import com.github.quickdto.testharness.impl.ExClass;
+import com.github.quickdto.testharness.impl.ImpInterface;
 import com.github.quickdto.testharness.impl.TestImpl;
 
-@QuickDto(source = TestImpl.class)
+@QuickDto(source = TestImpl.class, extend = ExClass.class, implement = ImpInterface.class)
 abstract public class TestDtoDef {
     @EqualsHashCode int id;
 
