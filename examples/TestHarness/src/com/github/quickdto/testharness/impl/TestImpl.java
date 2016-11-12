@@ -3,6 +3,8 @@ package com.github.quickdto.testharness.impl;
 public class TestImpl extends SuperImpl {
     private int myInt;
     private String myString;
+	private int readOnly;
+	private boolean myBoolean;
 
     public int getMyInt() {
         return myInt;
@@ -20,15 +22,19 @@ public class TestImpl extends SuperImpl {
         this.myString = myString;
     }
 
-    public void setReadOnly(int readOnly) {
+	public int getReadOnly() {
+		return readOnly;
+	}
 
-    }
+	public void setReadOnly(int readOnly) {
+		this.readOnly = readOnly;
+	}
 
-    public int getReadOnly() {
-        return 0;
-    }
+	public boolean isMyBoolean() {
+		return myBoolean;
+	}
 
-    public boolean isMyBoolean() {
-        return false;
-    }
+	public void setMyBoolean(boolean myBoolean) {
+		this.myBoolean = myBoolean;
+	}
 }

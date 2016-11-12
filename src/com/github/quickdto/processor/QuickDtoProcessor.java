@@ -79,8 +79,12 @@ public class QuickDtoProcessor extends AbstractProcessor {
                 if (subelement.getAnnotation(EqualsHashCode.class) != null) {
                     field.equalsHashCode = true;
                 }
-                if (subelement.getAnnotation(ReadOnly.class) != null) {
+                ReadOnly roAnnotation = subelement.getAnnotation(ReadOnly.class);
+                if (roAnnotation != null) {
                     field.readOnly = true;
+	                if (!roAnnotation.setter()) {
+		                field.excludeSetter = true;
+	                }
                 }
 
 	            addAnnotations(subelement, field);
@@ -278,6 +282,10 @@ public class QuickDtoProcessor extends AbstractProcessor {
         bw.append("\t\t\tthis.name = name;\n");
         bw.append("\t\t}\n");
         bw.newLine();
+        bw.append("\t\tpublic String toString() {\n");
+        bw.append("\t\t\treturn name;\n");
+        bw.append("\t\t}\n");
+        bw.newLine();
         bw.append("\t\tpublic static Fields get(String fieldName) {\n");
         bw.append("\t\t\tfor (Fields field: Fields.values()) {\n");
         bw.append("\t\t\t\tif (field.name.equals(fieldName)) {\n");
@@ -350,7 +358,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
             bw.append("\t\treturn ").append(field.fieldName).append(";\n");
             bw.append("\t}\n");
             bw.newLine();
-            if (!field.readOnly) {
+            if (!field.excludeSetter) {
 	            for (String annotation: field.setterAnnotations) {
 	   		        bw.append("\t").append(annotation).append("\n");
 	   	        }
@@ -462,8 +470,12 @@ public class QuickDtoProcessor extends AbstractProcessor {
     private void writeCopyTo(Source source, DtoDef dtoDef, BufferedWriter bw) throws IOException {
         bw.append("\t@GwtIncompatible\n");
         bw.append("\tpublic void copyTo(").append(source.type).append(" dest, Fields... fields) {\n");
-        bw.append("\t\tcopyTo(dest, Arrays.asList(fields));\n");
-        bw.append("\t}\n");
+	    bw.append("\t\tif (fields.length > 0) {\n");
+	    bw.append("\t\t\tcopyTo(dest, Arrays.asList(fields));\n");
+	    bw.append("\t\t} else {\n");
+	    bw.append("\t\t\tcopyTo(dest, getDirtyFields());\n");
+	    bw.append("\t\t}\n");
+	    bw.append("\t}\n");
         bw.newLine();
         bw.append("\t@GwtIncompatible\n");
         bw.append("\tpublic void copyTo(").append(source.type).append(" dest, Iterable<Fields> fields) {\n");
@@ -471,9 +483,11 @@ public class QuickDtoProcessor extends AbstractProcessor {
         bw.append("\t\t\tswitch (field) {\n");
         for (String setter: source.setters) {
             Field field = dtoDef.fields.get(setter);
-            bw.append("\t\t\t\tcase ").append(field.enumName).append(":\n");
-            bw.append("\t\t\t\t\tdest.set").append(field.accessorName).append("(").append(field.fieldName).append(");\n");
-            bw.append("\t\t\t\t\tbreak;\n");
+	        if (!field.readOnly) {
+		        bw.append("\t\t\t\tcase ").append(field.enumName).append(":\n");
+		        bw.append("\t\t\t\t\tdest.set").append(field.accessorName).append("(").append(field.fieldName).append(");\n");
+		        bw.append("\t\t\t\t\tbreak;\n");
+	        }
         }
         bw.append("\t\t\t}\n");
         bw.append("\t\t}\n");
@@ -572,6 +586,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
         String importString;
         boolean primitive;
         boolean readOnly;
+	    boolean excludeSetter;
         boolean ignoreDirty;
         boolean equalsHashCode;
         Class[] jsonExclude;
