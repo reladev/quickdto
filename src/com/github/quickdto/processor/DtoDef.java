@@ -8,6 +8,7 @@ public class DtoDef {
 	String name;
 	String qualifiedName;
 	String extend;
+	boolean strictCopy = true;
 	LinkedList<Source> sources = new LinkedList<>();
 	LinkedList<String> implementList = new LinkedList<>();
 	LinkedHashMap<String, Field> fields = new LinkedHashMap<String, Field>();

@@ -138,6 +138,11 @@ public class QuickDtoProcessor extends AbstractProcessor {
                         for (Object source: sources) {
 	                        addSource(dtoDef, source);
                         }
+
+                    } else if("strictCopy".equals(entry.getKey().getSimpleName().toString())) {
+	                    action = entry.getValue();
+	                    dtoDef.strictCopy = (boolean) action.getValue();
+
                     } else if("implement".equals(entry.getKey().getSimpleName().toString())) {
 	                    action = entry.getValue();
 	                    List implementList = (List) action.getValue();
@@ -146,6 +151,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
 		                    className = className.substring(0, className.length() - 6);
 		                    dtoDef.implementList.add(className);
 	                    }
+
                     } else if("extend".equals(entry.getKey().getSimpleName().toString())) {
 	                    action = entry.getValue();
 	                    List implementList = (List) action.getValue();
@@ -174,19 +180,25 @@ public class QuickDtoProcessor extends AbstractProcessor {
 		            String name = sourceSubEl.getSimpleName().toString();
 		            if (name.startsWith("set")) {
 		                String accessorName = name.substring(3);
-		                if (dtoDef.fields.get(accessorName) != null) {
+			            Field field = dtoDef.fields.get(accessorName);
+			            if (field != null) {
+				            field.sourceMapped = true;
 		                    sourceDef.setters.add(accessorName);
 		                }
 		            }
 		            if (name.startsWith("get")) {
 		                String accessorName = name.substring(3);
-		                if (dtoDef.fields.get(accessorName) != null) {
+			            Field field = dtoDef.fields.get(accessorName);
+			            if (field != null) {
+				            field.sourceMapped = true;
 		                    sourceDef.getters.add(accessorName);
 		                }
 		            }
 		            if (name.startsWith("is")) {
 		                String accessorName = name.substring(2);
-		                if (dtoDef.fields.get(accessorName) != null) {
+			            Field field = dtoDef.fields.get(accessorName);
+			            if (field != null) {
+				            field.sourceMapped = true;
 		                    sourceDef.getters.add(accessorName);
 		                }
 		            }
@@ -393,10 +405,6 @@ public class QuickDtoProcessor extends AbstractProcessor {
                 bw.append("\t}\n");
                 bw.newLine();
             }
-
-            if (field.body != null) {
-	            bw.append(field.body);
-            }
         }
     }
 
@@ -484,10 +492,15 @@ public class QuickDtoProcessor extends AbstractProcessor {
     }
 
     private void writeCopyMethods(DtoDef dtoDef, BufferedWriter bw) throws IOException {
-        for (Source source: dtoDef.sources) {
-            writeCopyTo(source, dtoDef, bw);
-            writeCopyFrom(source, dtoDef, bw);
-        }
+	    if (!dtoDef.sources.isEmpty()) {
+		    for (Source source : dtoDef.sources) {
+			    writeCopyTo(source, dtoDef, bw);
+			    writeCopyFrom(source, dtoDef, bw);
+		    }
+		    if (dtoDef.strictCopy) {
+			    writeUnmapped(dtoDef, bw);
+		    }
+	    }
     }
 
     private void writeCopyTo(Source source, DtoDef dtoDef, BufferedWriter bw) throws IOException {
@@ -534,6 +547,25 @@ public class QuickDtoProcessor extends AbstractProcessor {
 
         bw.append("\t}\n");
         bw.newLine();
+    }
+
+    private void writeUnmapped(DtoDef dtoDef, BufferedWriter bw) throws IOException {
+	    LinkedList<Field> unmapped = new LinkedList<>();
+	    for (Field field: dtoDef.fields.values()) {
+		    if (!field.sourceMapped) {
+			    unmapped.add(field);
+		    }
+	    }
+	    if (!unmapped.isEmpty()) {
+		    bw.append("\tpublic void fieldsNotMappedToSource() {\n");
+		    for (Field field: dtoDef.fields.values()) {
+			    bw.append("\t\t");
+			    bw.append(field.fieldName);
+			    bw.append(";\n");
+		    }
+		    bw.append("\t}\n");
+
+	    }
     }
 
     private void writeOtherMethods(DtoDef dtoDef, BufferedWriter bw) throws IOException {

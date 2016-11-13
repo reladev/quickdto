@@ -11,7 +11,7 @@ import com.github.quickdto.testharness.impl.ExClass;
 import com.github.quickdto.testharness.impl.ImpInterface;
 import com.github.quickdto.testharness.impl.TestImpl;
 
-@QuickDto(source = TestImpl.class, extend = ExClass.class, implement = ImpInterface.class)
+@QuickDto(source = TestImpl.class, extend = ExClass.class, implement = ImpInterface.class, strictCopy = false)
 abstract public class TestDtoDef {
     @EqualsHashCode int id;
 

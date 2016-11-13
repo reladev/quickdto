@@ -4,7 +4,7 @@ package com.github.quickdto.testharness;
 import com.github.quickdto.shared.QuickDto;
 import com.github.quickdto.testharness.impl.TestImpl;
 
-@QuickDto(source = {TestImpl.class, CollectionsDtoDef.class})
+@QuickDto(source = {TestImpl.class, CollectionsDtoDef.class}, strictCopy = false)
 public class BasicTypesDtoDef {
     byte myByte;
     Byte objByte;

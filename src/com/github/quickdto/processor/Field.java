@@ -8,15 +8,11 @@ public class Field implements Component {
 	String fieldName;
 	String enumName;
 	String accessorName;
-	String importString;
-	String body;
 	boolean primitive;
 	boolean readOnly;
 	boolean excludeSetter;
-	boolean ignoreDirty;
 	boolean equalsHashCode;
-	Class[] jsonExclude;
-	Class[] jsonInclude;
+	boolean sourceMapped;
 	List<String> fieldAnnotations = new LinkedList<>();
 	List<String> setterAnnotations = new LinkedList<>();
 	List<String> getterAnnotations = new LinkedList<>();

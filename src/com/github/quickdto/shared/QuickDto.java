@@ -11,4 +11,5 @@ public @interface QuickDto {
     Class[] source() default {};
     Class[] extend() default {};
     Class[] implement() default {};
+	boolean strictCopy() default true;
 }
