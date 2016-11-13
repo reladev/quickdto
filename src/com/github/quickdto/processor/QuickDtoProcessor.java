@@ -3,13 +3,13 @@ package com.github.quickdto.processor;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
@@ -37,16 +37,27 @@ import javax.tools.JavaFileObject;
 import com.github.quickdto.shared.EqualsHashCode;
 import com.github.quickdto.shared.QuickDto;
 import com.github.quickdto.shared.ReadOnly;
+import com.sun.source.tree.MethodTree;
+import com.sun.source.util.Trees;
 
 @SupportedAnnotationTypes({"com.github.quickdto.shared.QuickDto"})
 @SupportedSourceVersion(SourceVersion.RELEASE_7)
 public class QuickDtoProcessor extends AbstractProcessor {
-    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment env) {
+	private Trees trees;
+
+	@Override
+	public synchronized void init(ProcessingEnvironment processingEnv) {
+	    super.init(processingEnv);
+	    trees = Trees.instance(processingEnv);
+	}
+
+	public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment env) {
         for (Element element : env.getElementsAnnotatedWith(QuickDto.class)) {
             if (!element.getSimpleName().toString().endsWith("DtoDef")) {
                 processingEnv.getMessager().printMessage(Kind.ERROR, element.getSimpleName() + " DtoDef must end in 'DtoDef'");
             } else {
-                processDtoDef(element);
+	            DtoDef dtoDef = processDtoDef(element);
+	            writeDto(dtoDef);
             }
         }
 
@@ -62,49 +73,56 @@ public class QuickDtoProcessor extends AbstractProcessor {
         dtoDef.name = dtoDef.name.substring(0, dtoDef.name.length() - 3);
         dtoDef.qualifiedName = defElement.toString();
 
-        //for (AnnotationMirror ann: defElement.getAnnotationMirrors()) {
-        //    print(ann.toString());
-        //}
-        //QuickDto annotation = defElement.getAnnotation(QuickDto.class);
-
-        for (Element subelement : defElement.getEnclosedElements()) {
-            if (subelement.getKind() != ElementKind.CONSTRUCTOR) {
-                TypeMirror mirror = subelement.asType();
-                Field field = mirror.accept(getType, subelement);
-                if (field == null) {
-                    throw new IllegalStateException(mirror + " type can't be found.  If a DtoDef references another DtoDef, don't use the create Dto, use the DtoDef");
-                }
-                createNames(field);
-
-                if (subelement.getAnnotation(EqualsHashCode.class) != null) {
-                    field.equalsHashCode = true;
-                }
-                ReadOnly roAnnotation = subelement.getAnnotation(ReadOnly.class);
-                if (roAnnotation != null) {
-                    field.readOnly = true;
-	                if (!roAnnotation.setter()) {
-		                field.excludeSetter = true;
-	                }
-                }
-
-	            addAnnotations(subelement, field);
-
-	            Field existing = dtoDef.fields.get(field.accessorName);
-                if (existing == null) {
-                    dtoDef.fields.put(field.accessorName, field);
-                } else {
-                    //todo write merge
-                }
-            }
-        }
+	    addFieldMethods(defElement, dtoDef);
         addSources(defElement, dtoDef);
 
-        writeDto(dtoDef);
         return dtoDef;
     }
 
 	private boolean isQuickDtoAnntoation(AnnotationMirror an) {
 		return an.toString().startsWith("@com.github.quickdto");
+	}
+
+	private void addFieldMethods(Element defElement, DtoDef dtoDef) {
+		for (Element subelement : defElement.getEnclosedElements()) {
+			if (subelement.getKind() != ElementKind.CONSTRUCTOR) {
+				TypeMirror mirror = subelement.asType();
+				Component component = mirror.accept(getType, subelement);
+				if (component instanceof Field) {
+					addField(subelement, (Field) component, dtoDef);
+
+				} else if (component instanceof Method) {
+					dtoDef.methods.add((Method) component);
+
+				} else {
+					throw new IllegalStateException(mirror + " type can't be found.  If a DtoDef references another DtoDef, don't use the create Dto, use the DtoDef");
+				}
+			}
+		}
+	}
+
+	private void addField(Element subelement, Field field, DtoDef dtoDef) {
+		createNames(field);
+
+		if (subelement.getAnnotation(EqualsHashCode.class) != null) {
+			field.equalsHashCode = true;
+		}
+		ReadOnly roAnnotation = subelement.getAnnotation(ReadOnly.class);
+		if (roAnnotation != null) {
+			field.readOnly = true;
+			if (!roAnnotation.setter()) {
+				field.excludeSetter = true;
+			}
+		}
+
+		addAnnotations(subelement, field);
+
+		Field existing = dtoDef.fields.get(field.accessorName);
+		if (existing == null) {
+			dtoDef.fields.put(field.accessorName, field);
+		} else {
+			//todo write merge
+		}
 	}
 
     private void addSources(Element element, DtoDef dtoDef) {
@@ -253,6 +271,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
             writeGettersSetters(dtoDef, bw);
             writeEqualsHash(dtoDef, bw);
             writeCopyMethods(dtoDef, bw);
+	        writeOtherMethods(dtoDef, bw);
             bw.append("}\n");
 
             bw.flush();
@@ -373,6 +392,10 @@ public class QuickDtoProcessor extends AbstractProcessor {
                 bw.append("\t\t}\n");
                 bw.append("\t}\n");
                 bw.newLine();
+            }
+
+            if (field.body != null) {
+	            bw.append(field.body);
             }
         }
     }
@@ -513,9 +536,16 @@ public class QuickDtoProcessor extends AbstractProcessor {
         bw.newLine();
     }
 
-    private final TypeVisitor<Field, Element> getType =
-            new SimpleTypeVisitor7<Field, Element>() {
-                @Override public Field visitPrimitive(PrimitiveType t, Element element) {
+    private void writeOtherMethods(DtoDef dtoDef, BufferedWriter bw) throws IOException {
+	    for (Method method: dtoDef.methods) {
+		    bw.append(method.body);
+		    bw.newLine();
+	    }
+    }
+
+    private final TypeVisitor<Component, Element> getType =
+            new SimpleTypeVisitor7<Component, Element>() {
+                @Override public Component visitPrimitive(PrimitiveType t, Element element) {
                     Field field = new Field();
                     field.type = t.toString();
                     field.fieldName = element.toString();
@@ -523,14 +553,14 @@ public class QuickDtoProcessor extends AbstractProcessor {
                     return field;
                 }
 
-                @Override public Field visitArray(ArrayType t, Element element) {
+                @Override public Component visitArray(ArrayType t, Element element) {
                     Field field = new Field();
                     field.type = t.toString();
                     field.fieldName = element.toString();
                     return field;
                 }
 
-                @Override public Field visitDeclared(DeclaredType t, Element element) {
+                @Override public Component visitDeclared(DeclaredType t, Element element) {
                     Field field = new Field();
                     field.type = t.toString();
                     if (field.type.endsWith("DtoDef")) {
@@ -540,70 +570,51 @@ public class QuickDtoProcessor extends AbstractProcessor {
                     return field;
                 }
 
-                @Override public Field visitExecutable(ExecutableType t, Element element) {
-                    Field field = new Field();
-                    if (t.getReturnType().getKind() != TypeKind.VOID) {
-                        field = t.getReturnType().accept(getType, element);
-                    } else if (t.getParameterTypes().size() == 1) {
-                        field = t.getParameterTypes().get(0).accept(getType, element);
+                @Override public Component visitExecutable(ExecutableType t, Element element) {
+                    Component component = null;
+
+	                String name = element.toString();
+                    if ((name.startsWith("get") || name.startsWith("is")) &&
+	                      t.getReturnType().getKind() != TypeKind.VOID &&
+	                      t.getParameterTypes().size() == 0) {
+	                    component = t.getReturnType().accept(getType, element);
+
+                    } else if (name.startsWith("set") &&
+	                      t.getReturnType().getKind() == TypeKind.VOID &&
+	                      t.getParameterTypes().size() == 1) {
+	                    component = t.getParameterTypes().get(0).accept(getType, element);
+                    }
+
+                    if (component instanceof Field) {
+	                    int start = 0;
+	                    if (name.startsWith("set") || name.startsWith("get")) {
+	                        start = 3;
+	                    } else if (name.startsWith("is")) {
+	                        start = 2;
+	                    }
+	                    int end = name.indexOf('(');
+	                    if (end == -1) {
+	                        end = name.length();
+	                    }
+	                    ((Field) component).fieldName = name.substring(start, end);
+
                     } else {
-                        field.type = "Error";
+	                    Method method = new Method();
+	                    if ("convert".equals(element.toString()) && t.getParameterTypes().size() == 1) {
+		                    method.converter = true;
+		                    method.outType = t.getReturnType().toString();
+		                    method.inType = t.getParameterTypes().get(0).toString();
+	                    }
+
+	                    MethodScanner methodScanner = new MethodScanner();
+	                    MethodTree methodTree = methodScanner.scan((ExecutableElement) element, trees);
+	                    method.body = "\t" + methodTree.toString().replace("\n", "\n\t");
+
+	                    component = method;
                     }
 
-                    String name = element.toString();
-                    int start = 0;
-                    if (name.startsWith("set") || name.startsWith("get")) {
-                        start = 3;
-                    } else if (name.startsWith("is")) {
-                        start = 2;
-                    }
-                    int end = name.indexOf('(');
-                    if (end == -1) {
-                        end = name.length();
-                    }
-                    field.fieldName = name.substring(start, end);
-
-                    return field;
+                    return component;
                 }
 
             };
-
-    private class DtoDef {
-        String packageString;
-        String name;
-        String qualifiedName;
-        LinkedList<Source> sources = new LinkedList<Source>();
-        LinkedList<String> implementList = new LinkedList<>();
-        String extend;
-        LinkedHashMap<String, Field> fields = new LinkedHashMap<String, Field>();
-    }
-
-    private class Field {
-        String type;
-        String fieldName;
-        String enumName;
-        String accessorName;
-        String importString;
-        boolean primitive;
-        boolean readOnly;
-	    boolean excludeSetter;
-        boolean ignoreDirty;
-        boolean equalsHashCode;
-        Class[] jsonExclude;
-        Class[] jsonInclude;
-	    List<String> fieldAnnotations = new LinkedList<>();
-	    List<String> setterAnnotations = new LinkedList<>();
-	    List<String> getterAnnotations = new LinkedList<>();
-
-
-        public String toString() {
-            return type + " " + fieldName;
-        }
-    }
-
-    private class Source {
-        String type;
-        LinkedList<String> getters = new LinkedList<>();
-        LinkedList<String> setters = new LinkedList<>();
-    }
 }

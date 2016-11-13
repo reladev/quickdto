@@ -10,3 +10,4 @@ docs
 /lib
 /gwt-unitCache
 /www-test
+/examples/TestHarness/.apt_generated/
