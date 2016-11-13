@@ -9,4 +9,5 @@ public class SimpleDtoDef {
 	int normal;
 	@ReadOnly int readOnly;
 	@ReadOnly(setter = true) int readOnlyWithSetter;
+	int writeOnly;
 }

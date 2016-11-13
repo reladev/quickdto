@@ -4,6 +4,7 @@ public class Simple {
 	private int normal;
 	private int readOnly;
 	private int readOnlyWithSetter;
+	private int writeOnly;
 
 	public int getNormal() {
 		return normal;
@@ -27,5 +28,13 @@ public class Simple {
 
 	public void setReadOnlyWithSetter(int readOnlyWithSetter) {
 		this.readOnlyWithSetter = readOnlyWithSetter;
+	}
+
+	public void setWriteOnly(int writeOnly) {
+		this.writeOnly = writeOnly;
+	}
+
+	public int checkWriteOnly() {
+		return writeOnly;
 	}
 }

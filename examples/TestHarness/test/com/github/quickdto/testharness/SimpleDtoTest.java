@@ -27,6 +27,10 @@ public class SimpleDtoTest {
 		SimpleDto.class.getDeclaredMethod("getReadOnlyWithSetter");
 		SimpleDto.class.getDeclaredMethod("setReadOnlyWithSetter", int.class);
 
+		// WriteOnly
+		SimpleDto.class.getDeclaredMethod("getWriteOnly");
+		SimpleDto.class.getDeclaredMethod("setWriteOnly", int.class);
+
 	}
 
 	@Test
@@ -35,6 +39,7 @@ public class SimpleDtoTest {
 		from.setNormal(1);
 		from.setReadOnly(1);
 		from.setReadOnlyWithSetter(1);
+		from.setWriteOnly(1);
 
 		SimpleDto dto = new SimpleDto();
 
@@ -43,14 +48,17 @@ public class SimpleDtoTest {
 		assertEquals(1, dto.getReadOnly());
 		assertEquals(1, dto.getReadOnly());
 		assertEquals(1, dto.getReadOnly());
+		assertEquals(0, dto.getWriteOnly());
 
 		Simple toClean = new Simple();
 		assertEquals(0, toClean.getNormal());
 		assertEquals(0, toClean.getReadOnly());
 		assertEquals(0, toClean.getReadOnlyWithSetter());
+		assertEquals(0, toClean.checkWriteOnly());
 
 		dto.setNormal(2);
 		dto.setReadOnlyWithSetter(2);
+		dto.setWriteOnly(2);
 		dto.setDirty(Fields.READ_ONLY, true);
 
 		Simple toDirty = new Simple();
@@ -58,6 +66,7 @@ public class SimpleDtoTest {
 		assertEquals(2, toDirty.getNormal());
 		assertEquals(0, toDirty.getReadOnly());
 		assertEquals(0, toDirty.getReadOnlyWithSetter());
+		assertEquals(2, toDirty.checkWriteOnly());
 
 	}
 }
