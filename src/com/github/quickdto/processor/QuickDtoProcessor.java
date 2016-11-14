@@ -260,7 +260,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
             bw.append("import java.util.List;\n");
             bw.append("import java.util.Map;\n");
             bw.append("import java.util.Set;\n");
-            bw.append("import com.github.quickdto.shared.DtoUtil;\n");
+            bw.append("import java.util.Objects;\n");
             bw.append("import com.github.quickdto.shared.GwtIncompatible;\n");
             bw.newLine();
             bw.append("public class ").append(dtoDef.name);
@@ -397,7 +397,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
                 if (field.primitive) {
                     bw.append("\t\tif (this.").append(field.fieldName).append(" != ").append(field.fieldName).append(") {\n");
                 } else {
-                    bw.append("\t\tif (!DtoUtil.safeEquals(this.").append(field.fieldName).append(", ").append(field.fieldName).append(")) {\n");
+                    bw.append("\t\tif (!Objects.equals(this.").append(field.fieldName).append(", ").append(field.fieldName).append(")) {\n");
                 }
                 bw.append("\t\t\tsetDirty(Fields.").append(field.enumName).append(", true);\n");
                 bw.append("\t\t\tthis.").append(field.fieldName).append(" = ").append(field.fieldName).append(";\n");
