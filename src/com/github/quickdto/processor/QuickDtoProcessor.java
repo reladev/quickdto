@@ -12,13 +12,13 @@ import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
-import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ArrayType;
@@ -41,14 +41,19 @@ import com.sun.source.tree.MethodTree;
 import com.sun.source.util.Trees;
 
 @SupportedAnnotationTypes({"com.github.quickdto.shared.QuickDto"})
-@SupportedSourceVersion(SourceVersion.RELEASE_7)
 public class QuickDtoProcessor extends AbstractProcessor {
+	private ProcessingEnvironment processingEnv;
 	private Trees trees;
 
 	@Override
+	public SourceVersion getSupportedSourceVersion() {
+	    return SourceVersion.latest();
+	}
+
+	@Override
 	public synchronized void init(ProcessingEnvironment processingEnv) {
-	    super.init(processingEnv);
-	    trees = Trees.instance(processingEnv);
+		this.processingEnv = processingEnv;
+		super.init(processingEnv);
 	}
 
 	public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment env) {
@@ -95,7 +100,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
 					dtoDef.methods.add((Method) component);
 
 				} else {
-					throw new IllegalStateException(mirror + " type can't be found.  If a DtoDef references another DtoDef, don't use the create Dto, use the DtoDef");
+					processingEnv.getMessager().printMessage(Kind.WARNING, "--IGNORING:" + mirror + " - If method should be copied, set \"copyMethod\" in @QuickDto");
 				}
 			}
 		}
@@ -160,6 +165,13 @@ public class QuickDtoProcessor extends AbstractProcessor {
 		                    String className = extend.toString();
 		                    className = className.substring(0, className.length() - 6);
 		                    dtoDef.extend = className;
+	                    }
+
+                    } else if("copyMethods".equals(entry.getKey().getSimpleName().toString())) {
+	                    action = entry.getValue();
+	                    boolean copyMethods = (boolean) action.getValue();
+	                    if (copyMethods) {
+		                    trees = Trees.instance(processingEnv);
 	                    }
                     }
                 }
@@ -630,14 +642,28 @@ public class QuickDtoProcessor extends AbstractProcessor {
 	                    }
 	                    ((Field) component).fieldName = name.substring(start, end);
 
-                    } else {
+                    } else if ("convert".equals(element.toString()) && t.getParameterTypes().size() == 1) {
 	                    Method method = new Method();
-	                    if ("convert".equals(element.toString()) && t.getParameterTypes().size() == 1) {
-		                    method.converter = true;
-		                    method.outType = t.getReturnType().toString();
-		                    method.inType = t.getParameterTypes().get(0).toString();
-	                    }
+	                    method.converter = true;
+	                    method.outType = t.getReturnType().toString();
+	                    method.inType = t.getParameterTypes().get(0).toString();
 
+	                    if (trees != null) {
+		                    MethodScanner methodScanner = new MethodScanner();
+		                    MethodTree methodTree = methodScanner.scan((ExecutableElement) element, trees);
+		                    method.body = "\t" + methodTree.toString().replace("\n", "\n\t");
+		                    method.isStatic = element.getModifiers().contains(Modifier.STATIC);
+
+	                    } else if (element.getModifiers().contains(Modifier.STATIC)) {
+		                    method.isStatic = true;
+
+	                    } else {
+		                    method = null;
+	                    }
+	                    component = method;
+
+                    } else if (trees != null) {
+	                    Method method = new Method();
 	                    MethodScanner methodScanner = new MethodScanner();
 	                    MethodTree methodTree = methodScanner.scan((ExecutableElement) element, trees);
 	                    method.body = "\t" + methodTree.toString().replace("\n", "\n\t");
