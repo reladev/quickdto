@@ -5,17 +5,17 @@
       <configuration>
         <setting name="compilerMaxHeapSize" value="128" />
         <setting name="gwtScriptOutputStyle" value="DETAILED" />
-        <setting name="gwtSdkUrl" value="file://$MODULE_DIR$/../../../javalib/gwt-2.6.0" />
+        <setting name="gwtSdkUrl" value="file://$MODULE_DIR$/../../javalib/gwt-2.6.0" />
         <setting name="webFacet" value="Web" />
       </configuration>
     </facet>
     <facet type="web" name="Web">
       <configuration>
         <descriptors>
-          <deploymentDescriptor name="web.xml" url="file://$MODULE_DIR$/war/WEB-INF/web.xml" />
+          <deploymentDescriptor name="web.xml" url="file://$MODULE_DIR$/../examples/TestHarness/war/WEB-INF/web.xml" />
         </descriptors>
         <webroots>
-          <root url="file://$MODULE_DIR$/../GinCodeSplitting/war" relative="/" />
+          <root url="file://$MODULE_DIR$/../examples/GinCodeSplitting/war" relative="/" />
         </webroots>
         <sourceRoots />
       </configuration>
@@ -27,8 +27,8 @@
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/.apt_generated" isTestSource="false" generated="true" />
       <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="true" />
-      <excludeFolder url="file://$MODULE_DIR$/../GinCodeSplitting/build" />
-      <excludeFolder url="file://$MODULE_DIR$/../GinCodeSplitting/extras" />
+      <excludeFolder url="file://$MODULE_DIR$/../examples/GinCodeSplitting/build" />
+      <excludeFolder url="file://$MODULE_DIR$/../examples/GinCodeSplitting/extras" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
@@ -37,11 +37,11 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../build/libs/quickdto-0.1-SNAPSHOT.jar!/" />
+          <root url="jar://$MODULE_DIR$/../build/libs/quickdto-0.1-SNAPSHOT.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$MODULE_DIR$/../../build/libs/quickdto-0.1-SNAPSHOT.jar!/" />
+          <root url="jar://$MODULE_DIR$/../build/libs/quickdto-0.1-SNAPSHOT.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
