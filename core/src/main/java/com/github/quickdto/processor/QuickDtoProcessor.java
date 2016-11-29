@@ -34,9 +34,11 @@ import javax.lang.model.util.SimpleTypeVisitor7;
 import javax.tools.Diagnostic.Kind;
 import javax.tools.JavaFileObject;
 
+import com.github.quickdto.shared.CopyToOnly;
 import com.github.quickdto.shared.EqualsHashCode;
 import com.github.quickdto.shared.QuickDto;
-import com.github.quickdto.shared.ReadOnly;
+import com.github.quickdto.shared.CopyFromOnly;
+import com.github.quickdto.shared.StrictCopy;
 import com.sun.source.tree.MethodTree;
 import com.sun.source.util.Trees;
 
@@ -78,11 +80,22 @@ public class QuickDtoProcessor extends AbstractProcessor {
         dtoDef.name = dtoDef.name.substring(0, dtoDef.name.length() - 3);
         dtoDef.qualifiedName = defElement.toString();
 
+        addClassAnnotations(defElement, dtoDef);
 	    addFieldMethods(defElement, dtoDef);
         addSources(defElement, dtoDef);
 
         return dtoDef;
     }
+
+	private void addClassAnnotations(Element subelement, DtoDef dtoDef) {
+		List<? extends AnnotationMirror> annotationMirrors = subelement.getAnnotationMirrors();
+		for (AnnotationMirror am: annotationMirrors) {
+			if (!isQuickDtoAnntoation(am)) {
+				dtoDef.annotations.add(am.toString());
+			}
+		}
+	}
+
 
 	private boolean isQuickDtoAnntoation(AnnotationMirror an) {
 		return an.toString().startsWith("@com.github.quickdto");
@@ -98,9 +111,6 @@ public class QuickDtoProcessor extends AbstractProcessor {
 
 				} else if (component instanceof Method) {
 					dtoDef.methods.add((Method) component);
-
-				} else {
-					processingEnv.getMessager().printMessage(Kind.WARNING, "--IGNORING:" + mirror + " - If method should be copied, set \"copyMethod\" in @QuickDto");
 				}
 			}
 		}
@@ -112,12 +122,26 @@ public class QuickDtoProcessor extends AbstractProcessor {
 		if (subelement.getAnnotation(EqualsHashCode.class) != null) {
 			field.equalsHashCode = true;
 		}
-		ReadOnly roAnnotation = subelement.getAnnotation(ReadOnly.class);
-		if (roAnnotation != null) {
-			field.readOnly = true;
-			if (!roAnnotation.setter()) {
+		CopyFromOnly copyFromOnly = subelement.getAnnotation(CopyFromOnly.class);
+		if (copyFromOnly != null) {
+			field.copyFrom = true;
+			if (!copyFromOnly.setter()) {
 				field.excludeSetter = true;
 			}
+		}
+		CopyToOnly copyToOnly = subelement.getAnnotation(CopyToOnly.class);
+		if (copyToOnly != null) {
+			field.copyFrom = true;
+			if (!copyToOnly.getter()) {
+				field.excludeGetter = true;
+			}
+		}
+		StrictCopy strictCopy = subelement.getAnnotation(StrictCopy.class);
+		if (strictCopy != null) {
+			field.strictCopy = strictCopy.value();
+
+		} else {
+			field.strictCopy = dtoDef.strictCopy;
 		}
 
 		addAnnotations(subelement, field);
@@ -148,6 +172,10 @@ public class QuickDtoProcessor extends AbstractProcessor {
 	                    action = entry.getValue();
 	                    dtoDef.strictCopy = (boolean) action.getValue();
 
+                    } else if("fieldAnnotationsOnGetter".equals(entry.getKey().getSimpleName().toString())) {
+	                    action = entry.getValue();
+	                    dtoDef.fieldAnnotationsOnGetter = (boolean) action.getValue();
+
                     } else if("implement".equals(entry.getKey().getSimpleName().toString())) {
 	                    action = entry.getValue();
 	                    List implementList = (List) action.getValue();
@@ -159,11 +187,9 @@ public class QuickDtoProcessor extends AbstractProcessor {
 
                     } else if("extend".equals(entry.getKey().getSimpleName().toString())) {
 	                    action = entry.getValue();
-	                    List implementList = (List) action.getValue();
-	                    if (!implementList.isEmpty()) {
-		                    Object extend = implementList.get(0);
-		                    String className = extend.toString();
-		                    className = className.substring(0, className.length() - 6);
+	                    Object extend = action.getValue();
+	                    String className = extend.toString();
+	                    if (!className.equals(Object.class.getCanonicalName())) {
 		                    dtoDef.extend = className;
 	                    }
 
@@ -275,6 +301,10 @@ public class QuickDtoProcessor extends AbstractProcessor {
             bw.append("import java.util.Objects;\n");
             bw.append("import com.github.quickdto.shared.GwtIncompatible;\n");
             bw.newLine();
+            for (String annotation: dtoDef.annotations) {
+            	bw.append(annotation);
+	            bw.newLine();
+            }
             bw.append("public class ").append(dtoDef.name);
 	        if (dtoDef.extend != null) {
 		        bw.append(" extends ").append(dtoDef.extend);
@@ -342,8 +372,10 @@ public class QuickDtoProcessor extends AbstractProcessor {
 
     private void writeFields(DtoDef dtoDef, BufferedWriter bw) throws IOException {
         for (Field field: dtoDef.fields.values()) {
-	        for (String annotation: field.fieldAnnotations) {
-		        bw.append("\t").append(annotation).append("\n");
+        	if (!dtoDef.fieldAnnotationsOnGetter) {
+		        for (String annotation : field.fieldAnnotations) {
+			        bw.append("\t").append(annotation).append("\n");
+		        }
 	        }
             bw.append("\tprivate ").append(field.type).append(" ").append(field.fieldName).append(";\n");
         }
@@ -388,6 +420,11 @@ public class QuickDtoProcessor extends AbstractProcessor {
 
     private void writeGettersSetters(DtoDef dtoDef, BufferedWriter bw) throws IOException {
         for (Field field: dtoDef.fields.values()) {
+        	if (dtoDef.fieldAnnotationsOnGetter) {
+		        for (String annotation: field.fieldAnnotations) {
+			        bw.append("\t").append(annotation).append("\n");
+		        }
+	        }
 	        for (String annotation: field.getterAnnotations) {
 		        bw.append("\t").append(annotation).append("\n");
 	        }
@@ -531,7 +568,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
         bw.append("\t\t\tswitch (field) {\n");
         for (String setter: source.setters) {
             Field field = dtoDef.fields.get(setter);
-	        if (!field.readOnly) {
+	        if (!field.copyFrom) {
 		        bw.append("\t\t\t\tcase ").append(field.enumName).append(":\n");
 		        bw.append("\t\t\t\t\tdest.set").append(field.accessorName).append("(").append(field.fieldName).append(");\n");
 		        bw.append("\t\t\t\t\tbreak;\n");
@@ -564,13 +601,13 @@ public class QuickDtoProcessor extends AbstractProcessor {
     private void writeUnmapped(DtoDef dtoDef, BufferedWriter bw) throws IOException {
 	    LinkedList<Field> unmapped = new LinkedList<>();
 	    for (Field field: dtoDef.fields.values()) {
-		    if (!field.sourceMapped) {
+		    if (field.strictCopy && !field.sourceMapped) {
 			    unmapped.add(field);
 		    }
 	    }
 	    if (!unmapped.isEmpty()) {
 		    bw.append("\tpublic void fieldsNotMappedToSource() {\n");
-		    for (Field field: dtoDef.fields.values()) {
+		    for (Field field: unmapped) {
 			    bw.append("\t\t");
 			    bw.append(field.fieldName);
 			    bw.append(";\n");
@@ -642,25 +679,27 @@ public class QuickDtoProcessor extends AbstractProcessor {
 	                    }
 	                    ((Field) component).fieldName = name.substring(start, end);
 
-                    } else if ("convert".equals(element.toString()) && t.getParameterTypes().size() == 1) {
-	                    Method method = new Method();
-	                    method.converter = true;
-	                    method.outType = t.getReturnType().toString();
-	                    method.inType = t.getParameterTypes().get(0).toString();
-
-	                    if (trees != null) {
-		                    MethodScanner methodScanner = new MethodScanner();
-		                    MethodTree methodTree = methodScanner.scan((ExecutableElement) element, trees);
-		                    method.body = "\t" + methodTree.toString().replace("\n", "\n\t");
-		                    method.isStatic = element.getModifiers().contains(Modifier.STATIC);
-
-	                    } else if (element.getModifiers().contains(Modifier.STATIC)) {
-		                    method.isStatic = true;
-
-	                    } else {
-		                    method = null;
-	                    }
-	                    component = method;
+                    } else if (element.toString().startsWith("convert") && t.getParameterTypes().size() == 1) {
+	                    processingEnv.getMessager().printMessage(Kind.WARNING, "--WARNING Convert not implemented");
+	                    //Method method = new Method();
+	                    //method.converter = true;
+	                    //method.outType = t.getReturnType().toString();
+	                    //method.inType = t.getParameterTypes().get(0).toString();
+	                    //
+	                    //if (trees != null) {
+	                    //   MethodScanner methodScanner = new MethodScanner();
+	                    //   MethodTree methodTree = methodScanner.scan((ExecutableElement) element, trees);
+	                    //   method.body = "\t" + methodTree.toString().replace("\n", "\n\t");
+	                    //   method.isStatic = element.getModifiers().contains(Modifier.STATIC);
+	                    //
+	                    //} else if (element.getModifiers().contains(Modifier.STATIC)) {
+	                    //   method.isStatic = true;
+	                    //
+	                    //} else {
+	                    //   processingEnv.getMessager().printMessage(Kind.WARNING, "--IGNORING Invalid convert method:" + element);
+	                    //   method = null;
+	                    //}
+	                    //component = method;
 
                     } else if (trees != null) {
 	                    Method method = new Method();
@@ -669,6 +708,9 @@ public class QuickDtoProcessor extends AbstractProcessor {
 	                    method.body = "\t" + methodTree.toString().replace("\n", "\n\t");
 
 	                    component = method;
+
+                    } else {
+	                    processingEnv.getMessager().printMessage(Kind.WARNING, "--IGNORING Method:" + element + " - If method should be copied, set \"copyMethod\" in @QuickDto" );
                     }
 
                     return component;

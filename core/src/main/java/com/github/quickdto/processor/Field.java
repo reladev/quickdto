@@ -9,10 +9,13 @@ public class Field implements Component {
 	String enumName;
 	String accessorName;
 	boolean primitive;
-	boolean readOnly;
+	boolean copyFrom;
+	boolean copyTo;
 	boolean excludeSetter;
+	boolean excludeGetter;
 	boolean equalsHashCode;
 	boolean sourceMapped;
+	boolean strictCopy;
 	List<String> fieldAnnotations = new LinkedList<>();
 	List<String> setterAnnotations = new LinkedList<>();
 	List<String> getterAnnotations = new LinkedList<>();

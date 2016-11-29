@@ -9,6 +9,8 @@ public class DtoDef {
 	String qualifiedName;
 	String extend;
 	boolean strictCopy = true;
+	boolean fieldAnnotationsOnGetter = false;
+	LinkedList<String> annotations = new LinkedList<>();
 	LinkedList<Source> sources = new LinkedList<>();
 	LinkedList<String> implementList = new LinkedList<>();
 	LinkedHashMap<String, Field> fields = new LinkedHashMap<String, Field>();

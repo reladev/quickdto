@@ -8,9 +8,10 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.SOURCE)
 public @interface QuickDto {
+	Class extend() default Object.class;
+	Class[] implement() default {};
     Class[] source() default {};
-    Class[] extend() default {};
-    Class[] implement() default {};
 	boolean strictCopy() default true;
+	boolean fieldAnnotationsOnGetter() default false;
 	boolean copyMethods() default false;
 }
