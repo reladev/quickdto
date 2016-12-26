@@ -55,15 +55,16 @@ uploadArchives {
             }
 
             pom.project {
-               name 'Slotted'
+               name 'QuickDto'
+               artifactId 'quickdto'
                packaging 'jar'
-               description 'An extension of GWT Activities and Places, which adds the ability to nest Activities.'
+               description 'Dto generator for handling coping dirty data'
                url 'http://code.google.com/p/slotted/'
 
                scm {
-                   url 'scm:git:https://code.google.com/p/slotted/'
-                   connection 'scm:git:https://code.google.com/p/slotted/'
-                   developerConnection 'scm:git:https://code.google.com/p/slotted/'
+                   url 'scm:git:https://github.com/slotted/quickdto'
+                   connection 'scm:git:https://github.com/slotted/quickdto'
+                   developerConnection 'scm:git:https://github.com/slotted/quickdto'
                }
 
                licenses {
