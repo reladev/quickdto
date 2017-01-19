@@ -1,7 +1,9 @@
 package com.github.quickdto.processor;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.List;
 
 public class DtoDef {
 	String packageString;
@@ -15,4 +17,27 @@ public class DtoDef {
 	LinkedList<String> implementList = new LinkedList<>();
 	LinkedHashMap<String, Field> fields = new LinkedHashMap<String, Field>();
 	LinkedList<Method> methods = new LinkedList<>();
+
+	private HashMap<String, List<Method>> converters = new HashMap<>();
+
+	public Method getConverter(String toType, String fromType) {
+		List<Method> methods = converters.get(toType);
+		if (methods != null) {
+			for (Method method: methods) {
+				if (method.fromType.equals(fromType)) {
+					return method;
+				}
+			}
+		}
+		return null;
+	}
+
+	public void addConverter(Method method) {
+		List<Method> methods = converters.get(method.toType);
+		if (methods == null) {
+			methods = new LinkedList<>();
+			converters.put(method.toType, methods);
+		}
+		methods.add(method);
+	}
 }

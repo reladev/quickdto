@@ -3,9 +3,11 @@ package com.github.quickdto.processor;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -21,14 +23,19 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.NoType;
+import javax.lang.model.type.NullType;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.type.TypeVariable;
 import javax.lang.model.type.TypeVisitor;
+import javax.lang.model.type.UnionType;
+import javax.lang.model.type.WildcardType;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.SimpleTypeVisitor7;
 import javax.tools.Diagnostic.Kind;
@@ -64,6 +71,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
                 processingEnv.getMessager().printMessage(Kind.ERROR, element.getSimpleName() + " DtoDef must end in 'DtoDef'");
             } else {
 	            DtoDef dtoDef = processDtoDef(element);
+	            cleanDtoDefTypes(dtoDef);
 	            writeDto(dtoDef);
             }
         }
@@ -110,7 +118,11 @@ public class QuickDtoProcessor extends AbstractProcessor {
 					addField(subelement, (Field) component, dtoDef);
 
 				} else if (component instanceof Method) {
-					dtoDef.methods.add((Method) component);
+					Method method = (Method) component;
+					dtoDef.methods.add(method);
+					if (method.converter) {
+						dtoDef.addConverter(method);
+					}
 				}
 			}
 		}
@@ -205,7 +217,8 @@ public class QuickDtoProcessor extends AbstractProcessor {
         }
     }
 
-	private void addSource(DtoDef dtoDef, Object source) {Source sourceDef = new Source();
+	private void addSource(DtoDef dtoDef, Object source) {
+		Source sourceDef = new Source();
 		dtoDef.sources.add(sourceDef);
 		Elements elementUtils = processingEnv.getElementUtils();
 		String className = source.toString();
@@ -216,31 +229,36 @@ public class QuickDtoProcessor extends AbstractProcessor {
 		    for (Element sourceSubEl: sourceType.getEnclosedElements()) {
 		        if (sourceSubEl instanceof ExecutableElement) {
 		            String name = sourceSubEl.getSimpleName().toString();
-		            if (name.startsWith("set")) {
+			        int numParams = ((ExecutableElement) sourceSubEl).getParameters().size();
+
+		            if (name.startsWith("set") && numParams == 1) {
 		                String accessorName = name.substring(3);
 			            Field field = dtoDef.fields.get(accessorName);
 			            if (field != null) {
-				            field.sourceMapped = true;
-		                    sourceDef.setters.add(accessorName);
+				            VariableElement paramElement = ((ExecutableElement) sourceSubEl).getParameters().get(0);
+				            String toType = paramElement.asType().toString();
+			            	String fromType = field.type;
+			            	mapAccessorConverter(dtoDef, field, className, sourceSubEl, toType, fromType, sourceDef.setters, accessorName);
 		                }
 		            }
-		            if (name.startsWith("get")) {
+		            if (name.startsWith("get") && numParams == 0) {
 		                String accessorName = name.substring(3);
 			            Field field = dtoDef.fields.get(accessorName);
 			            if (field != null) {
-				            field.sourceMapped = true;
-		                    sourceDef.getters.add(accessorName);
+				            String fromType = ((ExecutableElement) sourceSubEl).getReturnType().toString();
+			            	String toType = field.type;
+				            mapAccessorConverter(dtoDef, field, className, sourceSubEl, toType, fromType, sourceDef.getters, accessorName);
 		                }
 		            }
-		            if (name.startsWith("is")) {
+		            if (name.startsWith("is") && numParams == 0) {
 		                String accessorName = name.substring(2);
 			            Field field = dtoDef.fields.get(accessorName);
 			            if (field != null) {
-				            field.sourceMapped = true;
-		                    sourceDef.getters.add(accessorName);
+				            String fromType = ((ExecutableElement) sourceSubEl).getReturnType().toString();
+			            	String toType = field.type;
+				            mapAccessorConverter(dtoDef, field, className, sourceSubEl, toType, fromType, sourceDef.getters, accessorName);
 		                }
 		            }
-
 		        }
 		    }
 
@@ -250,6 +268,28 @@ public class QuickDtoProcessor extends AbstractProcessor {
 		        sourceType = (TypeElement)((DeclaredType)sourceType.getSuperclass()).asElement();
 		    }
 		}
+	}
+
+	private boolean mapAccessorConverter(DtoDef dtoDef, Field field, String sourceClass, Element sourceSubEl, String toType, String fromType, HashMap<String, Method> accessorMap, String accessorName) {
+		boolean map = false;
+		Method converter = null;
+		if (!fromType.equals(toType)) {
+			converter = dtoDef.getConverter(toType, fromType);
+			if (converter != null) {
+				map = true;
+			} else {
+				processingEnv.getMessager().printMessage(Kind.WARNING, "Type mismatch for " + sourceClass + "." + sourceSubEl);
+			}
+		} else {
+			map = true;
+		}
+		
+		if (map) {
+			field.sourceMapped = true;
+			accessorMap.put(accessorName, converter);
+		}
+
+		return map;
 	}
 
 	private void addAnnotations(Element subelement, Field field) {
@@ -285,6 +325,14 @@ public class QuickDtoProcessor extends AbstractProcessor {
         }
         field.enumName = field.fieldName.replaceAll("(.)([A-Z])", "$1_$2").toUpperCase();
     }
+
+	private void cleanDtoDefTypes(DtoDef dtoDef) {
+		for (Field field: dtoDef.fields.values()) {
+			if (field.type.endsWith("DtoDef")) {
+				field.type = field.type.substring(0, field.type.length() - 3);
+			}
+		}
+	}
 
     private void writeDto(DtoDef dtoDef)  {
         try {
@@ -566,8 +614,8 @@ public class QuickDtoProcessor extends AbstractProcessor {
         bw.append("\tpublic void copyTo(").append(source.type).append(" dest, Iterable<Fields> fields) {\n");
         bw.append("\t\tfor (Fields field: fields) {\n");
         bw.append("\t\t\tswitch (field) {\n");
-        for (String setter: source.setters) {
-            Field field = dtoDef.fields.get(setter);
+        for (Entry<String, Method> setter: source.setters.entrySet()) {
+            Field field = dtoDef.fields.get(setter.getKey());
 	        if (!field.copyFrom) {
 		        bw.append("\t\t\t\tcase ").append(field.enumName).append(":\n");
 		        bw.append("\t\t\t\t\tdest.set").append(field.accessorName).append("(").append(field.fieldName).append(");\n");
@@ -583,8 +631,8 @@ public class QuickDtoProcessor extends AbstractProcessor {
     private void writeCopyFrom(Source source, DtoDef dtoDef, BufferedWriter bw) throws IOException {
         bw.append("\t@GwtIncompatible\n");
         bw.append("\tpublic void copyFrom(").append(source.type).append(" source) {\n");
-        for (String getter: source.getters) {
-            Field field = dtoDef.fields.get(getter);
+        for (Entry<String, Method> getter: source.getters.entrySet()) {
+            Field field = dtoDef.fields.get(getter.getKey());
             bw.append("\t\t").append(field.fieldName).append(" = source.");
             if ("boolean".equals(field.type) || "java.lang.Boolean".equals(field.type)) {
                 bw.append("is");
@@ -619,8 +667,10 @@ public class QuickDtoProcessor extends AbstractProcessor {
 
     private void writeOtherMethods(DtoDef dtoDef, BufferedWriter bw) throws IOException {
 	    for (Method method: dtoDef.methods) {
-		    bw.append(method.body);
-		    bw.newLine();
+	    	if (method.body != null) {
+			    bw.append(method.body);
+			    bw.newLine();
+		    }
 	    }
     }
 
@@ -644,14 +694,57 @@ public class QuickDtoProcessor extends AbstractProcessor {
                 @Override public Component visitDeclared(DeclaredType t, Element element) {
                     Field field = new Field();
                     field.type = t.toString();
-                    if (field.type.endsWith("DtoDef")) {
-                        field.type = field.type.substring(0, field.type.length() - 3);
-                    }
                     field.fieldName = element.toString();
                     return field;
                 }
 
-                @Override public Component visitExecutable(ExecutableType t, Element element) {
+	            @Override
+	            public Component visitTypeVariable(TypeVariable t, Element element) {
+		            processingEnv.getMessager().printMessage(Kind.ERROR, "Couldn't process Type:" + element);
+		            return super.visitTypeVariable(t, element);
+	            }
+
+	            @Override
+	            public Component visitUnknown(TypeMirror t, Element element) {
+		            processingEnv.getMessager().printMessage(Kind.ERROR, "Couldn't process Unknown:" + element);
+		            return super.visitUnknown(t, element);
+	            }
+
+	            @Override
+	            public Component visitUnion(UnionType t, Element element) {
+		            processingEnv.getMessager().printMessage(Kind.ERROR, "Couldn't process Union:" + element);
+		            return super.visitUnion(t, element);
+	            }
+
+	            @Override
+	            protected Component defaultAction(TypeMirror e, Element element) {
+                	if (element.toString().endsWith("Dto")) {
+		                processingEnv.getMessager().printMessage(Kind.ERROR, "Couldn't process Dto:" + element + ".  Use DtoDef instead.");
+	                } else {
+		                processingEnv.getMessager().printMessage(Kind.ERROR, "Couldn't process Action:" + element);
+	                }
+		            return super.defaultAction(e, element);
+	            }
+
+	            @Override
+	            public Component visitNull(NullType t, Element element) {
+		            processingEnv.getMessager().printMessage(Kind.ERROR, "Couldn't process Null:" + element);
+		            return super.visitNull(t, element);
+	            }
+
+	            @Override
+	            public Component visitWildcard(WildcardType t, Element element) {
+		            processingEnv.getMessager().printMessage(Kind.ERROR, "Couldn't process Wildcard:" + element);
+		            return super.visitWildcard(t, element);
+	            }
+
+	            @Override
+	            public Component visitNoType(NoType t, Element element) {
+		            processingEnv.getMessager().printMessage(Kind.ERROR, "Couldn't process NoType:" + element);
+		            return super.visitNoType(t, element);
+	            }
+
+	            @Override public Component visitExecutable(ExecutableType t, Element element) {
                     Component component = null;
 
 	                String name = element.toString();
@@ -679,27 +772,26 @@ public class QuickDtoProcessor extends AbstractProcessor {
 	                    }
 	                    ((Field) component).fieldName = name.substring(start, end);
 
-                    } else if (element.toString().startsWith("convert") && t.getParameterTypes().size() == 1) {
-	                    processingEnv.getMessager().printMessage(Kind.WARNING, "--WARNING Convert not implemented");
-	                    //Method method = new Method();
-	                    //method.converter = true;
-	                    //method.outType = t.getReturnType().toString();
-	                    //method.inType = t.getParameterTypes().get(0).toString();
-	                    //
-	                    //if (trees != null) {
-	                    //   MethodScanner methodScanner = new MethodScanner();
-	                    //   MethodTree methodTree = methodScanner.scan((ExecutableElement) element, trees);
-	                    //   method.body = "\t" + methodTree.toString().replace("\n", "\n\t");
-	                    //   method.isStatic = element.getModifiers().contains(Modifier.STATIC);
-	                    //
-	                    //} else if (element.getModifiers().contains(Modifier.STATIC)) {
-	                    //   method.isStatic = true;
-	                    //
-	                    //} else {
-	                    //   processingEnv.getMessager().printMessage(Kind.WARNING, "--IGNORING Invalid convert method:" + element);
-	                    //   method = null;
-	                    //}
-	                    //component = method;
+                    } else if (element.toString().startsWith("convert(") && t.getParameterTypes().size() == 1) {
+	                    Method method = new Method();
+	                    method.converter = true;
+	                    method.toType = t.getReturnType().toString();
+	                    method.fromType = t.getParameterTypes().get(0).toString();
+
+	                    if (trees != null) {
+	                       MethodScanner methodScanner = new MethodScanner();
+	                       MethodTree methodTree = methodScanner.scan((ExecutableElement) element, trees);
+	                       method.body = "\t" + methodTree.toString().replace("\n", "\n\t");
+	                       method.isStatic = element.getModifiers().contains(Modifier.STATIC);
+
+	                    } else if (element.getModifiers().contains(Modifier.STATIC)) {
+	                       method.isStatic = true;
+
+	                    } else {
+	                       processingEnv.getMessager().printMessage(Kind.WARNING, "IGNORING (" + element + ") it must be 'static' or copyMethod true");
+	                       method = null;
+	                    }
+	                    component = method;
 
                     } else if (trees != null) {
 	                    Method method = new Method();

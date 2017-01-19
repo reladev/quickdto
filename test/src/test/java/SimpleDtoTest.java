@@ -1,7 +1,6 @@
-package com.github.quickdto.testharness;
-
 import static org.junit.Assert.*;
 
+import com.github.quickdto.testharness.SimpleDto;
 import com.github.quickdto.testharness.SimpleDto.Fields;
 import com.github.quickdto.testharness.impl.Simple;
 import org.junit.Test;
@@ -20,7 +19,7 @@ public class SimpleDtoTest {
 		SimpleDto.class.getDeclaredMethod("getReadOnly");
 		try {
 			SimpleDto.class.getDeclaredMethod("setReadOnly", int.class);
-		    fail();
+			fail();
 		} catch (NoSuchMethodException ignored) {}
 
 		// ReadOnlyWithSetter

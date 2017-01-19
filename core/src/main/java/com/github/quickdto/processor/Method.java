@@ -4,8 +4,8 @@ public class Method implements Component {
 	String body;
 	boolean converter;
 	boolean isStatic;
-	String outType;
-	String inType;
+	String toType;
+	String fromType;
 
 
 	public String toString() {
