@@ -71,7 +71,6 @@ public class QuickDtoProcessor extends AbstractProcessor {
                 processingEnv.getMessager().printMessage(Kind.ERROR, element.getSimpleName() + " DtoDef must end in 'DtoDef'");
             } else {
 	            DtoDef dtoDef = processDtoDef(element);
-	            cleanDtoDefTypes(dtoDef);
 	            writeDto(dtoDef);
             }
         }
@@ -90,6 +89,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
 
         addClassAnnotations(defElement, dtoDef);
 	    addFieldMethods(defElement, dtoDef);
+	    cleanDtoDefTypes(dtoDef);
         addSources(defElement, dtoDef);
 
         return dtoDef;
@@ -278,7 +278,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
 			if (converter != null) {
 				map = true;
 			} else {
-				processingEnv.getMessager().printMessage(Kind.WARNING, "Type mismatch for " + sourceClass + "." + sourceSubEl);
+				processingEnv.getMessager().printMessage(Kind.WARNING, "Type Mismatch(" + toType + ":" + fromType + ") for " + sourceClass + "." + sourceSubEl);
 			}
 		} else {
 			map = true;
@@ -618,7 +618,13 @@ public class QuickDtoProcessor extends AbstractProcessor {
             Field field = dtoDef.fields.get(setter.getKey());
 	        if (!field.copyFrom) {
 		        bw.append("\t\t\t\tcase ").append(field.enumName).append(":\n");
-		        bw.append("\t\t\t\t\tdest.set").append(field.accessorName).append("(").append(field.fieldName).append(");\n");
+		        bw.append("\t\t\t\t\tdest.set").append(field.accessorName).append("(");
+		        if (setter.getValue() != null) {
+			        bw.append(dtoDef.name).append("Def.convert(").append(field.fieldName).append(")");
+		        } else {
+			        bw.append(field.fieldName);
+		        }
+		        bw.append(");\n");
 		        bw.append("\t\t\t\t\tbreak;\n");
 	        }
         }
@@ -633,13 +639,21 @@ public class QuickDtoProcessor extends AbstractProcessor {
         bw.append("\tpublic void copyFrom(").append(source.type).append(" source) {\n");
         for (Entry<String, Method> getter: source.getters.entrySet()) {
             Field field = dtoDef.fields.get(getter.getKey());
-            bw.append("\t\t").append(field.fieldName).append(" = source.");
+            bw.append("\t\t").append(field.fieldName).append(" = ");
+            if (getter.getValue() != null) {
+	            bw.append(dtoDef.name).append("Def.convert(");
+            }
+	        bw.append("source.");
             if ("boolean".equals(field.type) || "java.lang.Boolean".equals(field.type)) {
                 bw.append("is");
             } else {
                 bw.append("get");
             }
-            bw.append(field.accessorName).append("();\n");
+            bw.append(field.accessorName).append("()");
+	        if (getter.getValue() != null) {
+	        	bw.append(")");
+	        }
+            bw.append(";\n");
         }
 
         bw.append("\t}\n");

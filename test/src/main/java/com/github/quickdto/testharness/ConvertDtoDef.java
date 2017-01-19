@@ -13,11 +13,17 @@ import com.github.quickdto.testharness.impl.Simple;
 public class ConvertDtoDef {
 	int normal;
 	SimpleDtoDef simple;
-	List<SimpleDtoDef> simpleList;
+	//List<SimpleDtoDef> simpleList;
 
 	public static SimpleDto convert(Simple simple) {
 		SimpleDto simpleDto = new SimpleDto();
 		simpleDto.copyFrom(simple);
 		return simpleDto;
+	}
+
+	public static Simple convert(SimpleDto simpleDto) {
+		Simple simple = new Simple();
+		simpleDto.copyTo(simple);
+		return simple;
 	}
 }
