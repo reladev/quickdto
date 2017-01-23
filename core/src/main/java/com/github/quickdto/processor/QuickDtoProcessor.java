@@ -89,7 +89,6 @@ public class QuickDtoProcessor extends AbstractProcessor {
 
         addClassAnnotations(defElement, dtoDef);
 	    addFieldMethods(defElement, dtoDef);
-	    cleanDtoDefTypes(dtoDef);
         addSources(defElement, dtoDef);
 
         return dtoDef;
@@ -129,38 +128,36 @@ public class QuickDtoProcessor extends AbstractProcessor {
 	}
 
 	private void addField(Element subelement, Field field, DtoDef dtoDef) {
-		createNames(field);
-
 		if (subelement.getAnnotation(EqualsHashCode.class) != null) {
-			field.equalsHashCode = true;
+			field.setEqualsHashCode();
 		}
 		CopyFromOnly copyFromOnly = subelement.getAnnotation(CopyFromOnly.class);
 		if (copyFromOnly != null) {
-			field.copyFrom = true;
+			field.setCopyFrom();
 			if (!copyFromOnly.setter()) {
-				field.excludeSetter = true;
+				field.setExcludeSetter();
 			}
 		}
 		CopyToOnly copyToOnly = subelement.getAnnotation(CopyToOnly.class);
 		if (copyToOnly != null) {
-			field.copyTo = true;
+			field.setCopyTo();
 			if (!copyToOnly.getter()) {
-				field.excludeGetter = true;
+				field.setExcludeGetter();
 			}
 		}
 		StrictCopy strictCopy = subelement.getAnnotation(StrictCopy.class);
 		if (strictCopy != null) {
-			field.strictCopy = strictCopy.value();
+			field.setStrictCopy(strictCopy.value());
 
 		} else {
-			field.strictCopy = dtoDef.strictCopy;
+			field.setStrictCopy(dtoDef.strictCopy);
 		}
 
 		addAnnotations(subelement, field);
 
-		Field existing = dtoDef.fields.get(field.accessorName);
+		Field existing = dtoDef.fields.get(field.getAccessorName());
 		if (existing == null) {
-			dtoDef.fields.put(field.accessorName, field);
+			dtoDef.fields.put(field.getAccessorName(), field);
 		} else {
 			//todo write merge
 		}
@@ -237,7 +234,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
 			            if (field != null) {
 				            VariableElement paramElement = ((ExecutableElement) sourceSubEl).getParameters().get(0);
 				            String toType = paramElement.asType().toString();
-			            	String fromType = field.type;
+			            	String fromType = field.getTypeString();
 			            	mapAccessorConverter(dtoDef, field, className, sourceSubEl, toType, fromType, sourceDef.setters, accessorName);
 		                }
 		            }
@@ -246,7 +243,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
 			            Field field = dtoDef.fields.get(accessorName);
 			            if (field != null) {
 				            String fromType = ((ExecutableElement) sourceSubEl).getReturnType().toString();
-			            	String toType = field.type;
+			            	String toType = field.getTypeString();
 				            mapAccessorConverter(dtoDef, field, className, sourceSubEl, toType, fromType, sourceDef.getters, accessorName);
 		                }
 		            }
@@ -255,7 +252,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
 			            Field field = dtoDef.fields.get(accessorName);
 			            if (field != null) {
 				            String fromType = ((ExecutableElement) sourceSubEl).getReturnType().toString();
-			            	String toType = field.type;
+			            	String toType = field.getTypeString();
 				            mapAccessorConverter(dtoDef, field, className, sourceSubEl, toType, fromType, sourceDef.getters, accessorName);
 		                }
 		            }
@@ -285,7 +282,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
 		}
 		
 		if (map) {
-			field.sourceMapped = true;
+			field.setSourceMapped();
 			accessorMap.put(accessorName, converter);
 		}
 
@@ -297,14 +294,14 @@ public class QuickDtoProcessor extends AbstractProcessor {
 		for (AnnotationMirror am: annotationMirrors) {
 			if (!isQuickDtoAnntoation(am)) {
 				if (subelement.getKind() == ElementKind.FIELD) {
-					field.fieldAnnotations.add(am.toString());
+					field.addFieldAnnotation(am.toString());
 
 				} else if (subelement.getKind() == ElementKind.METHOD) {
 					if (subelement.getSimpleName().toString().startsWith("get")) {
-						field.getterAnnotations.add(am.toString());
+						field.addGetterAnnotation(am.toString());
 
 					} else if (subelement.getSimpleName().toString().startsWith("set")) {
-						field.setterAnnotations.add(am.toString());
+						field.addSetterAnnotation(am.toString());
 					}
 				}
 
@@ -312,27 +309,6 @@ public class QuickDtoProcessor extends AbstractProcessor {
 		}
 	}
 
-    private void createNames(Field field) {
-        char firstChar = field.fieldName.charAt(0);
-        if (Character.isUpperCase(firstChar)) {
-            field.accessorName = field.fieldName;
-            firstChar = Character.toLowerCase(firstChar);
-            field.fieldName = firstChar + field.fieldName.substring(1);
-
-        } else {
-            firstChar = Character.toUpperCase(firstChar);
-            field.accessorName = firstChar + field.fieldName.substring(1);
-        }
-        field.enumName = field.fieldName.replaceAll("(.)([A-Z])", "$1_$2").toUpperCase();
-    }
-
-	private void cleanDtoDefTypes(DtoDef dtoDef) {
-		for (Field field: dtoDef.fields.values()) {
-			if (field.type.endsWith("DtoDef")) {
-				field.type = field.type.substring(0, field.type.length() - 3);
-			}
-		}
-	}
 
     private void writeDto(DtoDef dtoDef)  {
         try {
@@ -393,7 +369,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
             } else {
                 first = false;
             }
-            bw.append("\t\t").append(field.enumName).append("(\"").append(field.fieldName).append("\")");
+            bw.append("\t\t").append(field.getEnumName()).append("(\"").append(field.getFieldName()).append("\")");
         }
         bw.append(";\n");
         bw.newLine();
@@ -421,11 +397,11 @@ public class QuickDtoProcessor extends AbstractProcessor {
     private void writeFields(DtoDef dtoDef, BufferedWriter bw) throws IOException {
         for (Field field: dtoDef.fields.values()) {
         	if (!dtoDef.fieldAnnotationsOnGetter) {
-		        for (String annotation : field.fieldAnnotations) {
+		        for (String annotation : field.getFieldAnnotations()) {
 			        bw.append("\t").append(annotation).append("\n");
 		        }
 	        }
-            bw.append("\tprivate ").append(field.type).append(" ").append(field.fieldName).append(";\n");
+            bw.append("\tprivate ").append(field.getTypeString()).append(" ").append(field.getFieldName()).append(";\n");
         }
     }
 
@@ -469,35 +445,35 @@ public class QuickDtoProcessor extends AbstractProcessor {
     private void writeGettersSetters(DtoDef dtoDef, BufferedWriter bw) throws IOException {
         for (Field field: dtoDef.fields.values()) {
         	if (dtoDef.fieldAnnotationsOnGetter) {
-		        for (String annotation: field.fieldAnnotations) {
+		        for (String annotation: field.getFieldAnnotations()) {
 			        bw.append("\t").append(annotation).append("\n");
 		        }
 	        }
-	        for (String annotation: field.getterAnnotations) {
+	        for (String annotation: field.getGetterAnnotations()) {
 		        bw.append("\t").append(annotation).append("\n");
 	        }
-            bw.append("\tpublic ").append(field.type);
-            if ("boolean".equals(field.type) || "java.lang.Boolean".equals(field.type)) {
+            bw.append("\tpublic ").append(field.getTypeString());
+            if ("boolean".equals(field.getTypeString()) || "java.lang.Boolean".equals(field.getTypeString())) {
                 bw.append(" is");
             } else {
                 bw.append(" get");
             }
-            bw.append(field.accessorName).append("() {\n");
-            bw.append("\t\treturn ").append(field.fieldName).append(";\n");
+            bw.append(field.getAccessorName()).append("() {\n");
+            bw.append("\t\treturn ").append(field.getFieldName()).append(";\n");
             bw.append("\t}\n");
             bw.newLine();
-            if (!field.excludeSetter) {
-	            for (String annotation: field.setterAnnotations) {
+            if (!field.isExcludeSetter()) {
+	            for (String annotation: field.getSetterAnnotations()) {
 	   		        bw.append("\t").append(annotation).append("\n");
 	   	        }
-                bw.append("\tpublic void set").append(field.accessorName).append("(").append(field.type).append(" ").append(field.fieldName).append(") {\n");
-                if (field.primitive) {
-                    bw.append("\t\tif (this.").append(field.fieldName).append(" != ").append(field.fieldName).append(") {\n");
+                bw.append("\tpublic void set").append(field.getAccessorName()).append("(").append(field.getTypeString()).append(" ").append(field.getFieldName()).append(") {\n");
+                if (field.isPrimitive()) {
+                    bw.append("\t\tif (this.").append(field.getFieldName()).append(" != ").append(field.getFieldName()).append(") {\n");
                 } else {
-                    bw.append("\t\tif (!Objects.equals(this.").append(field.fieldName).append(", ").append(field.fieldName).append(")) {\n");
+                    bw.append("\t\tif (!Objects.equals(this.").append(field.getFieldName()).append(", ").append(field.getFieldName()).append(")) {\n");
                 }
-                bw.append("\t\t\tsetDirty(Fields.").append(field.enumName).append(", true);\n");
-                bw.append("\t\t\tthis.").append(field.fieldName).append(" = ").append(field.fieldName).append(";\n");
+                bw.append("\t\t\tsetDirty(Fields.").append(field.getEnumName()).append(", true);\n");
+                bw.append("\t\t\tthis.").append(field.getFieldName()).append(" = ").append(field.getFieldName()).append(";\n");
                 bw.append("\t\t}\n");
                 bw.append("\t}\n");
                 bw.newLine();
@@ -508,7 +484,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
     private void writeEqualsHash(DtoDef dtoDef, BufferedWriter bw) throws IOException {
         List<Field> equalsFields = new LinkedList<>();
         for (Field field: dtoDef.fields.values()) {
-            if (field.equalsHashCode) {
+            if (field.isEqualsHashCode()) {
                 equalsFields.add(field);
             }
         }
@@ -533,16 +509,16 @@ public class QuickDtoProcessor extends AbstractProcessor {
         bw.newLine();
 
         for (Field field: genFields) {
-            if (field.type.equals("float")) {
-                bw.append("\t\tif (Float.compare(").append(field.fieldName).append(", that.").append(field.fieldName).append(") != 0) {\n");
-            } else if (field.type.equals("double")) {
-                bw.append("\t\tif (Double.compare(").append(field.fieldName).append(", that.").append(field.fieldName).append(") != 0) {\n");
-            } else if (field.primitive) {
-                bw.append("\t\tif (").append(field.fieldName).append(" != that.").append(field.fieldName).append(") {\n");
-            } else if (field.type.endsWith("[]")) {
-                bw.append("\t\tif (Arrays.equals(").append(field.fieldName).append(", that.").append(field.fieldName).append(")) {\n");
+            if (field.getTypeString().equals("float")) {
+                bw.append("\t\tif (Float.compare(").append(field.getFieldName()).append(", that.").append(field.getFieldName()).append(") != 0) {\n");
+            } else if (field.getTypeString().equals("double")) {
+                bw.append("\t\tif (Double.compare(").append(field.getFieldName()).append(", that.").append(field.getFieldName()).append(") != 0) {\n");
+            } else if (field.isPrimitive()) {
+                bw.append("\t\tif (").append(field.getFieldName()).append(" != that.").append(field.getFieldName()).append(") {\n");
+            } else if (field.getTypeString().endsWith("[]")) {
+                bw.append("\t\tif (Arrays.equals(").append(field.getFieldName()).append(", that.").append(field.getFieldName()).append(")) {\n");
             } else {
-                bw.append("\t\tif (").append(field.fieldName).append(" != null ? !").append(field.fieldName).append(".equals(that.").append(field.fieldName).append(") : that.").append(field.fieldName).append(" != null) {\n");
+                bw.append("\t\tif (").append(field.getFieldName()).append(" != null ? !").append(field.getFieldName()).append(".equals(that.").append(field.getFieldName()).append(") : that.").append(field.getFieldName()).append(" != null) {\n");
             }
 
             bw.append("\t\t\treturn false;\n");
@@ -558,8 +534,8 @@ public class QuickDtoProcessor extends AbstractProcessor {
         bw.append("\t\tlong temp;\n\n");
         boolean first = true;
         for (Field field: genFields) {
-            if (field.type.equals("double")) {
-                bw.append("\t\ttemp = Double.doubleToLongBits(").append(field.fieldName).append(");\n");
+            if (field.getTypeString().equals("double")) {
+                bw.append("\t\ttemp = Double.doubleToLongBits(").append(field.getFieldName()).append(");\n");
             }
             if (first) {
                 bw.append("\t\tint result = ");
@@ -568,18 +544,18 @@ public class QuickDtoProcessor extends AbstractProcessor {
                 bw.append("\t\tresult = 31 * result + ");
             }
 
-            if (field.type.equals("long")) {
-                bw.append("(int) (").append(field.fieldName).append(" ^ (").append(field.fieldName).append(" >>> 32));\n");
-            } else if (field.type.equals("float")) {
-                bw.append("(").append(field.fieldName).append(" != +0.0f ? Float.floatToIntBits(").append(field.fieldName).append(") : 0);");
-            } else if (field.type.equals("double")) {
+            if (field.getTypeString().equals("long")) {
+                bw.append("(int) (").append(field.getFieldName()).append(" ^ (").append(field.getFieldName()).append(" >>> 32));\n");
+            } else if (field.getTypeString().equals("float")) {
+                bw.append("(").append(field.getFieldName()).append(" != +0.0f ? Float.floatToIntBits(").append(field.getFieldName()).append(") : 0);");
+            } else if (field.getTypeString().equals("double")) {
                 bw.append("(int) (temp ^ (temp >>> 32));\n");
-            } else if (field.type.equals("boolean")) {
-                bw.append("(").append(field.fieldName).append(" ? 1 : 0);\n");
-            } else if (field.primitive) {
-                bw.append(field.fieldName).append(";\n");
+            } else if (field.getTypeString().equals("boolean")) {
+                bw.append("(").append(field.getFieldName()).append(" ? 1 : 0);\n");
+            } else if (field.isPrimitive()) {
+                bw.append(field.getFieldName()).append(";\n");
             } else {
-                bw.append("(").append(field.fieldName).append(" != null ? ").append(field.fieldName).append(".hashCode() : 0);\n");
+                bw.append("(").append(field.getFieldName()).append(" != null ? ").append(field.getFieldName()).append(".hashCode() : 0);\n");
             }
         }
 
@@ -616,13 +592,13 @@ public class QuickDtoProcessor extends AbstractProcessor {
         bw.append("\t\t\tswitch (field) {\n");
         for (Entry<String, Method> setter: source.setters.entrySet()) {
             Field field = dtoDef.fields.get(setter.getKey());
-	        if (!field.copyFrom) {
-		        bw.append("\t\t\t\tcase ").append(field.enumName).append(":\n");
-		        bw.append("\t\t\t\t\tdest.set").append(field.accessorName).append("(");
+	        if (!field.isCopyFrom()) {
+		        bw.append("\t\t\t\tcase ").append(field.getEnumName()).append(":\n");
+		        bw.append("\t\t\t\t\tdest.set").append(field.getAccessorName()).append("(");
 		        if (setter.getValue() != null) {
-			        bw.append(dtoDef.name).append("Def.convert(").append(field.fieldName).append(")");
+			        bw.append(dtoDef.name).append("Def.convert(").append(field.getFieldName()).append(")");
 		        } else {
-			        bw.append(field.fieldName);
+			        bw.append(field.getFieldName());
 		        }
 		        bw.append(");\n");
 		        bw.append("\t\t\t\t\tbreak;\n");
@@ -639,17 +615,17 @@ public class QuickDtoProcessor extends AbstractProcessor {
         bw.append("\tpublic void copyFrom(").append(source.type).append(" source) {\n");
         for (Entry<String, Method> getter: source.getters.entrySet()) {
             Field field = dtoDef.fields.get(getter.getKey());
-            bw.append("\t\t").append(field.fieldName).append(" = ");
+            bw.append("\t\t").append(field.getFieldName()).append(" = ");
             if (getter.getValue() != null) {
 	            bw.append(dtoDef.name).append("Def.convert(");
             }
 	        bw.append("source.");
-            if ("boolean".equals(field.type) || "java.lang.Boolean".equals(field.type)) {
+            if ("boolean".equals(field.getTypeString()) || "java.lang.Boolean".equals(field.getTypeString())) {
                 bw.append("is");
             } else {
                 bw.append("get");
             }
-            bw.append(field.accessorName).append("()");
+            bw.append(field.getAccessorName()).append("()");
 	        if (getter.getValue() != null) {
 	        	bw.append(")");
 	        }
@@ -663,7 +639,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
     private void writeUnmapped(DtoDef dtoDef, BufferedWriter bw) throws IOException {
 	    LinkedList<Field> unmapped = new LinkedList<>();
 	    for (Field field: dtoDef.fields.values()) {
-		    if (field.strictCopy && !field.sourceMapped) {
+		    if (field.isStrictCopy() && !field.isSourceMapped()) {
 			    unmapped.add(field);
 		    }
 	    }
@@ -671,7 +647,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
 		    bw.append("\tpublic void fieldsNotMappedToSource() {\n");
 		    for (Field field: unmapped) {
 			    bw.append("\t\t");
-			    bw.append(field.fieldName);
+			    bw.append(field.getFieldName());
 			    bw.append(";\n");
 		    }
 		    bw.append("\t}\n");
@@ -692,23 +668,23 @@ public class QuickDtoProcessor extends AbstractProcessor {
             new SimpleTypeVisitor7<Component, Element>() {
                 @Override public Component visitPrimitive(PrimitiveType t, Element element) {
                     Field field = new Field();
-                    field.type = t.toString();
-                    field.fieldName = element.toString();
-                    field.primitive = true;
+                    field.setType(t);
+                    field.setFieldName(element.toString());
+                    field.setPrimitive();
                     return field;
                 }
 
                 @Override public Component visitArray(ArrayType t, Element element) {
                     Field field = new Field();
-                    field.type = t.toString();
-                    field.fieldName = element.toString();
+                    field.setType(t);
+                    field.setFieldName(element.toString());
                     return field;
                 }
 
                 @Override public Component visitDeclared(DeclaredType t, Element element) {
                     Field field = new Field();
-                    field.type = t.toString();
-                    field.fieldName = element.toString();
+                    field.setType(t);
+                    field.setFieldName(element.toString());
                     return field;
                 }
 
@@ -784,7 +760,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
 	                    if (end == -1) {
 	                        end = name.length();
 	                    }
-	                    ((Field) component).fieldName = name.substring(start, end);
+	                    ((Field) component).setFieldName(name.substring(start, end));
 
                     } else if (element.toString().startsWith("convert(") && t.getParameterTypes().size() == 1) {
 	                    Method method = new Method();
