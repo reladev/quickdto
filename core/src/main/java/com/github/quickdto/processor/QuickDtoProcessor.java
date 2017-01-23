@@ -143,7 +143,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
 		}
 		CopyToOnly copyToOnly = subelement.getAnnotation(CopyToOnly.class);
 		if (copyToOnly != null) {
-			field.copyFrom = true;
+			field.copyTo = true;
 			if (!copyToOnly.getter()) {
 				field.excludeGetter = true;
 			}
