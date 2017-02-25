@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.lang.model.type.TypeMirror;
 
+@SuppressWarnings("WeakerAccess")
 public class Field implements Component {
 	private TypeMirror type;
 	private String typeString;
