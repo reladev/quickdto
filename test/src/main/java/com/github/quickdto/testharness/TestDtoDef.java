@@ -6,11 +6,12 @@ import java.util.Set;
 import com.github.quickdto.shared.EqualsHashCode;
 import com.github.quickdto.shared.CopyFromOnly;
 import com.github.quickdto.shared.QuickDto;
+import com.github.quickdto.testharness.impl.AnotherInterface;
 import com.github.quickdto.testharness.impl.ExClass;
 import com.github.quickdto.testharness.impl.ImpInterface;
 import com.github.quickdto.testharness.impl.TestImpl;
 
-@QuickDto(source = TestImpl.class, extend = ExClass.class, implement = ImpInterface.class, strictCopy = false)
+@QuickDto(source = TestImpl.class, extend = ExClass.class, implement = {ImpInterface.class, AnotherInterface.class}, strictCopy = false)
 abstract public class TestDtoDef {
     @EqualsHashCode int id;
 

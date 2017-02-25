@@ -335,8 +335,14 @@ public class QuickDtoProcessor extends AbstractProcessor {
 	        }
 	        if (!dtoDef.implementList.isEmpty()) {
 		        bw.append(" implements ");
+		        boolean firstPass = true;
 		        for (String implement : dtoDef.implementList) {
+		        	if (!firstPass) {
+		        		bw.append(", ");
+			        }
+
 			        bw.append(implement);
+		        	firstPass = false;
 		        }
 	        }
 	        bw.append(" {\n");
