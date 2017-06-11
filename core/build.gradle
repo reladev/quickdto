@@ -3,7 +3,7 @@ apply plugin: 'maven'
 apply plugin: 'signing'
 apply plugin: 'idea'
 
-group = 'com.github.quickdto'
+group = 'org.reladev.quickdto'
 version = '0.5.0-SNAPSHOT'
 
 repositories {
@@ -15,8 +15,8 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.10'
 }
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
 
 jar {
    from sourceSets.main.allJava
@@ -30,7 +30,7 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'
     from 'build/docs/javadoc'
 }
- 
+
 task sourcesJar(type: Jar) {
     from sourceSets.main.allSource
     classifier = 'sources'
@@ -61,13 +61,13 @@ uploadArchives {
                name 'QuickDto'
                artifactId 'quickdto'
                packaging 'jar'
-               description 'Dto generator for handling coping dirty data'
-               url 'http://code.google.com/p/slotted/'
+               description 'DTO generator for handling coping dirty data'
+               url 'https://github.com/reladev/quickdto'
 
                scm {
-                   url 'scm:git:https://github.com/slotted/quickdto'
-                   connection 'scm:git:https://github.com/slotted/quickdto'
-                   developerConnection 'scm:git:https://github.com/slotted/quickdto'
+                   url 'scm:git:https://github.com/reladev/quickdto.git'
+                   connection 'scm:git:https://github.com/reladev/quickdto.git'
+                   developerConnection 'scm:git:https://github.com/reladev/quickdto.git'
                }
 
                licenses {
