@@ -1,6 +1,8 @@
-#QuickDto
+QuickDto
+=====
 
-##What
+What
+=====
 
 DTO code generation using APT, that handles the 
 boilerplate code needed for dirty field detection, 
@@ -12,7 +14,8 @@ QuickDto is able to create a DTO that performs better
 then other libraries that depend on Reflections which
 can be slow.
 
-##Setup
+Setup
+=====
 
 QuickDto can be found in maven central here:
 
@@ -22,7 +25,8 @@ Here are a list of links to setup APT:
 * [Gradle](https://github.com/tbroyer/gradle-apt-plugin)
 * [Maven](https://github.com/bsorrentino/maven-annotation-plugin)
 
-##How
+How
+=======
 
 QuickDto uses `DtoDef` objects to define the properties
 of the DTO.  APT is then used to generate the actual DTO 
@@ -186,9 +190,11 @@ public class UserDto {
 }
 ```
 
-##Annotations
+Annotations
+=====
 
-###@QuickDto
+@QuickDto
+--------
 Used on the class to signify that it is a DtoDef, and is required for APT processing.
 
 * `extend` - defines the class the DTO should extend.
@@ -204,37 +210,44 @@ into the DTO class.  This functionality uses JDK classes that are not guaranteed
 all JDKs, so it isn't included by default. This is a compile time dependency, so if the copy 
 is successful, then it can be used on any JVM.
 
-###@EqualsHashCode
+@EqualsHashCode
+---------
 Used on fields that should be included in the `equals` and `hashCode` methods.  Only fields
 with this annotation will be included, but if no field have the annotation, then all the 
 fields are included in the `equals` and `hashCode` methods.
 
-###@CopyToOnly
+@CopyToOnly
+-------
 Used on fields that should only be copied from the source to the DTO.  This
 is useful for ID fields that are created on the server and need to be sent out.
 
 * `getter` [true] - defines whether the getter method should be generated in the DTO.
 
-###@CopyFromOnly
+@CopyFromOnly
+----------
 Used on fields that should only be copied from the DTO to the source.  This
 is useful for password fields that are sent in, but never sent out.
 
 * `setter` [false] - defines whether the setter method should be generated in the DTO.
 
-###@StrictCopy
+@StrictCopy
+----------
 Used on fields to enforce or not enforce strict copy.
 
 *`value` - true if the field should enforce, or false if the field shouldn't be enforced.
 
-##FAQ
+FAQ
+=======
 
-###Q: What is the @GwtIncompatible annotation for?
+Q: What is the @GwtIncompatible annotation for?
+---------
 A: This project was developed for use in GWT (Google Web Toolkit)
 projects, which compile Java to Javascript.  The annotation 
 is used to tell GWT not to transform those methods.  QuickDto
 owns the annotation, so there isn't any dependency on GWT.
 
-###Q: Does QuickDto support conversions for types when copying?
+Q: Does QuickDto support conversions for types when copying?
+---------
 A: Currently QuickDto doesn't support conversions.  It is the next
 feature planned for implementation.
 
