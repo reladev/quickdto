@@ -68,4 +68,6 @@ public class SimpleDtoTest {
 		assertEquals(2, toDirty.checkWriteOnly());
 
 	}
+
+
 }
