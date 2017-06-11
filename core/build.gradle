@@ -3,6 +3,7 @@ apply plugin: 'maven'
 apply plugin: 'signing'
 apply plugin: 'idea'
 
+archivesBaseName = 'quickdto'
 group = 'org.reladev.quickdto'
 version = '0.5.0-SNAPSHOT'
 
