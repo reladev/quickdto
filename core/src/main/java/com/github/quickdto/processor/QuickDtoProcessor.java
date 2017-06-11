@@ -41,10 +41,10 @@ import javax.lang.model.util.SimpleTypeVisitor7;
 import javax.tools.Diagnostic.Kind;
 import javax.tools.JavaFileObject;
 
+import com.github.quickdto.shared.CopyFromOnly;
 import com.github.quickdto.shared.CopyToOnly;
 import com.github.quickdto.shared.EqualsHashCode;
 import com.github.quickdto.shared.QuickDto;
-import com.github.quickdto.shared.CopyFromOnly;
 import com.github.quickdto.shared.StrictCopy;
 import com.sun.source.tree.MethodTree;
 import com.sun.source.util.Trees;
@@ -159,7 +159,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
 		if (existing == null) {
 			dtoDef.fields.put(field.getAccessorName(), field);
 		} else {
-			//todo write merge
+			processingEnv.getMessager().printMessage(Kind.WARNING, "Skipping duplicated field definition:" + field.getAccessorName());
 		}
 	}
 
@@ -407,7 +407,11 @@ public class QuickDtoProcessor extends AbstractProcessor {
 			        bw.append("\t").append(annotation).append("\n");
 		        }
 	        }
-            bw.append("\tprivate ").append(field.getTypeString()).append(" ").append(field.getFieldName()).append(";\n");
+	        if (field.isPrimitive()) {
+		        bw.append("\tprivate ").append(field.getPrimitiveTypeString()).append(" ").append(field.getFieldName()).append(";\n");
+	        } else {
+		        bw.append("\tprivate ").append(field.getTypeString()).append(" ").append(field.getFieldName()).append(";\n");
+	        }
         }
     }
 
@@ -465,7 +469,16 @@ public class QuickDtoProcessor extends AbstractProcessor {
                 bw.append(" get");
             }
             bw.append(field.getAccessorName()).append("() {\n");
-            bw.append("\t\treturn ").append(field.getFieldName()).append(";\n");
+	        if (field.isPrimitive()) {
+		        bw.append("\t\tif (").append(field.getFieldName()).append(" != null) {\n");
+		        bw.append("\t\t\treturn ").append(field.getFieldName()).append(";\n");
+		        bw.append("\t\t} else {\n");
+		        bw.append("\t\t\treturn ").append(field.getDefaultValue()).append(";\n");
+		        bw.append("\t\t}\n");
+
+	        } else {
+		        bw.append("\t\treturn ").append(field.getFieldName()).append(";\n");
+	        }
             bw.append("\t}\n");
             bw.newLine();
             if (!field.isExcludeSetter()) {
@@ -473,13 +486,9 @@ public class QuickDtoProcessor extends AbstractProcessor {
 	   		        bw.append("\t").append(annotation).append("\n");
 	   	        }
                 bw.append("\tpublic void set").append(field.getAccessorName()).append("(").append(field.getTypeString()).append(" ").append(field.getFieldName()).append(") {\n");
-                if (field.isPrimitive()) {
-                    bw.append("\t\tif (this.").append(field.getFieldName()).append(" != ").append(field.getFieldName()).append(") {\n");
-                } else {
-                    bw.append("\t\tif (!Objects.equals(this.").append(field.getFieldName()).append(", ").append(field.getFieldName()).append(")) {\n");
-                }
-                bw.append("\t\t\tsetDirty(Fields.").append(field.getEnumName()).append(", true);\n");
-                bw.append("\t\t\tthis.").append(field.getFieldName()).append(" = ").append(field.getFieldName()).append(";\n");
+	            bw.append("\t\tif (this.").append(field.getFieldName()).append(" == null || !Objects.equals(this.").append(field.getFieldName()).append(", ").append(field.getFieldName()).append(")) {\n");
+	            bw.append("\t\t\tsetDirty(Fields.").append(field.getEnumName()).append(", true);\n");
+	            bw.append("\t\t\tthis.").append(field.getFieldName()).append(" = ").append(field.getFieldName()).append(";\n");
                 bw.append("\t\t}\n");
                 bw.append("\t}\n");
                 bw.newLine();

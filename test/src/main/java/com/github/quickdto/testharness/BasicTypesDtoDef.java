@@ -15,9 +15,9 @@ public class BasicTypesDtoDef {
     char myChar;
     Character objCharacter;
     int myInt;
-    Integer oInteger;
-    long myLong;
-    Long objLong;
+	Integer objInteger;
+	long myLong;
+	Long objLong;
     float myFloat;
     Float objFloat;
     double myDouble;
