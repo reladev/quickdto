@@ -16,7 +16,7 @@ import java.lang.annotation.Target;
 @Documented
 public @interface GwtIncompatible {
 	/**
-	 * An attribute that can be used to explain why the code is incompatible.
+	 * @return An attribute that can be used to explain why the code is incompatible.
 	 * A GwtIncompatible annotation can have any number of attributes; attributes
 	 * are for documentation purposes and are ignored by the GWT compiler.
 	 */

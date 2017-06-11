@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 public @interface CopyToOnly {
 	/**
-	 * Defines whether the getter method should be generated in the DTO.
+	 * @return whether the getter method should be generated in the DTO.
 	 * <p>
 	 * Defaults to true.
 	 */

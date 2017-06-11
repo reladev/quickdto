@@ -15,22 +15,22 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 public @interface QuickDto {
 	/**
-	 * Defines the class the DTO should extend.
+	 * @return the class the DTO should extend.
 	 */
 	Class extend() default Object.class;
 
 	/**
-	 * Defines the interfaces the DTO should implement.
+	 * @return the interfaces the DTO should implement.
 	 */
 	Class[] implement() default {};
 
 	/**
-	 * Defines the source class should be used in the copy methods.
+	 * @return the source class should be used in the copy methods.
 	 */
 	Class[] source() default {};
 
 	/**
-	 * Defines whether the QuickDto should enforce that all the fields in the
+	 * @return whether the QuickDto should enforce that all the fields in the
 	 * DTO are copied to at least one source.  If not copied, then a compile error is created.  This
 	 * is beneficial for ensuring that name refactoring doesn't break copy methods.
 	 *
@@ -39,14 +39,14 @@ public @interface QuickDto {
 	boolean strictCopy() default true;
 
 	/**
-	 * Defines whether non QuickDto annotations on fields should be placed on the property or the getter method.
+	 * @return whether non QuickDto annotations on fields should be placed on the property or the getter method.
 	 *
 	 * Defaults to false.
 	 */
 	boolean fieldAnnotationsOnGetter() default false;
 
 	/**
-	 * Defines whether QuickDto should copy methods defined in the DtoDef
+	 * @return whether QuickDto should copy methods defined in the DtoDef
 	 * into the DTO class.  This functionality uses JDK classes that are not guaranteed to exist in
 	 * all JDKs, so it isn't included by default. This is a compile time dependency, so if the copy
 	 * is successful, then it can be used on any JVM.

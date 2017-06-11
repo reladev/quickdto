@@ -14,7 +14,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 public @interface StrictCopy {
 	/**
-	 * Defines whether this field should enforce strict copy.
+	 * @return whether this field should enforce strict copy.
 	 */
 	boolean value() default true;
 }
