@@ -73,6 +73,14 @@ public class Field implements Component {
 		return accessorName;
 	}
 
+    public String getGetAccessorName() {
+        if ("boolean".equals(getTypeString()) || "java.lang.Boolean".equals(getTypeString())) {
+            return "is" + getAccessorName();
+        } else {
+            return "get" + getAccessorName();
+        }
+    }
+
 	public boolean isPrimitive() {
 		return primitive;
 	}
