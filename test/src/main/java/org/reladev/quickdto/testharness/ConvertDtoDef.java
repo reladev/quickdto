@@ -11,6 +11,7 @@ public class ConvertDtoDef {
 	int normal;
 	SimpleDtoDef simple;
 	//List<SimpleDtoDef> simpleList;
+    boolean bool;
 
 	public static SimpleDto convert(Simple simple) {
 		SimpleDto simpleDto = new SimpleDto();
@@ -23,4 +24,12 @@ public class ConvertDtoDef {
 		simpleDto.copyTo(simple);
 		return simple;
 	}
+
+    public static Integer convert(int i) {
+        return i;
+    }
+
+    public static int convert(Integer i) {
+        return i == null ? 0 : i;
+    }
 }
