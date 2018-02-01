@@ -2,10 +2,10 @@ package org.reladev.quickdto.testharness.impl;
 
 import java.util.List;
 
-import org.reladev.quickdto.shared.QuickDtoUtil;
+import org.reladev.quickdto.shared.QuickDtoHelper;
 import org.reladev.quickdto.testharness.ConvertDtoDef;
 
-@QuickDtoUtil(dtoDef = {ConvertDtoDef.class})
+@QuickDtoHelper(dtoDef = {ConvertDtoDef.class})
 public class Convert {
     private int normal;
     private Simple simple;

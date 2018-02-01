@@ -10,8 +10,8 @@ import java.lang.annotation.Target;
  * to and from the Dtos listed.
  */
 @Target({ElementType.TYPE})
-@Retention(RetentionPolicy.SOURCE)
-public @interface QuickDtoUtil {
+@Retention(RetentionPolicy.CLASS)
+public @interface QuickDtoHelper {
     /**
      * @return the source class should be used in the copy methods.
      */

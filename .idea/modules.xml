@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/core/core.iml" filepath="$PROJECT_DIR$/.idea/modules/core/core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/jartest/jartest.iml" filepath="$PROJECT_DIR$/.idea/modules/jartest/jartest.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/quickdto.iml" filepath="$PROJECT_DIR$/.idea/modules/quickdto.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/test/test.iml" filepath="$PROJECT_DIR$/.idea/modules/test/test.iml" />
     </modules>

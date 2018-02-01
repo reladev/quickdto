@@ -20,8 +20,6 @@ dependencies {
     compile files('../core/build/libs/libs/something_local.jar')
     compile project(":core")
     apt project(":core")
-    compile project(":jartest")
-    apt project(":jartest")
     testCompile group: 'junit', name: 'junit', version: '4.10'
 }
 

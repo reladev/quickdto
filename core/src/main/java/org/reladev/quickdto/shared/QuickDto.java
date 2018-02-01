@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
  * based on the fields included.
  */
 @Target({ElementType.TYPE})
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.CLASS)
 public @interface QuickDto {
 	/**
 	 * @return the class the DTO should extend.

@@ -6,7 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class DtoDef {
-	String packageString;
+    boolean makeDto = true;
+    String packageString;
 	String name;
 	String qualifiedName;
 	String extend;

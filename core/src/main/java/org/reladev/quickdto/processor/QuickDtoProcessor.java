@@ -47,7 +47,7 @@ import org.reladev.quickdto.shared.CopyFromOnly;
 import org.reladev.quickdto.shared.CopyToOnly;
 import org.reladev.quickdto.shared.EqualsHashCode;
 import org.reladev.quickdto.shared.QuickDto;
-import org.reladev.quickdto.shared.QuickDtoUtil;
+import org.reladev.quickdto.shared.QuickDtoHelper;
 import org.reladev.quickdto.shared.StrictCopy;
 
 @SupportedAnnotationTypes({"org.reladev.quickdto.shared.QuickDto", "org.reladev.quickdto.shared.QuickDtoHelper"})
@@ -82,7 +82,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
             }
         }
 
-        for (Element element : env.getElementsAnnotatedWith(QuickDtoUtil.class)) {
+        for (Element element : env.getElementsAnnotatedWith(QuickDtoHelper.class)) {
             createHelper(element, defs);
         }
 
@@ -185,8 +185,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
                         action = entry.getValue();
                         List sources = (List) action.getValue();
                         for (Object source: sources) {
-                            String className = source.toString();
-                            className = className.substring(0, className.length() - 6);
+                            String className = annotationParamToClassName(source);
                             addSource(dtoDef, className);
                         }
 
@@ -202,8 +201,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
                         action = entry.getValue();
                         List implementList = (List) action.getValue();
                         for (Object implement : implementList) {
-                            String className = implement.toString();
-                            className = className.substring(0, className.length() - 6);
+                            String className = annotationParamToClassName(implement);
                             dtoDef.implementList.add(className);
                         }
 
@@ -225,6 +223,12 @@ public class QuickDtoProcessor extends AbstractProcessor {
                 }
             }
         }
+    }
+
+    private String annotationParamToClassName(Object source) {
+        String className = source.toString();
+        className = className.substring(0, className.length() - 6);
+        return className;
     }
 
     private void addSource(DtoDef dtoDef, String className) {
@@ -339,7 +343,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
 
     private List<DtoDef> addHelperDto(Element element, HashMap<String, DtoDef> defs) {
         List<DtoDef> helperDefs = new LinkedList<>();
-        final String annotationName = QuickDtoUtil.class.getName();
+        final String annotationName = QuickDtoHelper.class.getName();
         element.getAnnotationMirrors();
         for (AnnotationMirror am : element.getAnnotationMirrors()) {
             AnnotationValue action;
@@ -356,18 +360,21 @@ public class QuickDtoProcessor extends AbstractProcessor {
                         action = entry.getValue();
                         List sources = (List) action.getValue();
                         for (Object source : sources) {
-                            String dtoName = source.toString();
-                            dtoName = dtoName.substring(0, dtoName.length() - 6);
+                            String dtoName = annotationParamToClassName(source);
                             DtoDef dtoDef = defs.get(dtoName);
-                            if (dtoDef != null) {
-                                dtoDef.sources.clear();
-                                dtoDef.strictCopy = strictCopy;
-                                String sourceClassName = element.toString();
-                                addSource(dtoDef, sourceClassName);
-                                helperDefs.add(dtoDef);
-                            } else {
-                                processingEnv.getMessager().printMessage(Kind.NOTE, dtoName + " not found");
+                            if (dtoDef == null) {
+                                Elements elementUtils = processingEnv.getElementUtils();
+                                TypeElement dtoType = elementUtils.getTypeElement(dtoName);
+                                dtoDef = processDtoDef(dtoType);
+                                defs.put(dtoName, dtoDef);
+                                dtoDef.makeDto = false;
                             }
+
+                            dtoDef.sources.clear();
+                            dtoDef.strictCopy = strictCopy;
+                            String sourceClassName = element.toString();
+                            addSource(dtoDef, sourceClassName);
+                            helperDefs.add(dtoDef);
                         }
                     }
                 }
@@ -380,6 +387,9 @@ public class QuickDtoProcessor extends AbstractProcessor {
 
 
     private void writeDto(DtoDef dtoDef)  {
+        if (!dtoDef.makeDto) {
+            return;
+        }
         try {
             JavaFileObject jfo = processingEnv.getFiler().createSourceFile(dtoDef.packageString + "." + dtoDef.name);
 
