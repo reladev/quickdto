@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  * Most commonly used to override the strict copy set in {@link QuickDto}.
  */
 @Target({ElementType.TYPE, ElementType.FIELD, ElementType.METHOD})
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.CLASS)
 public @interface StrictCopy {
 	/**
 	 * @return whether this field should enforce strict copy.

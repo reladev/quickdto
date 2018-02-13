@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
  * is useful for password fields that are sent in, but never sent out.
  */
 @Target({ElementType.FIELD, ElementType.METHOD})
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.CLASS)
 public @interface CopyFromOnly {
 	/**
 	 * @return whether the setter method should be generated in the DTO.

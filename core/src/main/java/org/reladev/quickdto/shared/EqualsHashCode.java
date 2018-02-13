@@ -11,6 +11,6 @@ import java.lang.annotation.Target;
  * fields are included in the `equals` and `hashCode` methods.
  */
 @Target({ElementType.FIELD, ElementType.METHOD})
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.CLASS)
 public @interface EqualsHashCode {
 }

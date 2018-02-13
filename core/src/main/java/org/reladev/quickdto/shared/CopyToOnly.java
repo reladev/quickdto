@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
  * is useful for ID fields that are created on the server and need to be sent out.
  */
 @Target({ElementType.FIELD, ElementType.METHOD})
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.CLASS)
 public @interface CopyToOnly {
 	/**
 	 * @return whether the getter method should be generated in the DTO.
