@@ -16,8 +16,8 @@ public class DtoDef {
 	LinkedList<String> annotations = new LinkedList<>();
 	LinkedList<Source> sources = new LinkedList<>();
 	LinkedList<String> implementList = new LinkedList<>();
-	LinkedHashMap<String, Field> fields = new LinkedHashMap<>();
-	LinkedList<Method> methods = new LinkedList<>();
+    LinkedHashMap<String, DtoField> fields = new LinkedHashMap<>();
+    LinkedList<Method> methods = new LinkedList<>();
 
 	private HashMap<String, List<Method>> converters = new HashMap<>();
 
