@@ -64,17 +64,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
         return true;
     }
 
-    private void addClassAnnotations(Element subelement, DtoDef dtoDef) {
-        List<? extends AnnotationMirror> annotationMirrors = subelement.getAnnotationMirrors();
-        for (AnnotationMirror am : annotationMirrors) {
-            if (!isQuickDtoAnntoation(am)) {
-                dtoDef.annotations.add(am.toString());
-            }
-        }
-    }
-
-
-    private boolean isQuickDtoAnntoation(AnnotationMirror an) {
+    public static boolean isQuickDtoAnnotation(AnnotationMirror an) {
         return an.toString().startsWith("@org.reladev.quickdto");
     }
 
@@ -585,7 +575,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
     private void writeUnmapped(DtoDef dtoDef, BufferedWriter bw) throws IOException {
         LinkedList<DtoField> unmapped = new LinkedList<>();
         for (DtoField field : dtoDef.fields.values()) {
-            if (field.isStrictCopy() && !field.isSourceMapped()) {
+            if (field.isStrictCopy(dtoDef) && !field.isSourceMapped()) {
                 unmapped.add(field);
             }
         }

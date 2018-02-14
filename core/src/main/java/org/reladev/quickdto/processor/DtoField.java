@@ -15,8 +15,8 @@ public class DtoField extends Field implements Component {
 	private boolean excludeGetter;
 	private boolean equalsHashCode;
 	private boolean sourceMapped;
-	private boolean strictCopy;
-	private List<String> fieldAnnotations = new LinkedList<>();
+    private Boolean strictCopy;
+    private List<String> fieldAnnotations = new LinkedList<>();
 	private List<String> setterAnnotations = new LinkedList<>();
 	private List<String> getterAnnotations = new LinkedList<>();
 
@@ -116,9 +116,13 @@ public class DtoField extends Field implements Component {
 		this.sourceMapped = true;
 	}
 
-	public boolean isStrictCopy() {
-		return strictCopy;
-	}
+    public boolean isStrictCopy(DtoDef dtoDef) {
+        if (strictCopy != null) {
+            return strictCopy;
+        } else {
+            return dtoDef.strictCopy;
+        }
+    }
 
 	public void setStrictCopy(boolean strictCopy) {
 		this.strictCopy = strictCopy;

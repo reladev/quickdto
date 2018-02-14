@@ -34,13 +34,17 @@ public class Field implements Component {
         return fieldName;
     }
 
-    public void setFieldName(String fieldName) {
+    public static String normalizeFieldName(String fieldName) {
         char firstChar = fieldName.charAt(0);
         if (Character.isUpperCase(firstChar)) {
             firstChar = Character.toLowerCase(firstChar);
             fieldName = firstChar + fieldName.substring(1);
         }
-        this.fieldName = fieldName;
+        return fieldName;
+    }
+
+    public void setFieldName(String fieldName) {
+        this.fieldName = normalizeFieldName(fieldName);
     }
 
     public boolean isPrimitive() {
