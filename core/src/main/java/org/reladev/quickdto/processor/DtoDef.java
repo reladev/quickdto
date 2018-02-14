@@ -1,25 +1,31 @@
 package org.reladev.quickdto.processor;
 
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-public class DtoDef {
+import org.reladev.quickdto.shared.QuickDto;
+
+public class DtoDef extends ClassDef {
     boolean makeDto = true;
-    String packageString;
-	String name;
-	String qualifiedName;
-	String extend;
-	boolean strictCopy = true;
-	boolean fieldAnnotationsOnGetter = false;
-	LinkedList<String> annotations = new LinkedList<>();
-	LinkedList<Source> sources = new LinkedList<>();
-	LinkedList<String> implementList = new LinkedList<>();
-    LinkedHashMap<String, DtoField> fields = new LinkedHashMap<>();
+
+    LinkedList<String> annotations = new LinkedList<>();
+    String extend;
+    LinkedList<String> implementList = new LinkedList<>();
+
+    boolean fieldAnnotationsOnGetter = false;
+
+    boolean strictCopy = true;
+    LinkedList<Source> sources = new LinkedList<>();
+    private HashMap<String, List<Method>> converters = new HashMap<>();
+
+    /**
+     * List of methods in the DtoDef that should be copied to the DTO.
+     *
+     * @see QuickDto#copyMethods()
+     */
     LinkedList<Method> methods = new LinkedList<>();
 
-	private HashMap<String, List<Method>> converters = new HashMap<>();
 
 	public Method getConverter(String toType, String fromType) {
 		List<Method> methods = converters.get(toType);
