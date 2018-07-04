@@ -10,4 +10,6 @@ public class SimpleDtoDef {
 	@CopyFromOnly int readOnly;
 	@CopyFromOnly(setter = true) int readOnlyWithSetter;
 	int writeOnly;
+
+    String result;
 }

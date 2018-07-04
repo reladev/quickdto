@@ -408,10 +408,10 @@ public class QuickDtoProcessor extends AbstractProcessor {
                 bw.append("\t\ttemp = Double.doubleToLongBits(").append(field.getFieldName()).append(");\n");
             }
             if (first) {
-                bw.append("\t\tint result = ");
+                bw.append("\t\tint _r_ = ");
                 first = false;
             } else {
-                bw.append("\t\tresult = 31 * result + ");
+                bw.append("\t\t_r_ = 31 * _r_ + ");
             }
 
             if (field.getTypeString().equals("long")) {
@@ -429,7 +429,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
             }
         }
 
-        bw.append("\t\treturn result;\n");
+        bw.append("\t\treturn _r_;\n");
         bw.append("\t}\n");
         bw.newLine();
     }

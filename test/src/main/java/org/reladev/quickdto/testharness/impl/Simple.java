@@ -9,6 +9,7 @@ public class Simple {
     private int readOnly;
     private int readOnlyWithSetter;
     private int writeOnly;
+    private String result;
 
     public int getNormal() {
         return normal;
@@ -40,5 +41,13 @@ public class Simple {
 
     public int checkWriteOnly() {
         return writeOnly;
+    }
+
+    public String getResult() {
+        return result;
+    }
+
+    public void setResult(String result) {
+        this.result = result;
     }
 }
