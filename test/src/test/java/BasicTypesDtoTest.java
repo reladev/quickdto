@@ -30,58 +30,58 @@
 //	public void testPrimitiveDirty() throws Exception {
 //		BasicTypesDto dto = new BasicTypesDto();
 //
-//		assertFalse(dto.isDirty(Fields.MY_INT));
+//		assertFalse(dto.checkDirty(Fields.MY_INT));
 //		dto.setMyInt(0);
-//		assertTrue(dto.isDirty(Fields.MY_INT));
-//		assertFalse(dto.isDirty(Fields.OBJ_INTEGER));
+//		assertTrue(dto.checkDirty(Fields.MY_INT));
+//		assertFalse(dto.checkDirty(Fields.OBJ_INTEGER));
 //		dto.setObjInteger(null);
-//		assertTrue(dto.isDirty(Fields.OBJ_INTEGER));
+//		assertTrue(dto.checkDirty(Fields.OBJ_INTEGER));
 //
-//		assertFalse(dto.isDirty(Fields.MY_LONG));
+//		assertFalse(dto.checkDirty(Fields.MY_LONG));
 //		dto.setMyLong(0);
-//		assertTrue(dto.isDirty(Fields.MY_LONG));
-//		assertFalse(dto.isDirty(Fields.OBJ_LONG));
+//		assertTrue(dto.checkDirty(Fields.MY_LONG));
+//		assertFalse(dto.checkDirty(Fields.OBJ_LONG));
 //		dto.setObjLong(null);
-//		assertTrue(dto.isDirty(Fields.OBJ_LONG));
+//		assertTrue(dto.checkDirty(Fields.OBJ_LONG));
 //
-//		assertFalse(dto.isDirty(Fields.MY_SHORT));
+//		assertFalse(dto.checkDirty(Fields.MY_SHORT));
 //		dto.setMyShort((short) 0);
-//		assertTrue(dto.isDirty(Fields.MY_SHORT));
-//		assertFalse(dto.isDirty(Fields.OBJ_SHORT));
+//		assertTrue(dto.checkDirty(Fields.MY_SHORT));
+//		assertFalse(dto.checkDirty(Fields.OBJ_SHORT));
 //		dto.setObjShort(null);
-//		assertTrue(dto.isDirty(Fields.OBJ_SHORT));
+//		assertTrue(dto.checkDirty(Fields.OBJ_SHORT));
 //
-//		assertFalse(dto.isDirty(Fields.MY_BYTE));
+//		assertFalse(dto.checkDirty(Fields.MY_BYTE));
 //		dto.setMyByte((byte) 0);
-//		assertTrue(dto.isDirty(Fields.MY_BYTE));
-//		assertFalse(dto.isDirty(Fields.OBJ_BYTE));
+//		assertTrue(dto.checkDirty(Fields.MY_BYTE));
+//		assertFalse(dto.checkDirty(Fields.OBJ_BYTE));
 //		dto.setObjByte(null);
-//		assertTrue(dto.isDirty(Fields.OBJ_BYTE));
+//		assertTrue(dto.checkDirty(Fields.OBJ_BYTE));
 //
-//		assertFalse(dto.isDirty(Fields.MY_DOUBLE));
+//		assertFalse(dto.checkDirty(Fields.MY_DOUBLE));
 //		dto.setMyDouble(0);
-//		assertTrue(dto.isDirty(Fields.MY_DOUBLE));
-//		assertFalse(dto.isDirty(Fields.OBJ_DOUBLE));
+//		assertTrue(dto.checkDirty(Fields.MY_DOUBLE));
+//		assertFalse(dto.checkDirty(Fields.OBJ_DOUBLE));
 //		dto.setObjDouble(null);
-//		assertTrue(dto.isDirty(Fields.OBJ_DOUBLE));
+//		assertTrue(dto.checkDirty(Fields.OBJ_DOUBLE));
 //
-//		assertFalse(dto.isDirty(Fields.MY_FLOAT));
+//		assertFalse(dto.checkDirty(Fields.MY_FLOAT));
 //		dto.setMyFloat(0);
-//		assertTrue(dto.isDirty(Fields.MY_FLOAT));
-//		assertFalse(dto.isDirty(Fields.OBJ_FLOAT));
+//		assertTrue(dto.checkDirty(Fields.MY_FLOAT));
+//		assertFalse(dto.checkDirty(Fields.OBJ_FLOAT));
 //		dto.setObjFloat(null);
-//		assertTrue(dto.isDirty(Fields.OBJ_FLOAT));
+//		assertTrue(dto.checkDirty(Fields.OBJ_FLOAT));
 //
-//		assertFalse(dto.isDirty(Fields.MY_BOOLEAN));
+//		assertFalse(dto.checkDirty(Fields.MY_BOOLEAN));
 //		dto.setMyBoolean(false);
-//		assertTrue(dto.isDirty(Fields.MY_BOOLEAN));
-//		assertFalse(dto.isDirty(Fields.OBJ_BOOLEAN));
+//		assertTrue(dto.checkDirty(Fields.MY_BOOLEAN));
+//		assertFalse(dto.checkDirty(Fields.OBJ_BOOLEAN));
 //		dto.setObjBoolean(null);
-//		assertTrue(dto.isDirty(Fields.OBJ_BOOLEAN));
+//		assertTrue(dto.checkDirty(Fields.OBJ_BOOLEAN));
 //
-//		assertFalse(dto.isDirty(Fields.MY_STRING));
+//		assertFalse(dto.checkDirty(Fields.MY_STRING));
 //		dto.setMyString(null);
-//		assertTrue(dto.isDirty(Fields.MY_STRING));
+//		assertTrue(dto.checkDirty(Fields.MY_STRING));
 //	}
 //
 //	@Test
@@ -104,62 +104,62 @@
 //		dto.setObjBoolean(true);
 //		dto.setMyString("2");
 //
-//		assertTrue(dto.isDirty());
+//		assertTrue(dto.checkDirty());
 //		dto.resetDirty();
-//		assertFalse(dto.isDirty());
+//		assertFalse(dto.checkDirty());
 //
-//		assertFalse(dto.isDirty(Fields.MY_INT));
+//		assertFalse(dto.checkDirty(Fields.MY_INT));
 //		dto.setMyInt(2);
-//		assertFalse(dto.isDirty(Fields.MY_INT));
-//		assertFalse(dto.isDirty(Fields.OBJ_INTEGER));
+//		assertFalse(dto.checkDirty(Fields.MY_INT));
+//		assertFalse(dto.checkDirty(Fields.OBJ_INTEGER));
 //		dto.setObjInteger(2);
-//		assertFalse(dto.isDirty(Fields.OBJ_INTEGER));
+//		assertFalse(dto.checkDirty(Fields.OBJ_INTEGER));
 //
-//		assertFalse(dto.isDirty(Fields.MY_LONG));
+//		assertFalse(dto.checkDirty(Fields.MY_LONG));
 //		dto.setMyLong(2);
-//		assertFalse(dto.isDirty(Fields.MY_LONG));
-//		assertFalse(dto.isDirty(Fields.OBJ_LONG));
+//		assertFalse(dto.checkDirty(Fields.MY_LONG));
+//		assertFalse(dto.checkDirty(Fields.OBJ_LONG));
 //		dto.setObjLong((long) 2);
-//		assertFalse(dto.isDirty(Fields.OBJ_LONG));
+//		assertFalse(dto.checkDirty(Fields.OBJ_LONG));
 //
-//		assertFalse(dto.isDirty(Fields.MY_SHORT));
+//		assertFalse(dto.checkDirty(Fields.MY_SHORT));
 //		dto.setMyShort((short) 2);
-//		assertFalse(dto.isDirty(Fields.MY_SHORT));
-//		assertFalse(dto.isDirty(Fields.OBJ_SHORT));
+//		assertFalse(dto.checkDirty(Fields.MY_SHORT));
+//		assertFalse(dto.checkDirty(Fields.OBJ_SHORT));
 //		dto.setObjShort((short) 2);
-//		assertFalse(dto.isDirty(Fields.OBJ_SHORT));
+//		assertFalse(dto.checkDirty(Fields.OBJ_SHORT));
 //
-//		assertFalse(dto.isDirty(Fields.MY_BYTE));
+//		assertFalse(dto.checkDirty(Fields.MY_BYTE));
 //		dto.setMyByte((byte) 2);
-//		assertFalse(dto.isDirty(Fields.MY_BYTE));
-//		assertFalse(dto.isDirty(Fields.OBJ_BYTE));
+//		assertFalse(dto.checkDirty(Fields.MY_BYTE));
+//		assertFalse(dto.checkDirty(Fields.OBJ_BYTE));
 //		dto.setObjByte((byte) 2);
-//		assertFalse(dto.isDirty(Fields.OBJ_BYTE));
+//		assertFalse(dto.checkDirty(Fields.OBJ_BYTE));
 //
-//		assertFalse(dto.isDirty(Fields.MY_DOUBLE));
+//		assertFalse(dto.checkDirty(Fields.MY_DOUBLE));
 //		dto.setMyDouble(2);
-//		assertFalse(dto.isDirty(Fields.MY_DOUBLE));
-//		assertFalse(dto.isDirty(Fields.OBJ_DOUBLE));
+//		assertFalse(dto.checkDirty(Fields.MY_DOUBLE));
+//		assertFalse(dto.checkDirty(Fields.OBJ_DOUBLE));
 //		dto.setObjDouble((double) 2);
-//		assertFalse(dto.isDirty(Fields.OBJ_DOUBLE));
+//		assertFalse(dto.checkDirty(Fields.OBJ_DOUBLE));
 //
-//		assertFalse(dto.isDirty(Fields.MY_FLOAT));
+//		assertFalse(dto.checkDirty(Fields.MY_FLOAT));
 //		dto.setMyFloat(2);
-//		assertFalse(dto.isDirty(Fields.MY_FLOAT));
-//		assertFalse(dto.isDirty(Fields.OBJ_FLOAT));
+//		assertFalse(dto.checkDirty(Fields.MY_FLOAT));
+//		assertFalse(dto.checkDirty(Fields.OBJ_FLOAT));
 //		dto.setObjFloat((float) 2);
-//		assertFalse(dto.isDirty(Fields.OBJ_FLOAT));
+//		assertFalse(dto.checkDirty(Fields.OBJ_FLOAT));
 //
-//		assertFalse(dto.isDirty(Fields.MY_BOOLEAN));
+//		assertFalse(dto.checkDirty(Fields.MY_BOOLEAN));
 //		dto.setMyBoolean(false);
-//		assertFalse(dto.isDirty(Fields.MY_BOOLEAN));
-//		assertFalse(dto.isDirty(Fields.OBJ_BOOLEAN));
+//		assertFalse(dto.checkDirty(Fields.MY_BOOLEAN));
+//		assertFalse(dto.checkDirty(Fields.OBJ_BOOLEAN));
 //		dto.setObjBoolean(true);
-//		assertFalse(dto.isDirty(Fields.OBJ_BOOLEAN));
+//		assertFalse(dto.checkDirty(Fields.OBJ_BOOLEAN));
 //
-//		assertFalse(dto.isDirty(Fields.MY_STRING));
+//		assertFalse(dto.checkDirty(Fields.MY_STRING));
 //		dto.setMyString("2");
-//		assertFalse(dto.isDirty(Fields.MY_STRING));
+//		assertFalse(dto.checkDirty(Fields.MY_STRING));
 //	}
 //
 //

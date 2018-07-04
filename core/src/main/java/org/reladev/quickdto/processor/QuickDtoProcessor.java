@@ -273,7 +273,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
     private void writeDirty(BufferedWriter bw) throws IOException {
         bw.append("\tprotected Set<Fields> dirtyFields = new HashSet<Fields>();\n");
         bw.newLine();
-        bw.append("\tpublic void setDirty(Fields field, boolean dirty) {\n");
+        bw.append("\tpublic void markDirty(Fields field, boolean dirty) {\n");
         bw.append("\t\tif (dirty) {\n");
         bw.append("\t\t\tdirtyFields.add(field);\n");
         bw.append("\t\t} else {\n");
@@ -281,23 +281,23 @@ public class QuickDtoProcessor extends AbstractProcessor {
         bw.append("\t\t}\n");
         // Todo handle dirty for nested
         //bw.append("\t\tif (parent != null) {\n");
-        //bw.append("\t\t\tparent.setDirty(fieldInParent, isDirty());\n");
+        //bw.append("\t\t\tparent.markDirty(fieldInParent, checkDirty());\n");
         //bw.append("\t\t}\n");
         bw.append("\t}\n");
         bw.newLine();
-        bw.append("\tpublic boolean isDirty() {\n");
+        bw.append("\tpublic boolean checkDirty() {\n");
         bw.append("\t\treturn !dirtyFields.isEmpty();\n");
         bw.append("\t}\n");
         bw.newLine();
-        bw.append("\tpublic boolean isDirty(Fields field) {\n");
+        bw.append("\tpublic boolean checkDirty(Fields field) {\n");
         bw.append("\t\treturn dirtyFields.contains(field);\n");
         bw.append("\t}\n");
         bw.newLine();
-        bw.append("\tpublic void setDirtyFields(Set<Fields> dirtyFields) { \n");
+        bw.append("\tpublic void markDirtyFields(Set<Fields> dirtyFields) { \n");
         bw.append("\t\tthis.dirtyFields = dirtyFields;\n");
         bw.append("\t}\n");
         bw.newLine();
-        bw.append("\tpublic Set<Fields> getDirtyFields() {\n");
+        bw.append("\tpublic Set<Fields> listDirtyFields() {\n");
         bw.append("\t\treturn dirtyFields;\n");
         bw.append("\t}\n");
         bw.newLine();
@@ -342,7 +342,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
                 }
                 bw.append("\tpublic void set").append(field.getAccessorName()).append("(").append(field.getTypeString()).append(" ").append(field.getFieldName()).append(") {\n");
                 bw.append("\t\tif (this.").append(field.getFieldName()).append(" == null || !Objects.equals(this.").append(field.getFieldName()).append(", ").append(field.getFieldName()).append(")) {\n");
-                bw.append("\t\t\tsetDirty(Fields.").append(field.getEnumName()).append(", true);\n");
+                bw.append("\t\t\tmarkDirty(Fields.").append(field.getEnumName()).append(", true);\n");
                 bw.append("\t\t\tthis.").append(field.getFieldName()).append(" = ").append(field.getFieldName()).append(";\n");
                 bw.append("\t\t}\n");
                 bw.append("\t}\n");
@@ -452,7 +452,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
         bw.append("\t\tif (fields.length > 0) {\n");
         bw.append("\t\t\tcopyTo(dest, Arrays.asList(fields));\n");
         bw.append("\t\t} else {\n");
-        bw.append("\t\t\tcopyTo(dest, getDirtyFields());\n");
+        bw.append("\t\t\tcopyTo(dest, listDirtyFields());\n");
         bw.append("\t\t}\n");
         bw.append("\t}\n");
         bw.newLine();
@@ -521,7 +521,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
         bw.append("\t\tif (fields.length > 0) {\n");
         bw.append("\t\t\tcopyTo(dto, dest, Arrays.asList(fields));\n");
         bw.append("\t\t} else {\n");
-        bw.append("\t\t\tcopyTo(dto, dest, dto.getDirtyFields());\n");
+        bw.append("\t\t\tcopyTo(dto, dest, dto.listDirtyFields());\n");
         bw.append("\t\t}\n");
         bw.append("\t}\n");
         bw.newLine();

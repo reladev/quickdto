@@ -43,7 +43,7 @@
 //		SimpleDto dto = new SimpleDto();
 //
 //		dto.copyFrom(from);
-//		assertFalse(dto.isDirty());
+//		assertFalse(dto.checkDirty());
 //		assertEquals(1, dto.getReadOnly());
 //		assertEquals(1, dto.getReadOnly());
 //		assertEquals(1, dto.getReadOnly());
@@ -58,7 +58,7 @@
 //		dto.setNormal(2);
 //		dto.setReadOnlyWithSetter(2);
 //		dto.setWriteOnly(2);
-//		dto.setDirty(Fields.READ_ONLY, true);
+//		dto.markDirty(Fields.READ_ONLY, true);
 //
 //		Simple toDirty = new Simple();
 //		dto.copyTo(toDirty);

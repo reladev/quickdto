@@ -78,7 +78,7 @@ public class UserDto {
 
 	protected Set<Fields> dirtyFields = new HashSet<Fields>();
 
-	public void setDirty(Fields field, boolean dirty) {
+	public void markDirty(Fields field, boolean dirty) {
 		if (dirty) {
 			dirtyFields.add(field);
 		} else {
@@ -86,19 +86,19 @@ public class UserDto {
 		}
 	}
 
-	public boolean isDirty() {
+	public boolean checkDirty() {
 		return !dirtyFields.isEmpty();
 	}
 
-	public boolean isDirty(Fields field) {
+	public boolean checkDirty(Fields field) {
 		return dirtyFields.contains(field);
 	}
 
-	public void setDirtyFields(Set<Fields> dirtyFields) { 
+	public void markDirtyFields(Set<Fields> dirtyFields) { 
 		this.dirtyFields = dirtyFields;
 	}
 
-	public Set<Fields> getDirtyFields() {
+	public Set<Fields> listDirtyFields() {
 		return dirtyFields;
 	}
 
@@ -116,7 +116,7 @@ public class UserDto {
 
 	public void setFirstName(java.lang.String firstName) {
 		if (!Objects.equals(this.firstName, firstName)) {
-			setDirty(Fields.FIRST_NAME, true);
+			markDirty(Fields.FIRST_NAME, true);
 			this.firstName = firstName;
 		}
 	}
@@ -127,7 +127,7 @@ public class UserDto {
 
 	public void setLastName(java.lang.String lastName) {
 		if (!Objects.equals(this.lastName, lastName)) {
-			setDirty(Fields.LAST_NAME, true);
+			markDirty(Fields.LAST_NAME, true);
 			this.lastName = lastName;
 		}
 	}
@@ -162,7 +162,7 @@ public class UserDto {
 		if (fields.length > 0) {
 			copyTo(dest, Arrays.asList(fields));
 		} else {
-			copyTo(dest, getDirtyFields());
+			copyTo(dest, listDirtyFields());
 		}
 	}
 
