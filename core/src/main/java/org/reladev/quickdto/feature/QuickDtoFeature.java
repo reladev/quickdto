@@ -1,6 +1,11 @@
-package org.reladev.quickdto.processor;
+package org.reladev.quickdto.feature;
 
 import java.io.IOException;
+
+import org.reladev.quickdto.processor.DtoDef;
+import org.reladev.quickdto.processor.DtoField;
+import org.reladev.quickdto.processor.IndentWriter;
+import org.reladev.quickdto.processor.Source;
 
 abstract public class QuickDtoFeature {
 
@@ -25,4 +30,14 @@ abstract public class QuickDtoFeature {
     abstract public void writeHelperCopyFrom(Source source, DtoDef dtoDef, IndentWriter bw) throws IOException;
 
     abstract public void writeInnerClasses(DtoDef dtoDef, IndentWriter bw) throws IOException;
+
+    @Override
+    final public boolean equals(Object o) {
+        return this.getClass().equals(o.getClass());
+    }
+
+    @Override
+    final public int hashCode() {
+        return this.getClass().hashCode();
+    }
 }

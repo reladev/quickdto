@@ -21,6 +21,7 @@ import javax.lang.model.util.Elements;
 import javax.tools.Diagnostic.Kind;
 
 import com.sun.source.util.Trees;
+import org.reladev.quickdto.feature.QuickDtoFeature;
 import org.reladev.quickdto.shared.CopyFromOnly;
 import org.reladev.quickdto.shared.CopyToOnly;
 import org.reladev.quickdto.shared.EqualsHashCode;
@@ -166,6 +167,21 @@ public class ClassAnalyzer {
                         boolean copyMethods = (boolean) action.getValue();
                         if (copyMethods) {
                             trees = Trees.instance(processingEnv);
+                        }
+                    } else if ("feature".equals(entry.getKey().getSimpleName().toString())) {
+                        action = entry.getValue();
+                        List implementList = (List) action.getValue();
+                        for (Object implement : implementList) {
+                            String className = annotationParamToClassName(implement);
+                            try {
+                                Class featureClass = Class.forName(className);
+                                QuickDtoFeature feature = (QuickDtoFeature) featureClass.newInstance();
+                                if (!dtoDef.features.contains(feature)) {
+                                    dtoDef.features.add(feature);
+                                }
+                            } catch (Exception e) {
+                                processingEnv.getMessager().printMessage(Kind.WARNING, "Can't create feature:" + className);
+                            }
                         }
                     }
                 }

@@ -1,11 +1,12 @@
 package org.reladev.quickdto.testharness;
 
 
+import org.reladev.quickdto.feature.DirtyFeature;
 import org.reladev.quickdto.shared.GwtIncompatible;
 import org.reladev.quickdto.shared.QuickDto;
 import org.reladev.quickdto.testharness.impl.TestImpl;
 
-@QuickDto(source = {TestImpl.class, CollectionsDtoDef.class}, strictCopy = false)
+@QuickDto(source = {TestImpl.class, CollectionsDtoDef.class}, strictCopy = false, feature = DirtyFeature.class)
 public class BasicTypesDtoDef {
     byte myByte;
     @GwtIncompatible

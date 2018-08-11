@@ -1,11 +1,12 @@
 package org.reladev.quickdto.testharness;
 
+import org.reladev.quickdto.feature.DirtyFeature;
 import org.reladev.quickdto.shared.QuickDto;
 import org.reladev.quickdto.testharness.impl.Basic;
 import org.reladev.quickdto.testharness.impl.Convert;
 import org.reladev.quickdto.testharness.impl.ExistingParam;
 
-@QuickDto(source = Convert.class)
+@QuickDto(source = Convert.class, feature = DirtyFeature.class)
 public class ConvertDtoDef {
     BasicDtoDef basic;
     ExistingParamDtoDef existing;

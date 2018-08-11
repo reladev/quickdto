@@ -21,8 +21,11 @@ import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic.Kind;
 import javax.tools.JavaFileObject;
 
+import org.reladev.quickdto.feature.QuickDtoFeature;
 import org.reladev.quickdto.shared.QuickDto;
 import org.reladev.quickdto.shared.QuickDtoHelper;
+
+import static org.reladev.quickdto.processor.Reversed.reversed;
 
 @SupportedAnnotationTypes({"org.reladev.quickdto.shared.QuickDto", "org.reladev.quickdto.shared.QuickDtoHelper"})
 public class QuickDtoProcessor extends AbstractProcessor {
@@ -31,7 +34,6 @@ public class QuickDtoProcessor extends AbstractProcessor {
 
     private ProcessingEnvironment processingEnv;
     private ClassAnalyzer classAnalyzer;
-    private DirtyFeature dirtyFeature = new DirtyFeature();
 
     @Override
     public SourceVersion getSupportedSourceVersion() {
@@ -53,7 +55,6 @@ public class QuickDtoProcessor extends AbstractProcessor {
             } else {
                 DtoDef dtoDef = classAnalyzer.processDtoDef(element);
                 defs.put(dtoDef.qualifiedName + DefSuffix, dtoDef);
-                processingEnv.getMessager().printMessage(Kind.NOTE, dtoDef.qualifiedName + " added to Defs");
                 writeDto(dtoDef);
             }
         }
@@ -174,15 +175,21 @@ public class QuickDtoProcessor extends AbstractProcessor {
 
             bw.newLine();
             writeFields(dtoDef, bw);
-            dirtyFeature.writeFields(dtoDef, bw);
+            for (QuickDtoFeature feature : dtoDef.features) {
+                feature.writeFields(dtoDef, bw);
+            }
             bw.newLine();
             writeGettersSetters(dtoDef, bw);
-            dirtyFeature.writeMethods(dtoDef, bw);
+            for (QuickDtoFeature feature : dtoDef.features) {
+                feature.writeMethods(dtoDef, bw);
+            }
             writeEqualsHash(dtoDef, bw);
             writeCopyMethods(dtoDef, bw);
             writeOtherMethods(dtoDef, bw);
             writeFieldsEnum(dtoDef, bw);
-            dirtyFeature.writeInnerClasses(dtoDef, bw);
+            for (QuickDtoFeature feature : dtoDef.features) {
+                feature.writeInnerClasses(dtoDef, bw);
+            }
 
             bw.unindent();
             bw.line("}");
@@ -291,7 +298,9 @@ public class QuickDtoProcessor extends AbstractProcessor {
             bw.append(field.getAccessorName()).append("() {");
 
             bw.indent();
-            dirtyFeature.preGetterLogic(field, dtoDef, bw);
+            for (QuickDtoFeature feature : dtoDef.features) {
+                feature.preGetterLogic(field, dtoDef, bw);
+            }
             if (field.isPrimitive()) {
                 bw.line(0, "if (").append(field.getFieldName()).append(" != null) {");
                 bw.line(1, "return ").append(field.getFieldName()).append(";");
@@ -300,9 +309,11 @@ public class QuickDtoProcessor extends AbstractProcessor {
                 bw.line(0, "}");
 
             } else {
-                bw.line(1, "return ").append(field.getFieldName()).append(";");
+                bw.line(0, "return ").append(field.getFieldName()).append(";");
             }
-            dirtyFeature.postGetterLogic(field, dtoDef, bw);
+            for (QuickDtoFeature feature : reversed(dtoDef.features)) {
+                feature.postGetterLogic(field, dtoDef, bw);
+            }
             bw.unindent();
 
             bw.line("}");
@@ -314,9 +325,13 @@ public class QuickDtoProcessor extends AbstractProcessor {
                 bw.line("public void set").append(field.getAccessorName()).append("(").append(field.getTypeString()).append(" ").append(field.getFieldName()).append(") {");
 
                 bw.indent();
-                dirtyFeature.preSetterLogic(field, dtoDef, bw);
+                for (QuickDtoFeature feature : dtoDef.features) {
+                    feature.preSetterLogic(field, dtoDef, bw);
+                }
                 bw.line("this.").append(field.getFieldName()).append(" = ").append(field.getFieldName()).append(";");
-                dirtyFeature.postSetterLogic(field, dtoDef, bw);
+                for (QuickDtoFeature feature : reversed(dtoDef.features)) {
+                    feature.postSetterLogic(field, dtoDef, bw);
+                }
                 bw.unindent();
 
                 bw.line("}");
@@ -413,10 +428,14 @@ public class QuickDtoProcessor extends AbstractProcessor {
         if (!dtoDef.sources.isEmpty()) {
             for (Source source : dtoDef.sources) {
                 writeCopyTo(source, dtoDef, bw);
-                dirtyFeature.writeCopyTo(source, dtoDef, bw);
+                for (QuickDtoFeature feature : dtoDef.features) {
+                    feature.writeCopyTo(source, dtoDef, bw);
+                }
 
                 writeCopyFrom(source, dtoDef, bw);
-                dirtyFeature.writeCopyFrom(source, dtoDef, bw);
+                for (QuickDtoFeature feature : dtoDef.features) {
+                    feature.writeCopyFrom(source, dtoDef, bw);
+                }
             }
             if (dtoDef.strictCopy) {
                 writeUnmapped(dtoDef, bw);
@@ -492,10 +511,14 @@ public class QuickDtoProcessor extends AbstractProcessor {
             if (!dtoDef.sources.isEmpty()) {
                 for (Source source : dtoDef.sources) {
                     writeHelperCopyTo(source, dtoDef, bw);
-                    dirtyFeature.writeHelperCopyTo(source, dtoDef, bw);
+                    for (QuickDtoFeature feature : dtoDef.features) {
+                        feature.writeHelperCopyTo(source, dtoDef, bw);
+                    }
 
                     writeHelperCopyFrom(source, dtoDef, bw);
-                    dirtyFeature.writeHelperCopyFrom(source, dtoDef, bw);
+                    for (QuickDtoFeature feature : dtoDef.features) {
+                        feature.writeHelperCopyFrom(source, dtoDef, bw);
+                    }
                 }
                 if (dtoDef.strictCopy) {
                     writeUnmapped(dtoDef, bw);

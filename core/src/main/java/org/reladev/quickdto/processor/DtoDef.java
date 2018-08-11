@@ -1,23 +1,30 @@
 package org.reladev.quickdto.processor;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.reladev.quickdto.feature.QuickDtoFeature;
 import org.reladev.quickdto.shared.QuickDto;
 
 public class DtoDef extends ClassDef {
-    boolean makeDto = true;
+    public boolean makeDto = true;
+    public List<QuickDtoFeature> features = new ArrayList<>();
 
-    LinkedList<String> annotations = new LinkedList<>();
-    String extend;
-    LinkedList<String> implementList = new LinkedList<>();
+    public LinkedList<String> annotations = new LinkedList<>();
+    public String extend;
+    public LinkedList<String> implementList = new LinkedList<>();
 
-    boolean fieldAnnotationsOnGetter = false;
+    public boolean fieldAnnotationsOnGetter = false;
 
-    boolean strictCopy = true;
-    LinkedList<Source> sources = new LinkedList<>();
-    private HashMap<String, List<Method>> converters = new HashMap<>();
+    public boolean strictCopy = true;
+    public LinkedList<Source> sources = new LinkedList<>();
+    public HashMap<String, List<Method>> converters = new HashMap<>();
+
+    public DtoDef() {
+        //features.add(new DirtyFeature());
+    }
 
     /**
      * List of methods in the DtoDef that should be copied to the DTO.

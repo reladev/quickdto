@@ -1,6 +1,11 @@
-package org.reladev.quickdto.processor;
+package org.reladev.quickdto.feature;
 
 import java.io.IOException;
+
+import org.reladev.quickdto.processor.DtoDef;
+import org.reladev.quickdto.processor.DtoField;
+import org.reladev.quickdto.processor.IndentWriter;
+import org.reladev.quickdto.processor.Source;
 
 public class DirtyFeature extends QuickDtoFeature {
 
