@@ -137,22 +137,22 @@ public class QuickDtoProcessor extends AbstractProcessor {
         try {
             JavaFileObject jfo = processingEnv.getFiler().createSourceFile(dtoDef.packageString + "." + dtoDef.name);
 
-            BufferedWriter bw = new BufferedWriter(jfo.openWriter());
-            bw.append("package ").append(dtoDef.packageString).append(";\n");
+            IndentWriter bw = new IndentWriter(new BufferedWriter(jfo.openWriter()), "\t");
+            bw.append("package ").append(dtoDef.packageString).append(";");
             bw.newLine();
-            bw.append("import java.util.Arrays;\n");
-            bw.append("import java.util.HashSet;\n");
-            bw.append("import java.util.List;\n");
-            bw.append("import java.util.Map;\n");
-            bw.append("import java.util.Set;\n");
-            bw.append("import java.util.Objects;\n");
-            bw.append("import org.reladev.quickdto.shared.GwtIncompatible;\n");
+            bw.line("import java.util.Arrays;");
+            bw.line("import java.util.HashSet;");
+            bw.line("import java.util.List;");
+            bw.line("import java.util.Map;");
+            bw.line("import java.util.Set;");
+            bw.line("import java.util.Objects;");
+            bw.line("import org.reladev.quickdto.shared.GwtIncompatible;");
             bw.newLine();
             for (String annotation: dtoDef.annotations) {
                 bw.append(annotation);
                 bw.newLine();
             }
-            bw.append("public class ").append(dtoDef.name);
+            bw.line("public class ").append(dtoDef.name);
             if (dtoDef.extend != null) {
                 bw.append(" extends ").append(dtoDef.extend);
             }
@@ -168,7 +168,9 @@ public class QuickDtoProcessor extends AbstractProcessor {
                     firstPass = false;
                 }
             }
-            bw.append(" {\n");
+            bw.append(" {");
+            bw.indent();
+
             bw.newLine();
             writeFieldsEnum(dtoDef, bw);
             bw.newLine();
@@ -179,7 +181,9 @@ public class QuickDtoProcessor extends AbstractProcessor {
             writeEqualsHash(dtoDef, bw);
             writeCopyMethods(dtoDef, bw);
             writeOtherMethods(dtoDef, bw);
-            bw.append("}\n");
+
+            bw.unindent();
+            bw.line("}");
 
             bw.flush();
             bw.close();
@@ -193,25 +197,25 @@ public class QuickDtoProcessor extends AbstractProcessor {
         try {
             JavaFileObject jfo = processingEnv.getFiler().createSourceFile(packageString + "." + sourceClassName + HelperSuffix);
 
-            BufferedWriter bw = new BufferedWriter(jfo.openWriter());
-            bw.append("package ").append(packageString).append(";\n");
+            IndentWriter bw = new IndentWriter(new BufferedWriter(jfo.openWriter()), "\t");
+            bw.append("package ").append(packageString).append(";");
             bw.newLine();
-            bw.append("import java.util.Arrays;\n");
-            bw.append("import java.util.HashSet;\n");
-            bw.append("import java.util.List;\n");
-            bw.append("import java.util.Map;\n");
-            bw.append("import java.util.Set;\n");
-            bw.append("import java.util.Objects;\n");
-            bw.append("import org.reladev.quickdto.shared.GwtIncompatible;\n");
+            bw.line("import java.util.Arrays;");
+            bw.line("import java.util.HashSet;");
+            bw.line("import java.util.List;");
+            bw.line("import java.util.Map;");
+            bw.line("import java.util.Set;");
+            bw.line("import java.util.Objects;");
+            bw.line("import org.reladev.quickdto.shared.GwtIncompatible;");
             bw.newLine();
             for (DtoDef dtoDef : dtoDefs) {
-                bw.append("import ").append(dtoDef.qualifiedName).append(";\n");
+                bw.line("import ").append(dtoDef.qualifiedName).append(";");
             }
             bw.newLine();
-            bw.append("public class ").append(sourceClassName).append(HelperSuffix).append(" {\n");
+            bw.line("public class ").append(sourceClassName).append(HelperSuffix).append(" {");
             bw.newLine();
             writeHelperCopyMethods(dtoDefs, bw);
-            bw.append("}\n");
+            bw.line("}");
 
             bw.flush();
             bw.close();
@@ -221,135 +225,131 @@ public class QuickDtoProcessor extends AbstractProcessor {
         }
     }
 
-    private void writeFieldsEnum(DtoDef dtoDef, BufferedWriter bw) throws IOException {
-        bw.append("\tpublic static enum Fields {\n");
-        boolean first = true;
+    private void writeFieldsEnum(DtoDef dtoDef, IndentWriter bw) throws IOException {
+        bw.line(0, "public static enum Fields {");
+        bw.startLineList(",");
         for (DtoField field : dtoDef.fields.values()) {
-            if (!first) {
-                bw.append(",\n");
-            } else {
-                first = false;
-            }
-            bw.append("\t\t").append(field.getEnumName()).append("(\"").append(field.getFieldName()).append("\")");
+            bw.line(1, "").append(field.getEnumName()).append("(\"").append(field.getFieldName()).append("\")");
         }
-        bw.append(";\n");
+        bw.endLineList();
+        bw.append(";");
         bw.newLine();
-        bw.append("\t\tprivate String name;\n");
+        bw.line(1, "private String name;");
         bw.newLine();
-        bw.append("\t\tFields(String name) {\n");
-        bw.append("\t\t\tthis.name = name;\n");
-        bw.append("\t\t}\n");
+        bw.line(1, "Fields(String name) {");
+        bw.line(2, "this.name = name;");
+        bw.line(1, "}");
         bw.newLine();
-        bw.append("\t\tpublic String toString() {\n");
-        bw.append("\t\t\treturn name;\n");
-        bw.append("\t\t}\n");
+        bw.line(1, "public String toString() {");
+        bw.line(2, "return name;");
+        bw.line(1, "}");
         bw.newLine();
-        bw.append("\t\tpublic static Fields get(String fieldName) {\n");
-        bw.append("\t\t\tfor (Fields field: Fields.values()) {\n");
-        bw.append("\t\t\t\tif (field.name.equals(fieldName)) {\n");
-        bw.append("\t\t\t\t\treturn field;\n");
-        bw.append("\t\t\t\t}\n");
-        bw.append("\t\t\t}\n");
-        bw.append("\t\t\treturn null;\n");
-        bw.append("\t\t}\n");
-        bw.append("\t}\n");
+        bw.line(1, "public static Fields get(String fieldName) {");
+        bw.line(2, "for (Fields field: Fields.values()) {");
+        bw.line(3, "if (field.name.equals(fieldName)) {");
+        bw.line(4, "return field;");
+        bw.line(3, "}");
+        bw.line(2, "}");
+        bw.line(2, "return null;");
+        bw.line(1, "}");
+        bw.line(0, "}");
     }
 
-    private void writeFields(DtoDef dtoDef, BufferedWriter bw) throws IOException {
+    private void writeFields(DtoDef dtoDef, IndentWriter bw) throws IOException {
         for (DtoField field : dtoDef.fields.values()) {
             if (!dtoDef.fieldAnnotationsOnGetter) {
                 for (String annotation : field.getFieldAnnotations()) {
-                    bw.append("\t").append(annotation).append("\n");
+                    bw.line(0, "").append(annotation);
                 }
             }
             if (field.isPrimitive()) {
-                bw.append("\tprivate ").append(field.getPrimitiveTypeString()).append(" ").append(field.getFieldName()).append(";\n");
+                bw.line(0, "private ").append(field.getPrimitiveTypeString()).append(" ").append(field.getFieldName()).append(";");
             } else {
-                bw.append("\tprivate ").append(field.getTypeString()).append(" ").append(field.getFieldName()).append(";\n");
+                bw.line(0, "private ").append(field.getTypeString()).append(" ").append(field.getFieldName()).append(";");
             }
         }
     }
 
-    private void writeDirty(BufferedWriter bw) throws IOException {
-        bw.append("\tprotected Set<Fields> dirtyFields = new HashSet<Fields>();\n");
+    private void writeDirty(IndentWriter bw) throws IOException {
+        bw.line(0, "protected Set<Fields> dirtyFields = new HashSet<Fields>();");
         bw.newLine();
-        bw.append("\tpublic void markDirty(boolean dirty, Fields... fields) { \n");
-        bw.append("\t\tfor (Fields field: fields) {\n");
-        bw.append("\t\t\tif (dirty) {\n");
-        bw.append("\t\t\t\tdirtyFields.add(field);\n");
-        bw.append("\t\t\t} else {\n");
-        bw.append("\t\t\t\tdirtyFields.remove(field);\n");
-        bw.append("\t\t\t}\n");
+        bw.line(0, "public void markDirty(boolean dirty, Fields... fields) { ");
+        bw.line(1, "for (Fields field: fields) {");
+        bw.line(2, "if (dirty) {");
+        bw.line(3, "dirtyFields.add(field);");
+        bw.line(2, "} else {");
+        bw.line(3, "dirtyFields.remove(field);");
+        bw.line(2, "}");
         // Todo handle dirty for nested
-        //bw.append("\t\t\tif (parent != null) {\n");
-        //bw.append("\t\t\t\tparent.markDirty(fieldInParent, checkDirty());\n");
-        //bw.append("\t\t\t}\n");
-        bw.append("\t\t}\n");
-        bw.append("\t}\n");
+        //bw.line(2, "if (parent != null) {");
+        //bw.line(3, "parent.markDirty(fieldInParent, checkDirty());");
+        //bw.line(2, "}");
+        bw.line(1, "}");
+        bw.line(0, "}");
         bw.newLine();
-        bw.append("\tpublic boolean checkDirty() {\n");
-        bw.append("\t\treturn !dirtyFields.isEmpty();\n");
-        bw.append("\t}\n");
+        bw.line(0, "public boolean checkDirty() {");
+        bw.line(1, "return !dirtyFields.isEmpty();");
+        bw.line(0, "}");
         bw.newLine();
-        bw.append("\tpublic boolean checkDirty(Fields field) {\n");
-        bw.append("\t\treturn dirtyFields.contains(field);\n");
-        bw.append("\t}\n");
+        bw.line(0, "public boolean checkDirty(Fields field) {");
+        bw.line(1, "return dirtyFields.contains(field);");
+        bw.line(0, "}");
         bw.newLine();
-        bw.append("\tpublic Set<Fields> listDirtyFields() {\n");
-        bw.append("\t\treturn dirtyFields;\n");
-        bw.append("\t}\n");
+        bw.line(0, "public Set<Fields> listDirtyFields() {");
+        bw.line(1, "return dirtyFields;");
+        bw.line(0, "}");
         bw.newLine();
-        bw.append("\tpublic void resetDirty() {\n");
-        bw.append("\t\tdirtyFields.clear();\n");
-        bw.append("\t}\n");
+        bw.line(0, "public void resetDirty() {");
+        bw.line(1, "dirtyFields.clear();");
+        bw.line(0, "}");
         bw.newLine();
     }
 
-    private void writeGettersSetters(DtoDef dtoDef, BufferedWriter bw) throws IOException {
+    private void writeGettersSetters(DtoDef dtoDef, IndentWriter bw) throws IOException {
         for (DtoField field : dtoDef.fields.values()) {
             if (dtoDef.fieldAnnotationsOnGetter) {
                 for (String annotation : field.getFieldAnnotations()) {
-                    bw.append("\t").append(annotation).append("\n");
+                    bw.line(0, "").append(annotation).append("");
                 }
             }
             for (String annotation : field.getGetterAnnotations()) {
-                bw.append("\t").append(annotation).append("\n");
+                bw.line(0, "").append(annotation).append("");
             }
-            bw.append("\tpublic ").append(field.getTypeString());
+            bw.line(0, "public ").append(field.getTypeString());
             if ("boolean".equals(field.getTypeString()) || "java.lang.Boolean".equals(field.getTypeString())) {
                 bw.append(" is");
             } else {
                 bw.append(" get");
             }
-            bw.append(field.getAccessorName()).append("() {\n");
+            bw.append(field.getAccessorName()).append("() {");
             if (field.isPrimitive()) {
-                bw.append("\t\tif (").append(field.getFieldName()).append(" != null) {\n");
-                bw.append("\t\t\treturn ").append(field.getFieldName()).append(";\n");
-                bw.append("\t\t} else {\n");
-                bw.append("\t\t\treturn ").append(field.getDefaultValue()).append(";\n");
-                bw.append("\t\t}\n");
+                bw.line(1, "if (").append(field.getFieldName()).append(" != null) {");
+                bw.line(2, "return ").append(field.getFieldName()).append(";");
+                bw.line(1, "} else {");
+                bw.line(2, "return ").append(field.getDefaultValue()).append(";");
+                bw.line(1, "}");
 
             } else {
-                bw.append("\t\treturn ").append(field.getFieldName()).append(";\n");
+                bw.line(1, "return ").append(field.getFieldName()).append(";");
             }
-            bw.append("\t}\n");
+            bw.line(0, "}");
             bw.newLine();
             if (!field.isExcludeSetter()) {
                 for (String annotation : field.getSetterAnnotations()) {
-                    bw.append("\t").append(annotation).append("\n");
+                    bw.line(0, "").append(annotation).append("");
                 }
-                bw.append("\tpublic void set").append(field.getAccessorName()).append("(").append(field.getTypeString()).append(" ").append(field.getFieldName()).append(") {\n");
-                bw.append("\t\tif (this.").append(field.getFieldName()).append(" == null || !Objects.equals(this.").append(field.getFieldName()).append(", ").append(field.getFieldName()).append(")) {\n");
-                bw.append("\t\t\tmarkDirty(true, Fields.").append(field.getEnumName()).append(");\n");
-                bw.append("\t\t\tthis.").append(field.getFieldName()).append(" = ").append(field.getFieldName()).append(";\n");
-                bw.append("\t\t}\n");
-                bw.append("\t}\n");
+                bw.line(0, "public void set").append(field.getAccessorName()).append("(").append(field.getTypeString()).append(" ").append(field.getFieldName()).append(") {");
+                bw.line(1, "if (this.").append(field.getFieldName()).append(" == null || !Objects.equals(this.").append(field.getFieldName()).append(", ").append(field.getFieldName()).append(")) {");
+                bw.line(2, "markDirty(true, Fields.").append(field.getEnumName()).append(");");
+                bw.line(2, "this.").append(field.getFieldName()).append(" = ").append(field.getFieldName()).append(";");
+                bw.line(1, "}");
+                bw.line(0, "}");
                 bw.newLine();
             }
         }
     }
 
-    private void writeEqualsHash(DtoDef dtoDef, BufferedWriter bw) throws IOException {
+    private void writeEqualsHash(DtoDef dtoDef, IndentWriter bw) throws IOException {
         List<DtoField> equalsFields = new LinkedList<>();
         for (DtoField field : dtoDef.fields.values()) {
             if (field.isEqualsHashCode()) {
@@ -364,75 +364,76 @@ public class QuickDtoProcessor extends AbstractProcessor {
             genFields = equalsFields;
         }
 
-        bw.append("\tpublic boolean equals(Object o) {\n");
-        bw.append("\t\tif (this == o) {\n");
-        bw.append("\t\t\treturn true;\n");
-        bw.append("\t\t}\n");
+        bw.line(0, "public boolean equals(Object o) {");
+        bw.line(1, "if (this == o) {");
+        bw.line(2, "return true;");
+        bw.line(1, "}");
         bw.newLine();
-        bw.append("\t\tif (o == null || getClass() != o.getClass()) {\n");
-        bw.append("\t\t\treturn false;\n");
-        bw.append("\t\t}\n");
+        bw.line(1, "if (o == null || getClass() != o.getClass()) {");
+        bw.line(2, "return false;");
+        bw.line(1, "}");
         bw.newLine();
-        bw.append("\t\t").append(dtoDef.name).append(" that = (").append(dtoDef.name).append(") o;\n");
+        bw.line(1, "").append(dtoDef.name).append(" that = (").append(dtoDef.name).append(") o;");
         bw.newLine();
 
         for (DtoField field : genFields) {
             if (field.getTypeString().equals("float")) {
-                bw.append("\t\tif (Float.compare(").append(field.getFieldName()).append(", that.").append(field.getFieldName()).append(") != 0) {\n");
+                bw.line(1, "if (Float.compare(").append(field.getFieldName()).append(", that.").append(field.getFieldName()).append(") != 0) {");
             } else if (field.getTypeString().equals("double")) {
-                bw.append("\t\tif (Double.compare(").append(field.getFieldName()).append(", that.").append(field.getFieldName()).append(") != 0) {\n");
+                bw.line(1, "if (Double.compare(").append(field.getFieldName()).append(", that.").append(field.getFieldName()).append(") != 0) {");
             } else if (field.isPrimitive()) {
-                bw.append("\t\tif (").append(field.getFieldName()).append(" != that.").append(field.getFieldName()).append(") {\n");
+                bw.line(1, "if (").append(field.getFieldName()).append(" != that.").append(field.getFieldName()).append(") {");
             } else if (field.getTypeString().endsWith("[]")) {
-                bw.append("\t\tif (Arrays.equals(").append(field.getFieldName()).append(", that.").append(field.getFieldName()).append(")) {\n");
+                bw.line(1, "if (Arrays.equals(").append(field.getFieldName()).append(", that.").append(field.getFieldName()).append(")) {");
             } else {
-                bw.append("\t\tif (").append(field.getFieldName()).append(" != null ? !").append(field.getFieldName()).append(".equals(that.").append(field.getFieldName()).append(") : that.").append(field.getFieldName()).append(" != null) {\n");
+                bw.line(1, "if (").append(field.getFieldName()).append(" != null ? !").append(field.getFieldName()).append(".equals(that.").append(field.getFieldName()).append(") : that.").append(field.getFieldName()).append(" != null) {");
             }
 
-            bw.append("\t\t\treturn false;\n");
-            bw.append("\t\t}\n");
+            bw.line(2, "return false;");
+            bw.line(1, "}");
         }
 
         bw.newLine();
-        bw.append("\t\treturn true;\n");
-        bw.append("\t}\n");
+        bw.line(1, "return true;");
+        bw.line(0, "}");
         bw.newLine();
 
-        bw.append("\tpublic int hashCode() {\n");
-        bw.append("\t\tlong temp;\n\n");
+        bw.line(0, "public int hashCode() {");
+        bw.line(1, "long _l_;");
+        bw.newLine();
         boolean first = true;
         for (DtoField field : genFields) {
             if (field.getTypeString().equals("double")) {
-                bw.append("\t\ttemp = Double.doubleToLongBits(").append(field.getFieldName()).append(");\n");
+                bw.line(1, "_l_ = Double.doubleToLongBits(").append(field.getFieldName()).append(");");
             }
             if (first) {
-                bw.append("\t\tint _r_ = ");
+                bw.line(1, "int _r_ = ");
                 first = false;
             } else {
-                bw.append("\t\t_r_ = 31 * _r_ + ");
+                bw.line(1, "_r_ = 31 * _r_ + ");
             }
 
             if (field.getTypeString().equals("long")) {
-                bw.append("(int) (").append(field.getFieldName()).append(" ^ (").append(field.getFieldName()).append(" >>> 32));\n");
+                bw.append("(int) (").append(field.getFieldName()).append(" ^ (").append(field.getFieldName()).append(" >>> 32));");
             } else if (field.getTypeString().equals("float")) {
                 bw.append("(").append(field.getFieldName()).append(" != +0.0f ? Float.floatToIntBits(").append(field.getFieldName()).append(") : 0);");
             } else if (field.getTypeString().equals("double")) {
-                bw.append("(int) (temp ^ (temp >>> 32));\n");
+                bw.append("(int) (_l_ ^ (_l_ >>> 32));");
             } else if (field.getTypeString().equals("boolean")) {
-                bw.append("(").append(field.getFieldName()).append(" ? 1 : 0);\n");
+                bw.append("(").append(field.getFieldName()).append(" ? 1 : 0);");
             } else if (field.isPrimitive()) {
-                bw.append(field.getFieldName()).append(";\n");
+                bw.append(field.getFieldName()).append(";");
             } else {
-                bw.append("(").append(field.getFieldName()).append(" != null ? ").append(field.getFieldName()).append(".hashCode() : 0);\n");
+                bw.append("(").append(field.getFieldName()).append(" != null ? ").append(field.getFieldName()).append(".hashCode() : 0);");
             }
         }
 
-        bw.append("\t\treturn _r_;\n");
-        bw.append("\t}\n");
+        bw.line(1, "return _r_;");
+        bw.line(0, "}");
         bw.newLine();
     }
 
-    private void writeCopyMethods(DtoDef dtoDef, BufferedWriter bw) throws IOException {
+    private void writeCopyMethods(DtoDef dtoDef, IndentWriter bw) throws IOException {
         if (!dtoDef.sources.isEmpty()) {
             for (Source source : dtoDef.sources) {
                 writeCopyTo(source, dtoDef, bw);
@@ -444,25 +445,25 @@ public class QuickDtoProcessor extends AbstractProcessor {
         }
     }
 
-    private void writeCopyTo(Source source, DtoDef dtoDef, BufferedWriter bw) throws IOException {
-        bw.append("\t@GwtIncompatible\n");
-        bw.append("\tpublic void copyTo(").append(source.type).append(" dest, Fields... fields) {\n");
-        bw.append("\t\tif (fields.length > 0) {\n");
-        bw.append("\t\t\tcopyTo(dest, Arrays.asList(fields));\n");
-        bw.append("\t\t} else {\n");
-        bw.append("\t\t\tcopyTo(dest, listDirtyFields());\n");
-        bw.append("\t\t}\n");
-        bw.append("\t}\n");
+    private void writeCopyTo(Source source, DtoDef dtoDef, IndentWriter bw) throws IOException {
+        bw.line(0, "@GwtIncompatible");
+        bw.line(0, "public void copyTo(").append(source.type).append(" dest, Fields... fields) {");
+        bw.line(1, "if (fields.length > 0) {");
+        bw.line(2, "copyTo(dest, Arrays.asList(fields));");
+        bw.line(1, "} else {");
+        bw.line(2, "copyTo(dest, listDirtyFields());");
+        bw.line(1, "}");
+        bw.line(0, "}");
         bw.newLine();
-        bw.append("\t@GwtIncompatible\n");
-        bw.append("\tpublic void copyTo(").append(source.type).append(" dest, Iterable<Fields> fields) {\n");
-        bw.append("\t\tfor (Fields field: fields) {\n");
-        bw.append("\t\t\tswitch (field) {\n");
+        bw.line(0, "@GwtIncompatible");
+        bw.line(0, "public void copyTo(").append(source.type).append(" dest, Iterable<Fields> fields) {");
+        bw.line(1, "for (Fields field: fields) {");
+        bw.line(2, "switch (field) {");
         for (Entry<String, Method> setter: source.setters.entrySet()) {
             DtoField field = dtoDef.fields.get(setter.getKey());
             if (!field.isCopyFrom()) {
-                bw.append("\t\t\t\tcase ").append(field.getEnumName()).append(":\n");
-                bw.append("\t\t\t\t\tdest.set").append(field.getAccessorName()).append("(");
+                bw.line(3, "case ").append(field.getEnumName()).append(":");
+                bw.line(4, "dest.set").append(field.getAccessorName()).append("(");
                 Method converter = setter.getValue();
                 if (converter != null) {
                     bw.append(dtoDef.name).append("Def.convert(").append(field.getFieldName());
@@ -473,22 +474,22 @@ public class QuickDtoProcessor extends AbstractProcessor {
                 } else {
                     bw.append(field.getFieldName());
                 }
-                bw.append(");\n");
-                bw.append("\t\t\t\t\tbreak;\n");
+                bw.append(");");
+                bw.line(4, "break;");
             }
         }
-        bw.append("\t\t\t}\n");
-        bw.append("\t\t}\n");
-        bw.append("\t}\n");
+        bw.line(2, "}");
+        bw.line(1, "}");
+        bw.line(0, "}");
         bw.newLine();
     }
 
-    private void writeCopyFrom(Source source, DtoDef dtoDef, BufferedWriter bw) throws IOException {
-        bw.append("\t@GwtIncompatible\n");
-        bw.append("\tpublic void copyFrom(").append(source.type).append(" source) {\n");
+    private void writeCopyFrom(Source source, DtoDef dtoDef, IndentWriter bw) throws IOException {
+        bw.line(0, "@GwtIncompatible");
+        bw.line(0, "public void copyFrom(").append(source.type).append(" source) {");
         for (Entry<String, Method> getter: source.getters.entrySet()) {
             DtoField field = dtoDef.fields.get(getter.getKey());
-            bw.append("\t\t").append(field.getFieldName()).append(" = ");
+            bw.line(1, "").append(field.getFieldName()).append(" = ");
             Method converter = getter.getValue();
             if (converter != null) {
                 bw.append(dtoDef.name).append("Def.convert(");
@@ -500,14 +501,14 @@ public class QuickDtoProcessor extends AbstractProcessor {
                 }
                 bw.append(")");
             }
-            bw.append(";\n");
+            bw.append(";");
         }
 
-        bw.append("\t}\n");
+        bw.line(0, "}");
         bw.newLine();
     }
 
-    private void writeHelperCopyMethods(List<DtoDef> dtoDefs, BufferedWriter bw) throws IOException {
+    private void writeHelperCopyMethods(List<DtoDef> dtoDefs, IndentWriter bw) throws IOException {
         for (DtoDef dtoDef : dtoDefs) {
             if (!dtoDef.sources.isEmpty()) {
                 for (Source source : dtoDef.sources) {
@@ -521,50 +522,50 @@ public class QuickDtoProcessor extends AbstractProcessor {
         }
     }
 
-    private void writeHelperCopyTo(Source source, DtoDef dtoDef, BufferedWriter bw) throws IOException {
-        bw.append("\t@GwtIncompatible\n");
-        bw.append("\tpublic static void copyTo(").append(dtoDef.name).append(" dto, ");
-        bw.append(source.type).append(" dest, ").append(dtoDef.name).append(".Fields... fields) {\n");
-        bw.append("\t\tif (fields.length > 0) {\n");
-        bw.append("\t\t\tcopyTo(dto, dest, Arrays.asList(fields));\n");
-        bw.append("\t\t} else {\n");
-        bw.append("\t\t\tcopyTo(dto, dest, dto.listDirtyFields());\n");
-        bw.append("\t\t}\n");
-        bw.append("\t}\n");
+    private void writeHelperCopyTo(Source source, DtoDef dtoDef, IndentWriter bw) throws IOException {
+        bw.line(0, "@GwtIncompatible");
+        bw.line(0, "public static void copyTo(").append(dtoDef.name).append(" dto, ");
+        bw.append(source.type).append(" dest, ").append(dtoDef.name).append(".Fields... fields) {");
+        bw.line(1, "if (fields.length > 0) {");
+        bw.line(2, "copyTo(dto, dest, Arrays.asList(fields));");
+        bw.line(1, "} else {");
+        bw.line(2, "copyTo(dto, dest, dto.listDirtyFields());");
+        bw.line(1, "}");
+        bw.line(0, "}");
         bw.newLine();
-        bw.append("\t@GwtIncompatible\n");
-        bw.append("\tpublic static void copyTo(").append(dtoDef.name).append(" dto, ");
-        bw.append(source.type).append(" dest, Iterable<").append(dtoDef.name).append(".Fields> fields) {\n");
-        bw.append("\t\tfor (").append(dtoDef.name).append(".Fields field: fields) {\n");
-        bw.append("\t\t\tswitch (field) {\n");
+        bw.line(0, "@GwtIncompatible");
+        bw.line(0, "public static void copyTo(").append(dtoDef.name).append(" dto, ");
+        bw.append(source.type).append(" dest, Iterable<").append(dtoDef.name).append(".Fields> fields) {");
+        bw.line(1, "for (").append(dtoDef.name).append(".Fields field: fields) {");
+        bw.line(2, "switch (field) {");
         for (Entry<String, Method> setter : source.setters.entrySet()) {
             DtoField field = dtoDef.fields.get(setter.getKey());
             if (!field.isCopyFrom()) {
-                bw.append("\t\t\t\tcase ").append(field.getEnumName()).append(":\n");
-                bw.append("\t\t\t\t\tdest.set").append(field.getAccessorName()).append("(");
+                bw.line(3, "case ").append(field.getEnumName()).append(":");
+                bw.line(4, "dest.set").append(field.getAccessorName()).append("(");
                 if (setter.getValue() != null) {
                     bw.append(dtoDef.qualifiedName).append("Def.convert(dto.").append(field.getGetAccessorName()).append("())");
                 } else {
                     bw.append("dto.").append(field.getGetAccessorName()).append("()");
                 }
 
-                bw.append(");\n");
-                bw.append("\t\t\t\t\tbreak;\n");
+                bw.append(");");
+                bw.line(4, "break;");
             }
         }
-        bw.append("\t\t\t}\n");
-        bw.append("\t\t}\n");
-        bw.append("\t}\n");
+        bw.line(2, "}");
+        bw.line(1, "}");
+        bw.line(0, "}");
         bw.newLine();
     }
 
-    private void writeHelperCopyFrom(Source source, DtoDef dtoDef, BufferedWriter bw) throws IOException {
-        bw.append("\t@GwtIncompatible\n");
-        bw.append("\tpublic static void copyFrom(").append(dtoDef.name).append(" dto, ");
-        bw.append(source.type).append(" source) {\n");
+    private void writeHelperCopyFrom(Source source, DtoDef dtoDef, IndentWriter bw) throws IOException {
+        bw.line(0, "@GwtIncompatible");
+        bw.line(0, "public static void copyFrom(").append(dtoDef.name).append(" dto, ");
+        bw.append(source.type).append(" source) {");
         for (Entry<String, Method> getter : source.getters.entrySet()) {
             DtoField field = dtoDef.fields.get(getter.getKey());
-            bw.append("\t\tdto.set").append(field.getAccessorName()).append("(");
+            bw.line(1, "dto.set").append(field.getAccessorName()).append("(");
             if (getter.getValue() != null) {
                 bw.append(dtoDef.qualifiedName).append("Def.convert(");
             }
@@ -572,14 +573,14 @@ public class QuickDtoProcessor extends AbstractProcessor {
             if (getter.getValue() != null) {
                 bw.append(")");
             }
-            bw.append(");\n");
+            bw.append(");");
         }
 
-        bw.append("\t}\n");
+        bw.line(0, "}");
         bw.newLine();
     }
 
-    private void writeUnmapped(DtoDef dtoDef, BufferedWriter bw) throws IOException {
+    private void writeUnmapped(DtoDef dtoDef, IndentWriter bw) throws IOException {
         LinkedList<DtoField> unmapped = new LinkedList<>();
         for (DtoField field : dtoDef.fields.values()) {
             if (field.isStrictCopy(dtoDef) && !field.isSourceMapped()) {
@@ -587,18 +588,18 @@ public class QuickDtoProcessor extends AbstractProcessor {
             }
         }
         if (!unmapped.isEmpty()) {
-            bw.append("\tpublic void fieldsNotMappedToSource() {\n");
+            bw.line(0, "public void fieldsNotMappedToSource() {");
             for (DtoField field : unmapped) {
-                bw.append("\t\t");
+                bw.line(1, "");
                 bw.append(field.getFieldName());
-                bw.append(";\n");
+                bw.append(";");
             }
-            bw.append("\t}\n");
+            bw.line(0, "}");
 
         }
     }
 
-    private void writeOtherMethods(DtoDef dtoDef, BufferedWriter bw) throws IOException {
+    private void writeOtherMethods(DtoDef dtoDef, IndentWriter bw) throws IOException {
         for (Method method : dtoDef.methods) {
             if (method.body != null) {
                 bw.append(method.body);
