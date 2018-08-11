@@ -463,8 +463,13 @@ public class QuickDtoProcessor extends AbstractProcessor {
             if (!field.isCopyFrom()) {
                 bw.append("\t\t\t\tcase ").append(field.getEnumName()).append(":\n");
                 bw.append("\t\t\t\t\tdest.set").append(field.getAccessorName()).append("(");
-                if (setter.getValue() != null) {
-                    bw.append(dtoDef.name).append("Def.convert(").append(field.getFieldName()).append(")");
+                Method converter = setter.getValue();
+                if (converter != null) {
+                    bw.append(dtoDef.name).append("Def.convert(").append(field.getFieldName());
+                    if (converter.existingParam) {
+                        bw.append(", dest.get").append(field.getAccessorName()).append("()");
+                    }
+                    bw.append(")");
                 } else {
                     bw.append(field.getFieldName());
                 }
@@ -484,11 +489,15 @@ public class QuickDtoProcessor extends AbstractProcessor {
         for (Entry<String, Method> getter: source.getters.entrySet()) {
             DtoField field = dtoDef.fields.get(getter.getKey());
             bw.append("\t\t").append(field.getFieldName()).append(" = ");
-            if (getter.getValue() != null) {
+            Method converter = getter.getValue();
+            if (converter != null) {
                 bw.append(dtoDef.name).append("Def.convert(");
             }
             bw.append("source.").append(field.getGetAccessorName()).append("()");
-            if (getter.getValue() != null) {
+            if (converter != null) {
+                if (converter.existingParam) {
+                    bw.append(", ").append(field.getFieldName());
+                }
                 bw.append(")");
             }
             bw.append(";\n");

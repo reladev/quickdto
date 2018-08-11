@@ -1,6 +1,7 @@
 package org.reladev.quickdto.processor;
 
 import java.util.HashMap;
+import java.util.List;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
@@ -86,7 +87,7 @@ public class FieldVisitor extends SimpleTypeVisitor7<Component, Element> {
         } else if (name.startsWith("set") && t.getReturnType().getKind() == TypeKind.VOID && t.getParameterTypes().size() == 1) {
             component = visitSetter(t, element, name);
 
-        } else if (element.toString().startsWith("convert(") && t.getParameterTypes().size() == 1) {
+        } else if (element.toString().startsWith("convert(") && t.getParameterTypes().size() > 0) {
             component = visitConverter(t, element);
 
         } else if (trees != null) {
@@ -126,10 +127,30 @@ public class FieldVisitor extends SimpleTypeVisitor7<Component, Element> {
     }
 
     private Component visitConverter(ExecutableType t, Element element) {
+        boolean isValid = true;
         Method method = new Method();
         method.converter = true;
         method.toType = t.getReturnType().toString();
-        method.fromType = t.getParameterTypes().get(0).toString();
+        List<? extends TypeMirror> parameterTypes = t.getParameterTypes();
+
+        int numParams = parameterTypes.size();
+        //if (parameterTypes.isEmpty() || parameterTypes.size() > 2) {
+        if (parameterTypes.isEmpty() || numParams > 2) {
+            processingEnv.getMessager().printMessage(Kind.WARNING, "IGNORING (" + element + ") invalid parameters to be converter.");
+            isValid = false;
+
+        } else {
+            method.fromType = parameterTypes.get(0).toString();
+            if (numParams > 1) {
+                if (method.toType.equals(parameterTypes.get(1).toString())) {
+                    method.existingParam = true;
+
+                } else {
+                    processingEnv.getMessager().printMessage(Kind.WARNING, "IGNORING (" + element + ") invalid 2nd parameter to be converter.");
+                    isValid = false;
+                }
+            }
+        }
 
         if (trees != null) {
             MethodScanner methodScanner = new MethodScanner();
@@ -142,9 +163,9 @@ public class FieldVisitor extends SimpleTypeVisitor7<Component, Element> {
 
         } else {
             processingEnv.getMessager().printMessage(Kind.WARNING, "IGNORING (" + element + ") it must be 'static' or copyMethod true");
-            method = null;
+            isValid = false;
         }
-        return method;
+        return isValid ? method : null;
     }
 
     private Component visitCopyMethod(ExecutableType t, Element element) {
