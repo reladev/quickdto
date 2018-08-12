@@ -1,6 +1,5 @@
 package org.reladev.quickdto.processor;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -89,8 +88,8 @@ public class ClassAnalyzer {
                     if (component instanceof DtoField) {
                         addField(subelement, (DtoField) component, dtoDef);
 
-                    } else if (component instanceof Method) {
-                        Method method = (Method) component;
+                    } else if (component instanceof ConverterMethod) {
+                        ConverterMethod method = (ConverterMethod) component;
                         dtoDef.methods.add(method);
                         if (method.converter) {
                             dtoDef.addConverter(method);
@@ -158,7 +157,6 @@ public class ClassAnalyzer {
                         for (Object source : sources) {
                             String className = annotationParamToClassName(source);
                             //todo this is in the wrong location
-                            addSource(dtoDef, className);
                             SourceDef sourceDef = createSourceDef(className);
                             SourceCopyMap sourceCopyMap = createSourceCopyMap(dtoDef, sourceDef);
                             dtoDef.sourceMaps.add(sourceCopyMap);
@@ -211,57 +209,6 @@ public class ClassAnalyzer {
                         }
                     }
                 }
-            }
-        }
-    }
-
-    private void addSource(DtoDef dtoDef, String className) {
-        Source sourceDef = new Source();
-        dtoDef.sources.add(sourceDef);
-        Elements elementUtils = processingEnv.getElementUtils();
-        sourceDef.type = className;
-        TypeElement sourceType = elementUtils.getTypeElement(className);
-        while (sourceType != null) {
-            for (Element sourceSubEl : sourceType.getEnclosedElements()) {
-                if (sourceSubEl instanceof ExecutableElement) {
-                    String name = sourceSubEl.getSimpleName().toString();
-                    int numParams = ((ExecutableElement) sourceSubEl).getParameters().size();
-
-                    if (name.startsWith("set") && numParams == 1) {
-                        String accessorName = name.substring(3);
-                        DtoField field = dtoDef.fields.get(accessorName);
-                        if (field != null) {
-                            VariableElement paramElement = ((ExecutableElement) sourceSubEl).getParameters().get(0);
-                            String toType = paramElement.asType().toString();
-                            String fromType = field.getTypeString();
-                            mapAccessorConverter(dtoDef, field, className, sourceSubEl, toType, fromType, sourceDef.setters, accessorName);
-                        }
-                    }
-                    if (name.startsWith("get") && numParams == 0) {
-                        String accessorName = name.substring(3);
-                        DtoField field = dtoDef.fields.get(accessorName);
-                        if (field != null) {
-                            String fromType = ((ExecutableElement) sourceSubEl).getReturnType().toString();
-                            String toType = field.getTypeString();
-                            mapAccessorConverter(dtoDef, field, className, sourceSubEl, toType, fromType, sourceDef.getters, accessorName);
-                        }
-                    }
-                    if (name.startsWith("is") && numParams == 0) {
-                        String accessorName = name.substring(2);
-                        DtoField field = dtoDef.fields.get(accessorName);
-                        if (field != null) {
-                            String fromType = ((ExecutableElement) sourceSubEl).getReturnType().toString();
-                            String toType = field.getTypeString();
-                            mapAccessorConverter(dtoDef, field, className, sourceSubEl, toType, fromType, sourceDef.getters, accessorName);
-                        }
-                    }
-                }
-            }
-
-            if (sourceType.getSuperclass() instanceof NoType) {
-                sourceType = null;
-            } else {
-                sourceType = (TypeElement) ((DeclaredType) sourceType.getSuperclass()).asElement();
             }
         }
     }
@@ -322,7 +269,7 @@ public class ClassAnalyzer {
             map = true;
 
         } else { // try to find converter
-            Method converter = converterList.getConverter(toType, fromType);
+            ConverterMethod converter = converterList.getConverter(toType, fromType);
             if (converter != null) {
                 map = true;
                 mappedAccessor.converterMethod = converter;
@@ -409,27 +356,6 @@ public class ClassAnalyzer {
             method = null;
         }
         return method;
-    }
-
-
-    private void mapAccessorConverter(DtoDef dtoDef, DtoField field, String sourceClass, Element sourceSubEl, String toType, String fromType, HashMap<String, Method> accessorMap, String accessorName) {
-        boolean map = false;
-        Method converter = null;
-        if (!fromType.equals(toType)) {
-            converter = dtoDef.getConverter(toType, fromType);
-            if (converter != null) {
-                map = true;
-            } else {
-                processingEnv.getMessager().printMessage(Kind.WARNING, "Type Mismatch(" + toType + ":" + fromType + ") for " + sourceClass + "." + sourceSubEl);
-            }
-        } else {
-            map = true;
-        }
-
-        if (map) {
-            field.setSourceMapped();
-            accessorMap.put(accessorName, converter);
-        }
     }
 
     private void addAnnotations(Element subelement, DtoField field) {

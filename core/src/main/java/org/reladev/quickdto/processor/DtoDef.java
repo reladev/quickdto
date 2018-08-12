@@ -20,9 +20,8 @@ public class DtoDef extends ClassDef {
     public boolean fieldAnnotationsOnGetter = false;
 
     public boolean strictCopy = true;
-    public LinkedList<Source> sources = new LinkedList<>();
     public LinkedList<SourceCopyMap> sourceMaps = new LinkedList<>();
-    public HashMap<String, List<Method>> converters = new HashMap<>();
+    public HashMap<String, List<ConverterMethod>> converters = new HashMap<>();
 
     public DtoDef() {
         //features.add(new DirtyFeature());
@@ -33,17 +32,17 @@ public class DtoDef extends ClassDef {
      *
      * @see QuickDto#copyMethods()
      */
-    LinkedList<Method> methods = new LinkedList<>();
+    LinkedList<ConverterMethod> methods = new LinkedList<>();
 
 
-	public Method getConverter(String toType, String fromType) {
-		List<Method> methods = converters.get(toType);
+    public ConverterMethod getConverter(String toType, String fromType) {
+        List<ConverterMethod> methods = converters.get(toType);
 		if (methods == null) {
 			String simpleToType = toType.substring(toType.lastIndexOf(".") + 1);
 			methods = converters.get(simpleToType);
 		}
 		if (methods != null) {
-			for (Method method: methods) {
+            for (ConverterMethod method : methods) {
 				if (method.fromType.equals(fromType)) {
 					return method;
 				} else {
@@ -57,8 +56,8 @@ public class DtoDef extends ClassDef {
 		return null;
 	}
 
-	public void addConverter(Method method) {
-		List<Method> methods = converters.get(method.toType);
+    public void addConverter(ConverterMethod method) {
+        List<ConverterMethod> methods = converters.get(method.toType);
 		if (methods == null) {
 			methods = new LinkedList<>();
 			converters.put(method.toType, methods);

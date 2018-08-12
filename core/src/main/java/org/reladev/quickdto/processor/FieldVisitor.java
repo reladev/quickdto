@@ -128,7 +128,7 @@ public class FieldVisitor extends SimpleTypeVisitor7<Component, Element> {
 
     private Component visitConverter(ExecutableType t, Element element) {
         boolean isValid = true;
-        Method method = new Method();
+        ConverterMethod method = new ConverterMethod();
         method.converter = true;
         method.toType = t.getReturnType().toString();
         List<? extends TypeMirror> parameterTypes = t.getParameterTypes();
@@ -169,7 +169,7 @@ public class FieldVisitor extends SimpleTypeVisitor7<Component, Element> {
     }
 
     private Component visitCopyMethod(ExecutableType t, Element element) {
-        Method method = new Method();
+        ConverterMethod method = new ConverterMethod();
         MethodScanner methodScanner = new MethodScanner();
         MethodTree methodTree = methodScanner.scan((ExecutableElement) element, trees);
         method.body = "\t" + methodTree.toString().replace("\n", "\n\t");
