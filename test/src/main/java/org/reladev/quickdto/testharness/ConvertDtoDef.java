@@ -1,39 +1,80 @@
 package org.reladev.quickdto.testharness;
 
-import org.reladev.quickdto.feature.DirtyFeature;
-import org.reladev.quickdto.shared.QuickDto;
-import org.reladev.quickdto.testharness.impl.Basic;
-import org.reladev.quickdto.testharness.impl.Convert;
-import org.reladev.quickdto.testharness.impl.ExistingParam;
+import java.util.ArrayList;
+import java.util.List;
 
-@QuickDto(source = Convert.class, feature = DirtyFeature.class)
+import org.reladev.quickdto.shared.QuickDto;
+import org.reladev.quickdto.testharness.impl.BasicImpl;
+import org.reladev.quickdto.testharness.impl.ConvertImpl;
+import org.reladev.quickdto.testharness.impl.ExistingParamImpl;
+
+@QuickDto(source = ConvertImpl.class)
 public class ConvertDtoDef {
     BasicDtoDef basic;
+    List<BasicDto> basicList;
     ExistingParamDtoDef existing;
 
-    public static BasicDto convert(Basic basic) {
+    public static BasicDto convert(BasicImpl basic) {
+        if (basic == null) {
+            return null;
+        }
         BasicDto basicDto = new BasicDto();
         basicDto.copyFrom(basic);
         return basicDto;
     }
 
-    public static Basic convert(BasicDto basicDto) {
-        Basic basic = new Basic();
+    public static BasicImpl convert(BasicDto basicDto) {
+        if (basicDto == null) {
+            return null;
+        }
+        BasicImpl basic = new BasicImpl();
         basicDto.copyTo(basic);
         return basic;
     }
 
-    public static ExistingParamDto convert(ExistingParam existingParam, ExistingParamDto existing) {
+    public static List<BasicDto> convert(List<BasicImpl> basicList) {
+        if (basicList == null) {
+            return null;
+        }
+        List<BasicDto> dtoList = new ArrayList<>();
+        for (BasicImpl basic : basicList) {
+            BasicDto basicDto = new BasicDto();
+            basicDto.copyFrom(basic);
+            dtoList.add(basicDto);
+        }
+        return dtoList;
+    }
+
+    public static List<BasicImpl> convert(List<BasicDto> basicDtoList, List<BasicImpl> existing) {
+        if (basicDtoList == null) {
+            return null;
+        }
+        List<BasicImpl> basicList = new ArrayList<>();
+        for (BasicDto basicDto : basicDtoList) {
+            BasicImpl basic = new BasicImpl();
+            basicDto.copyTo(basic);
+            basicList.add(basic);
+        }
+        return basicList;
+    }
+
+    public static ExistingParamDto convert(ExistingParamImpl existingParam, ExistingParamDto existing) {
         if (existingParam == null) {
             return null;
+        }
+        if (existing == null) {
+            existing = new ExistingParamDto();
         }
         existing.copyFrom(existingParam);
         return existing;
     }
 
-    public static ExistingParam convert(ExistingParamDto existingParamDto, ExistingParam existing) {
+    public static ExistingParamImpl convert(ExistingParamDto existingParamDto, ExistingParamImpl existing) {
         if (existingParamDto == null) {
             return null;
+        }
+        if (existing == null) {
+            existing = new ExistingParamImpl();
         }
         existingParamDto.copyTo(existing);
         return existing;

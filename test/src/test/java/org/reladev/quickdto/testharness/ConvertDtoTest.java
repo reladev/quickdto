@@ -1,38 +1,92 @@
 package org.reladev.quickdto.testharness;
 
-import org.junit.Test;
-import org.reladev.quickdto.testharness.impl.Basic;
-import org.reladev.quickdto.testharness.impl.Convert;
+import java.util.Arrays;
+import java.util.List;
 
-import static org.junit.Assert.*;
+import org.junit.Test;
+import org.reladev.quickdto.testharness.impl.BasicImpl;
+import org.reladev.quickdto.testharness.impl.ConvertImpl;
+import org.reladev.quickdto.testharness.impl.ExistingParamImpl;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 
 public class ConvertDtoTest {
     @Test
     public void testCopy() {
-        Basic basic = new Basic();
+        ConvertImpl convert = new ConvertImpl();
+
+        BasicImpl basic = new BasicImpl();
+        basic.setText("basic");
+        convert.setBasic(basic);
+        convert.setBasicList(Arrays.asList(basic));
+
+        ConvertDto convertDto = new ConvertDto();
+        convertDto.copyFrom(convert);
+
+        BasicDto basicDto = convertDto.getBasic();
+        assertEquals("basic", basicDto.getText());
+
+        List<BasicDto> basicList = convertDto.getBasicList();
+        assertEquals(1, basicList.size());
+        assertEquals("basic", basicList.get(0).getText());
+
+        ConvertImpl newConvert = new ConvertImpl();
+        convertDto.copyTo(newConvert);
+
+        BasicImpl newBasic = newConvert.getBasic();
+        assertNotNull(newBasic);
+        assertEquals("basic", newBasic.getText());
+        assertEquals(1, newConvert.getBasicList().size());
+        assertEquals("basic", newConvert.getBasicList().get(0).getText());
+    }
+
+    @Test
+    public void testNullCopy() {
+        BasicImpl basic = new BasicImpl();
         basic.setText("foo");
 
-        Convert convert = new Convert();
+        ConvertImpl convert = new ConvertImpl();
         convert.setBasic(basic);
 
         ConvertDto convertDto = new ConvertDto();
         convertDto.copyFrom(convert);
 
         BasicDto basicDto = convertDto.getBasic();
-
-        assertFalse(convertDto.checkDirty());
-        assertFalse(basicDto.checkDirty());
         assertEquals("foo", basicDto.getText());
 
-        convertDto.markDirty(true, ConvertDto.Fields.values());
-        basicDto.markDirty(true, BasicDto.Fields.values());
-
-        Convert newConvert = new Convert();
+        ConvertImpl newConvert = new ConvertImpl();
         convertDto.copyTo(newConvert);
 
-        Basic newBasic = newConvert.getBasic();
+        BasicImpl newBasic = newConvert.getBasic();
         assertNotNull(newBasic);
         assertEquals("foo", newBasic.getText());
     }
+
+    @Test
+    public void testExisting() {
+        ConvertImpl convert = new ConvertImpl();
+
+        ExistingParamImpl existingParam = new ExistingParamImpl();
+        existingParam.setText("existingParam");
+        convert.setExisting(existingParam);
+
+        ConvertDto convertDto = new ConvertDto();
+        convertDto.copyFrom(convert);
+
+        ExistingParamDto existingDto = convertDto.getExisting();
+        assertEquals("existingParam", existingDto.getText());
+
+        existingParam.setText("changed");
+        convertDto.copyFrom(convert);
+
+        assertEquals("changed", existingDto.getText());
+
+        existingDto.setText("changed2");
+        convertDto.copyTo(convert);
+
+        assertEquals("changed2", existingParam.getText());
+    }
+
 }

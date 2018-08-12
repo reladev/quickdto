@@ -1,6 +1,6 @@
 package org.reladev.quickdto.testharness.impl;
 
-public class ExistingParam {
+public class ExistingParamImpl {
     private String text;
 
     public String getText() {

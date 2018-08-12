@@ -1,6 +1,6 @@
 package org.reladev.quickdto.testharness.impl;
 
-public class Basic {
+public class BasicImpl {
     private String text;
 
     public String getText() {
