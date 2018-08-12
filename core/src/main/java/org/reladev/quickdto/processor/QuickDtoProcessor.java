@@ -14,7 +14,6 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
-import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic.Kind;
 import javax.tools.JavaFileObject;
@@ -59,71 +58,12 @@ public class QuickDtoProcessor extends AbstractProcessor {
         }
 
         for (Element element : env.getElementsAnnotatedWith(QuickDtoHelper.class)) {
-            createHelper(element, defs);
+            HelperDef helperDef = classAnalyzer.createHelperDef(element);
+            writeHelper(helperDef);
         }
 
         return true;
     }
-
-    private void createHelper(Element element, HashMap<String, DtoDef> defs) {
-        String className = element.getSimpleName().toString();
-        PackageElement packageElement = (PackageElement) element.getEnclosingElement();
-        String packageString = packageElement.getQualifiedName().toString();
-        processingEnv.getMessager().printMessage(Kind.NOTE, "QuickDtoHelper: " + className);
-
-        List<DtoDef> dtoDefs = addHelperDto(element, defs);
-
-        if (dtoDefs.isEmpty()) {
-            processingEnv.getMessager().printMessage(Kind.NOTE, "QuickDtoHelper: " + className + " Skipped (No Dtos found).");
-        } else {
-            writeHelper(packageString, className, dtoDefs);
-        }
-    }
-
-    private List<DtoDef> addHelperDto(Element element, HashMap<String, DtoDef> defs) {
-        List<DtoDef> helperDefs = new LinkedList<>();
-        //final String annotationName = QuickDtoHelper.class.getName();
-        //element.getAnnotationMirrors();
-        //for (AnnotationMirror am : element.getAnnotationMirrors()) {
-        //    AnnotationValue action;
-        //    if (annotationName.equals(am.getAnnotationType().toString())) {
-        //        boolean strictCopy = true;
-        //        for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : am.getElementValues().entrySet()) {
-        //            if ("strictCopy".equals(entry.getKey().getSimpleName().toString())) {
-        //                action = entry.getValue();
-        //                strictCopy = (boolean) action.getValue();
-        //            }
-        //        }
-        //        for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : am.getElementValues().entrySet()) {
-        //            if ("dtoDef".equals(entry.getKey().getSimpleName().toString())) {
-        //                action = entry.getValue();
-        //                List sources = (List) action.getValue();
-        //                for (Object source : sources) {
-        //                    String dtoName = annotationParamToClassName(source);
-        //                    DtoDef dtoDef = defs.get(dtoName);
-        //                    if (dtoDef == null) {
-        //                        Elements elementUtils = processingEnv.getElementUtils();
-        //                        TypeElement dtoType = elementUtils.getTypeElement(dtoName);
-        //                        dtoDef = processDtoDef(dtoType);
-        //                        defs.put(dtoName, dtoDef);
-        //                        dtoDef.makeDto = false;
-        //                    }
-        //
-        //                    dtoDef.sources.clear();
-        //                    dtoDef.strictCopy = strictCopy;
-        //                    String sourceClassName = element.toString();
-        //                    addSource(dtoDef, sourceClassName);
-        //                    helperDefs.add(dtoDef);
-        //                }
-        //            }
-        //        }
-        //    }
-        //}
-
-        return helperDefs;
-    }
-
-
 
     private void writeDto(DtoDef dtoDef)  {
         if (!dtoDef.makeDto) {
@@ -198,12 +138,12 @@ public class QuickDtoProcessor extends AbstractProcessor {
         }
     }
 
-    private void writeHelper(String packageString, String sourceClassName, List<DtoDef> dtoDefs) {
+    private void writeHelper(HelperDef helperDef) {
         try {
-            JavaFileObject jfo = processingEnv.getFiler().createSourceFile(packageString + "." + sourceClassName + HelperSuffix);
+            JavaFileObject jfo = processingEnv.getFiler().createSourceFile(helperDef.getQualifiedName() + HelperSuffix);
 
             IndentWriter bw = new IndentWriter(new BufferedWriter(jfo.openWriter()), "\t");
-            bw.append("package ").append(packageString).append(";");
+            bw.append("package ").append(helperDef.getPackageString()).append(";");
             bw.newLine();
             bw.line("import java.util.Arrays;");
             bw.line("import java.util.HashSet;");
@@ -213,17 +153,18 @@ public class QuickDtoProcessor extends AbstractProcessor {
             bw.line("import java.util.Objects;");
             bw.line("import org.reladev.quickdto.shared.GwtIncompatible;");
             bw.newLine();
-            for (DtoDef dtoDef : dtoDefs) {
-                bw.line("import ").append(dtoDef.qualifiedName).append(";");
-            }
-            bw.newLine();
-            bw.line("public class ").append(sourceClassName).append(HelperSuffix).append(" {");
-            bw.newLine();
-            writeHelperCopyMethods(dtoDefs, bw);
-            bw.line("}");
-
-            bw.flush();
-            bw.close();
+            //todo helper
+            //for (DtoDef dtoDef : dtoDefs) {
+            //    bw.line("import ").append(dtoDef.qualifiedName).append(";");
+            //}
+            //bw.newLine();
+            //bw.line("public class ").append(sourceClassName).append(HelperSuffix).append(" {");
+            //bw.newLine();
+            //writeHelperCopyMethods(dtoDefs, bw);
+            //bw.line("}");
+            //
+            //bw.flush();
+            //bw.close();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -233,7 +174,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
     private void writeFieldsEnum(DtoDef dtoDef, IndentWriter bw) throws IOException {
         bw.line(0, "public static enum Fields {");
         bw.startLineList(",");
-        for (DtoField field : dtoDef.fields.values()) {
+        for (Field field : dtoDef.getFields().values()) {
             bw.line(1, "").append(field.getEnumName()).append("(\"").append(field.getFieldName()).append("\")");
         }
         bw.endLineList();
@@ -261,72 +202,74 @@ public class QuickDtoProcessor extends AbstractProcessor {
     }
 
     private void writeFields(DtoDef dtoDef, IndentWriter bw) throws IOException {
-        for (DtoField field : dtoDef.fields.values()) {
+        for (Field field : dtoDef.getFields().values()) {
+            DtoField dtoField = (DtoField) field;
             if (!dtoDef.fieldAnnotationsOnGetter) {
-                for (String annotation : field.getFieldAnnotations()) {
+                for (String annotation : dtoField.getFieldAnnotations()) {
                     bw.line(0, "").append(annotation);
                 }
             }
-            if (field.isPrimitive()) {
-                bw.line(0, "private ").append(field.getPrimitiveTypeString()).append(" ").append(field.getFieldName()).append(";");
+            if (dtoField.isPrimitive()) {
+                bw.line(0, "private ").append(dtoField.getPrimitiveTypeString()).append(" ").append(dtoField.getFieldName()).append(";");
             } else {
-                bw.line(0, "private ").append(field.getTypeString()).append(" ").append(field.getFieldName()).append(";");
+                bw.line(0, "private ").append(dtoField.getTypeString()).append(" ").append(dtoField.getFieldName()).append(";");
             }
         }
     }
 
     private void writeGettersSetters(DtoDef dtoDef, IndentWriter bw) throws IOException {
-        for (DtoField field : dtoDef.fields.values()) {
+        for (Field field : dtoDef.getFields().values()) {
+            DtoField dtoField = (DtoField) field;
             if (dtoDef.fieldAnnotationsOnGetter) {
-                for (String annotation : field.getFieldAnnotations()) {
+                for (String annotation : dtoField.getFieldAnnotations()) {
                     bw.line("").append(annotation).append("");
                 }
             }
-            for (String annotation : field.getGetterAnnotations()) {
+            for (String annotation : dtoField.getGetterAnnotations()) {
                 bw.line("").append(annotation).append("");
             }
-            bw.line("public ").append(field.getTypeString());
-            if ("boolean".equals(field.getTypeString()) || "java.lang.Boolean".equals(field.getTypeString())) {
+            bw.line("public ").append(dtoField.getTypeString());
+            if ("boolean".equals(dtoField.getTypeString()) || "java.lang.Boolean".equals(dtoField.getTypeString())) {
                 bw.append(" is");
             } else {
                 bw.append(" get");
             }
-            bw.append(field.getAccessorName()).append("() {");
+            bw.append(dtoField.getAccessorName()).append("() {");
 
             bw.indent();
             for (QuickDtoFeature feature : dtoDef.features) {
-                feature.preGetterLogic(field, dtoDef, bw);
+                feature.preGetterLogic(dtoField, dtoDef, bw);
             }
-            if (field.isPrimitive()) {
-                bw.line(0, "if (").append(field.getFieldName()).append(" != null) {");
-                bw.line(1, "return ").append(field.getFieldName()).append(";");
+            if (dtoField.isPrimitive()) {
+                bw.line(0, "if (").append(dtoField.getFieldName()).append(" != null) {");
+                bw.line(1, "return ").append(dtoField.getFieldName()).append(";");
                 bw.line(0, "} else {");
-                bw.line(1, "return ").append(field.getDefaultValue()).append(";");
+                bw.line(1, "return ").append(dtoField.getDefaultValue()).append(";");
                 bw.line(0, "}");
 
             } else {
-                bw.line(0, "return ").append(field.getFieldName()).append(";");
+                bw.line(0, "return ").append(dtoField.getFieldName()).append(";");
             }
             for (QuickDtoFeature feature : reversed(dtoDef.features)) {
-                feature.postGetterLogic(field, dtoDef, bw);
+                feature.postGetterLogic(dtoField, dtoDef, bw);
             }
             bw.unindent();
 
             bw.line("}");
             bw.newLine();
-            if (!field.isExcludeSetter()) {
-                for (String annotation : field.getSetterAnnotations()) {
+            if (!dtoField.getFlags().isExcludeSetter()) {
+                for (String annotation : dtoField.getSetterAnnotations()) {
                     bw.line("").append(annotation).append("");
                 }
-                bw.line("public void set").append(field.getAccessorName()).append("(").append(field.getTypeString()).append(" ").append(field.getFieldName()).append(") {");
+                bw.line("public void set").append(dtoField.getAccessorName()).append("(").append(dtoField.getTypeString()).append(" ").append(dtoField.getFieldName()).append(") {");
 
                 bw.indent();
                 for (QuickDtoFeature feature : dtoDef.features) {
-                    feature.preSetterLogic(field, dtoDef, bw);
+                    feature.preSetterLogic(dtoField, dtoDef, bw);
                 }
-                bw.line("this.").append(field.getFieldName()).append(" = ").append(field.getFieldName()).append(";");
+                bw.line("this.").append(dtoField.getFieldName()).append(" = ").append(dtoField.getFieldName()).append(";");
                 for (QuickDtoFeature feature : reversed(dtoDef.features)) {
-                    feature.postSetterLogic(field, dtoDef, bw);
+                    feature.postSetterLogic(dtoField, dtoDef, bw);
                 }
                 bw.unindent();
 
@@ -337,15 +280,15 @@ public class QuickDtoProcessor extends AbstractProcessor {
     }
 
     private void writeEqualsHash(DtoDef dtoDef, IndentWriter bw) throws IOException {
-        List<DtoField> equalsFields = new LinkedList<>();
-        for (DtoField field : dtoDef.fields.values()) {
-            if (field.isEqualsHashCode()) {
+        List<Field> equalsFields = new LinkedList<>();
+        for (Field field : dtoDef.getFields().values()) {
+            if (field.getFlags().isEqualsHashCode()) {
                 equalsFields.add(field);
             }
         }
-        Collection<DtoField> genFields;
+        Collection<Field> genFields;
         if (equalsFields.isEmpty()) {
-            genFields = dtoDef.fields.values();
+            genFields = dtoDef.getFields().values();
 
         } else {
             genFields = equalsFields;
@@ -363,7 +306,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
         bw.line(1, "").append(dtoDef.name).append(" that = (").append(dtoDef.name).append(") o;");
         bw.newLine();
 
-        for (DtoField field : genFields) {
+        for (Field field : genFields) {
             if (field.getTypeString().equals("float")) {
                 bw.line(1, "if (Float.compare(").append(field.getFieldName()).append(", that.").append(field.getFieldName()).append(") != 0) {");
             } else if (field.getTypeString().equals("double")) {
@@ -389,7 +332,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
         bw.line(1, "long _l_;");
         bw.newLine();
         boolean first = true;
-        for (DtoField field : genFields) {
+        for (Field field : genFields) {
             if (field.getTypeString().equals("double")) {
                 bw.line(1, "_l_ = Double.doubleToLongBits(").append(field.getFieldName()).append(");");
             }
@@ -454,8 +397,8 @@ public class QuickDtoProcessor extends AbstractProcessor {
         bw.line(1, "for (Fields field: fields) {");
         bw.line(2, "switch (field) {");
         for (MappedAccessor setter : source.mappedSetters.values()) {
-            DtoField field = setter.dtoField;
-            if (!field.isCopyFrom()) {
+            Field field = setter.field;
+            if (!field.getFlags().isCopyFrom()) {
                 bw.line(3, "case ").append(field.getEnumName()).append(":");
                 bw.line(4, "dest.set").append(field.getAccessorName()).append("(");
                 ConverterMethod converter = setter.converterMethod;
@@ -482,7 +425,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
         bw.line(0, "@GwtIncompatible");
         bw.line(0, "public void copyFrom(").append(source.sourceDef.type).append(" source) {");
         for (MappedAccessor getter : source.mappedGetters.values()) {
-            DtoField field = getter.dtoField;
+            Field field = getter.field;
             bw.line(1, "").append(field.getFieldName()).append(" = ");
             ConverterMethod converter = getter.converterMethod;
             if (converter != null) {
@@ -540,8 +483,8 @@ public class QuickDtoProcessor extends AbstractProcessor {
         bw.line(1, "for (").append(dtoDef.name).append(".Fields field: fields) {");
         bw.line(2, "switch (field) {");
         for (MappedAccessor setter : source.mappedSetters.values()) {
-            DtoField field = setter.dtoField;
-            if (!field.isCopyFrom()) {
+            Field field = setter.field;
+            if (!field.getFlags().isCopyFrom()) {
                 bw.line(3, "case ").append(field.getEnumName()).append(":");
                 bw.line(4, "dest.set").append(field.getAccessorName()).append("(");
                 if (setter.converterMethod != null) {
@@ -560,7 +503,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
         bw.newLine();
     }
 
-    private void writeHelperCopyFrom(SourceCopyMap source, DtoDef dtoDef, IndentWriter bw) throws IOException {
+    private void writeHelperCopyFrom(SourceCopyMap source, DtoDef dtoDef, IndentWriter bw) {
         //todo Helpers
         //bw.line(0, "@GwtIncompatible");
         //bw.line(0, "public static void copyFrom(").append(dtoDef.name).append(" dto, ");
@@ -583,15 +526,15 @@ public class QuickDtoProcessor extends AbstractProcessor {
     }
 
     private void writeUnmapped(DtoDef dtoDef, IndentWriter bw) throws IOException {
-        LinkedList<DtoField> unmapped = new LinkedList<>();
-        for (DtoField field : dtoDef.fields.values()) {
-            if (field.isStrictCopy(dtoDef) && !field.isSourceMapped()) {
+        LinkedList<Field> unmapped = new LinkedList<>();
+        for (Field field : dtoDef.getFields().values()) {
+            if (field.getFlags().isStrictCopy(dtoDef) && !field.isSourceMapped()) {
                 unmapped.add(field);
             }
         }
         if (!unmapped.isEmpty()) {
             bw.line(0, "public void fieldsNotMappedToSource() {");
-            for (DtoField field : unmapped) {
+            for (Field field : unmapped) {
                 bw.line(1, "");
                 bw.append(field.getFieldName());
                 bw.append(";");

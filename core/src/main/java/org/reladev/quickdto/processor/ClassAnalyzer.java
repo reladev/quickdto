@@ -27,6 +27,7 @@ import org.reladev.quickdto.shared.CopyFromOnly;
 import org.reladev.quickdto.shared.CopyToOnly;
 import org.reladev.quickdto.shared.EqualsHashCode;
 import org.reladev.quickdto.shared.QuickDto;
+import org.reladev.quickdto.shared.QuickDtoHelper;
 import org.reladev.quickdto.shared.StrictCopy;
 
 public class ClassAnalyzer {
@@ -35,6 +36,53 @@ public class ClassAnalyzer {
 
     public ClassAnalyzer(ProcessingEnvironment processingEnv) {
         this.processingEnv = processingEnv;
+    }
+
+    public HelperDef createHelperDef(Element element) {
+        HelperDef helperDef = new HelperDef();
+        helperDef.setName(element.getSimpleName().toString());
+        PackageElement packageElement = (PackageElement) element.getEnclosingElement();
+        helperDef.setPackageString(packageElement.getQualifiedName().toString());
+
+        processingEnv.getMessager().printMessage(Kind.NOTE, "QuickDtoHelper: " + helperDef.getName());
+
+        parseHelperAnnotation(helperDef, element);
+
+        helperDef.setSourceDef(createSourceDef(helperDef.getName()));
+
+        for (String className : helperDef.getCopyToClasses()) {
+            SourceDef sourceDef = createSourceDef(className);
+            SourceCopyMap sourceCopyMap = createSourceCopyMap(helperDef, sourceDef);
+
+        }
+
+        return helperDef;
+    }
+
+    private void parseHelperAnnotation(HelperDef helperDef, Element element) {
+        final String annotationName = QuickDtoHelper.class.getName();
+        element.getAnnotationMirrors();
+        for (AnnotationMirror am : element.getAnnotationMirrors()) {
+            AnnotationValue action;
+            if (annotationName.equals(am.getAnnotationType().toString())) {
+                for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : am.getElementValues().entrySet()) {
+                    if ("strictCopy".equals(entry.getKey().getSimpleName().toString())) {
+                        action = entry.getValue();
+                        helperDef.setStrictCopy((boolean) action.getValue());
+                    }
+                }
+                for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : am.getElementValues().entrySet()) {
+                    if ("copyToClass".equals(entry.getKey().getSimpleName().toString())) {
+                        action = entry.getValue();
+                        List sources = (List) action.getValue();
+                        for (Object source : sources) {
+                            String className = annotationParamToClassName(source);
+                            helperDef.getCopyToClasses().add(className);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public DtoDef processDtoDef(ClassSymbol defElement) {
@@ -61,6 +109,7 @@ public class ClassAnalyzer {
 
         return dtoDef;
     }
+
 
     private void addClassAnnotations(Element subelement, DtoDef dtoDef) {
         List<? extends AnnotationMirror> annotationMirrors = subelement.getAnnotationMirrors();
@@ -110,35 +159,35 @@ public class ClassAnalyzer {
 
     private void addField(Element subelement, DtoField field, DtoDef dtoDef) {
         if (subelement.getAnnotation(EqualsHashCode.class) != null) {
-            field.setEqualsHashCode();
+            field.getFlags().setEqualsHashCode();
         }
         CopyFromOnly copyFromOnly = subelement.getAnnotation(CopyFromOnly.class);
         if (copyFromOnly != null) {
-            field.setCopyFrom();
+            field.getFlags().setCopyFrom();
             if (!copyFromOnly.setter()) {
-                field.setExcludeSetter();
+                field.getFlags().setExcludeSetter();
             }
         }
         CopyToOnly copyToOnly = subelement.getAnnotation(CopyToOnly.class);
         if (copyToOnly != null) {
-            field.setCopyTo();
+            field.getFlags().setCopyTo();
             if (!copyToOnly.getter()) {
-                field.setExcludeGetter();
+                field.getFlags().setExcludeGetter();
             }
         }
         StrictCopy strictCopy = subelement.getAnnotation(StrictCopy.class);
         if (strictCopy != null) {
-            field.setStrictCopy(strictCopy.value());
+            field.getFlags().setStrictCopy(strictCopy.value());
 
         } else {
-            field.setStrictCopy(dtoDef.strictCopy);
+            field.getFlags().setStrictCopy(dtoDef.strictCopy);
         }
 
         addAnnotations(subelement, field);
 
-        DtoField existing = dtoDef.fields.get(field.getAccessorName());
+        Field existing = dtoDef.getField(field.getAccessorName());
         if (existing == null) {
-            dtoDef.fields.put(field.getAccessorName(), field);
+            dtoDef.getFields().put(field.getAccessorName(), field);
         } else {
             processingEnv.getMessager().printMessage(Kind.WARNING, "Skipping duplicated field definition:" + field.getAccessorName());
         }
@@ -216,13 +265,13 @@ public class ClassAnalyzer {
     /**
      * Creates a map of fields to accessor methods and adds a converter if on is needed.
      */
-    private SourceCopyMap createSourceCopyMap(DtoDef dtoDef, SourceDef sourceDef) {
+    private SourceCopyMap createSourceCopyMap(ClassDef classDef, SourceDef sourceDef) {
         SourceCopyMap sourceCopyMap = new SourceCopyMap();
         sourceCopyMap.sourceDef = sourceDef;
 
         for (AccessorMethod getter : sourceDef.getters.values()) {
-            DtoField field = dtoDef.fields.get(getter.accessorName);
-            MappedAccessor mappedGetter = mapFieldToAccessor(true, field, getter, dtoDef);
+            Field field = classDef.getField(getter.getAccessorName());
+            MappedAccessor mappedGetter = mapFieldToAccessor(true, field, getter, classDef);
             if (mappedGetter != null) {
                 field.setSourceMapped();
                 sourceCopyMap.mappedGetters.put(field.getAccessorName(), mappedGetter);
@@ -230,8 +279,8 @@ public class ClassAnalyzer {
         }
 
         for (AccessorMethod setter : sourceDef.setters.values()) {
-            DtoField field = dtoDef.fields.get(setter.accessorName);
-            MappedAccessor mappedSetter = mapFieldToAccessor(false, field, setter, dtoDef);
+            Field field = classDef.getField(setter.getAccessorName());
+            MappedAccessor mappedSetter = mapFieldToAccessor(false, field, setter, classDef);
             if (mappedSetter != null) {
                 field.setSourceMapped();
                 sourceCopyMap.mappedSetters.put(field.getAccessorName(), mappedSetter);
@@ -247,7 +296,7 @@ public class ClassAnalyzer {
      *
      * @return 'null' if type mismatch and no converter found.
      */
-    private MappedAccessor mapFieldToAccessor(boolean getter, DtoField field, AccessorMethod method, DtoDef converterList) {
+    private MappedAccessor mapFieldToAccessor(boolean getter, Field field, AccessorMethod method, ClassDef converterList) {
         if (field == null) {
             return null;
         }
@@ -257,10 +306,10 @@ public class ClassAnalyzer {
         String fromType;
         String toType;
         if (getter) {
-            fromType = method.typeString;
+            fromType = method.getTypeString();
             toType = field.getTypeString();
         } else {
-            toType = method.typeString;
+            toType = method.getTypeString();
             fromType = field.getTypeString();
         }
 
@@ -302,9 +351,9 @@ public class ClassAnalyzer {
                     AccessorMethod method = createAccessorMethod(sourceSubEl);
                     if (method != null) {
                         if (method.isGetter) {
-                            sourceDef.getters.put(method.accessorName, method);
+                            sourceDef.getters.put(method.getAccessorName(), method);
                         } else {
-                            sourceDef.setters.put(method.accessorName, method);
+                            sourceDef.setters.put(method.getAccessorName(), method);
                         }
                     }
                 }
@@ -332,25 +381,20 @@ public class ClassAnalyzer {
         int numParams = ((ExecutableElement) sourceSubEl).getParameters().size();
         if (method.methodName.startsWith("set") && numParams == 1) {
             method.isGetter = false;
-            method.accessorName = method.methodName.substring(3);
+            method.setFieldName(method.methodName.substring(3));
 
             VariableElement paramElement = ((ExecutableElement) sourceSubEl).getParameters().get(0);
-            method.type = paramElement.asType();
-            method.typeString = method.type.toString();
+            method.setType(paramElement.asType());
 
         } else if (method.methodName.startsWith("get") && numParams == 0) {
             method.isGetter = true;
-            method.accessorName = method.methodName.substring(3);
-
-            method.type = ((ExecutableElement) sourceSubEl).getReturnType();
-            method.typeString = method.type.toString();
+            method.setFieldName(method.methodName.substring(3));
+            method.setType(((ExecutableElement) sourceSubEl).getReturnType());
 
         } else if (method.methodName.startsWith("is") && numParams == 0) {
             method.isGetter = true;
-            method.accessorName = method.methodName.substring(2);
-
-            method.type = ((ExecutableElement) sourceSubEl).getReturnType();
-            method.typeString = method.type.toString();
+            method.setFieldName(method.methodName.substring(2));
+            method.setType(((ExecutableElement) sourceSubEl).getReturnType());
 
         } else {
             method = null;
@@ -378,7 +422,7 @@ public class ClassAnalyzer {
         }
     }
 
-    private String annotationParamToClassName(Object source) {
+    public String annotationParamToClassName(Object source) {
         String className = source.toString();
         className = className.substring(0, className.length() - 6);
         return className;

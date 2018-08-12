@@ -15,7 +15,7 @@ public @interface QuickDtoHelper {
     /**
      * @return the source class should be used in the copy methods.
      */
-    Class[] dtoDef() default {};
+    Class[] copyClass() default {};
 
     /**
      * @return whether the QuickDto should enforce that all the fields in the

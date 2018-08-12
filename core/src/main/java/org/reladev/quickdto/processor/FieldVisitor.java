@@ -62,7 +62,6 @@ public class FieldVisitor extends SimpleTypeVisitor7<Component, Element> {
     @Override
     public Component visitPrimitive(PrimitiveType t, Element element) {
         DtoField field = getOrCreate(t, element);
-        field.setPrimitive();
         return field;
     }
 

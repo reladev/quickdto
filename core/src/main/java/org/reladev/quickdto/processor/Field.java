@@ -6,11 +6,11 @@ import javax.lang.model.type.TypeMirror;
 public class Field implements Component {
     private TypeMirror type;
     private String typeString;
+    private String primitiveTypeString;
     private String fieldName;
-    private boolean primitive;
-
-    private boolean hasGetter;
-    private boolean hasSetter;
+    private String accessorName;
+    private String enumName;
+    private QuickDtoFlags flags = new QuickDtoFlags();
 
     private boolean sourceMapped;
 
@@ -48,12 +48,56 @@ public class Field implements Component {
     }
 
     public boolean isPrimitive() {
-        return primitive;
+        return type.getKind().isPrimitive();
     }
 
-    public void setPrimitive() {
-        this.primitive = true;
+    public String getPrimitiveTypeString() {
+        if (primitiveTypeString == null) {
+            String typeString = getTypeString();
+            if ("int".equals(typeString)) {
+                primitiveTypeString = "Integer";
+            } else if ("boolean".equals(typeString)) {
+                primitiveTypeString = "Boolean";
+            } else if ("long".equals(typeString)) {
+                primitiveTypeString = "Long";
+            } else if ("double".equals(typeString)) {
+                primitiveTypeString = "Double";
+            } else if ("float".equals(typeString)) {
+                primitiveTypeString = "Float";
+            } else if ("char".equals(typeString)) {
+                primitiveTypeString = "Character";
+            } else if ("byte".equals(typeString)) {
+                primitiveTypeString = "Byte";
+            } else if ("short".equals(typeString)) {
+                primitiveTypeString = "Short";
+            }
+        }
+        return primitiveTypeString;
+    }
 
+
+    public String getAccessorName() {
+        if (accessorName == null) {
+            char firstChar = getFieldName().charAt(0);
+            firstChar = Character.toUpperCase(firstChar);
+            accessorName = firstChar + getFieldName().substring(1);
+        }
+        return accessorName;
+    }
+
+    public String getGetAccessorName() {
+        if ("boolean".equals(getTypeString()) || "java.lang.Boolean".equals(getTypeString())) {
+            return "is" + getAccessorName();
+        } else {
+            return "get" + getAccessorName();
+        }
+    }
+
+    public String getEnumName() {
+        if (enumName == null) {
+            enumName = getFieldName().replaceAll("(.)([A-Z])", "$1_$2").toUpperCase();
+        }
+        return enumName;
     }
 
     public boolean isSourceMapped() {
@@ -62,6 +106,10 @@ public class Field implements Component {
 
     public void setSourceMapped() {
         this.sourceMapped = true;
+    }
+
+    public QuickDtoFlags getFlags() {
+        return flags;
     }
 
     public String toString() {

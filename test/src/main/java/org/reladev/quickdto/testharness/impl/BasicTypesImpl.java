@@ -4,7 +4,7 @@ package org.reladev.quickdto.testharness.impl;
 import org.reladev.quickdto.shared.QuickDtoHelper;
 import org.reladev.quickdto.testharness.BasicTypesDtoDef;
 
-@QuickDtoHelper(dtoDef = BasicTypesDtoDef.class)
+@QuickDtoHelper(copyClass = BasicTypesDtoDef.class)
 public class BasicTypesImpl {
     byte myByte;
     Byte objByte;

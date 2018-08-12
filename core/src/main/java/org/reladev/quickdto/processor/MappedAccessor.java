@@ -1,12 +1,12 @@
 package org.reladev.quickdto.processor;
 
 public class MappedAccessor implements Component {
-    public DtoField dtoField;
+    public Field field;
     public AccessorMethod accessorMethod;
     public ConverterMethod converterMethod;
 
-    public MappedAccessor(DtoField dtoField, AccessorMethod accessorMethod) {
-        this.dtoField = dtoField;
+    public MappedAccessor(Field field, AccessorMethod accessorMethod) {
+        this.field = field;
         this.accessorMethod = accessorMethod;
     }
 }
