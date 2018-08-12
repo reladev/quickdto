@@ -1,6 +1,6 @@
 package org.reladev.quickdto.processor;
 
-public class Method implements Component {
+public class Method implements MethodType {
 	String body;
 	boolean converter;
 	boolean isStatic;
@@ -10,6 +10,6 @@ public class Method implements Component {
 
 
 	public String toString() {
-		return body;
+        return toType;
 	}
 }

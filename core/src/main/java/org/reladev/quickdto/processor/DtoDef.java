@@ -21,6 +21,7 @@ public class DtoDef extends ClassDef {
 
     public boolean strictCopy = true;
     public LinkedList<Source> sources = new LinkedList<>();
+    public LinkedList<SourceCopyMap> sourceMaps = new LinkedList<>();
     public HashMap<String, List<Method>> converters = new HashMap<>();
 
     public DtoDef() {

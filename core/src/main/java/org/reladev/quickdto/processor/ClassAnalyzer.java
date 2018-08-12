@@ -157,7 +157,11 @@ public class ClassAnalyzer {
                         List sources = (List) action.getValue();
                         for (Object source : sources) {
                             String className = annotationParamToClassName(source);
+                            //todo this is in the wrong location
                             addSource(dtoDef, className);
+                            SourceDef sourceDef = createSourceDef(className);
+                            SourceCopyMap sourceCopyMap = createSourceCopyMap(dtoDef, sourceDef);
+                            dtoDef.sourceMaps.add(sourceCopyMap);
                         }
 
                     } else if ("strictCopy".equals(entry.getKey().getSimpleName().toString())) {
@@ -260,6 +264,151 @@ public class ClassAnalyzer {
                 sourceType = (TypeElement) ((DeclaredType) sourceType.getSuperclass()).asElement();
             }
         }
+    }
+
+    /**
+     * Creates a map of fields to accessor methods and adds a converter if on is needed.
+     */
+    private SourceCopyMap createSourceCopyMap(DtoDef dtoDef, SourceDef sourceDef) {
+        SourceCopyMap sourceCopyMap = new SourceCopyMap();
+        sourceCopyMap.sourceDef = sourceDef;
+
+        for (AccessorMethod getter : sourceDef.getters.values()) {
+            DtoField field = dtoDef.fields.get(getter.accessorName);
+            MappedAccessor mappedGetter = mapFieldToAccessor(true, field, getter, dtoDef);
+            if (mappedGetter != null) {
+                field.setSourceMapped();
+                sourceCopyMap.mappedGetters.put(field.getAccessorName(), mappedGetter);
+            }
+        }
+
+        for (AccessorMethod setter : sourceDef.setters.values()) {
+            DtoField field = dtoDef.fields.get(setter.accessorName);
+            MappedAccessor mappedSetter = mapFieldToAccessor(false, field, setter, dtoDef);
+            if (mappedSetter != null) {
+                field.setSourceMapped();
+                sourceCopyMap.mappedSetters.put(field.getAccessorName(), mappedSetter);
+            }
+        }
+
+        return sourceCopyMap;
+    }
+
+    /**
+     * Attempts to associate a Field with an Accessor by match types.  If types mismatch,
+     * attempts to find a converter.
+     *
+     * @return 'null' if type mismatch and no converter found.
+     */
+    private MappedAccessor mapFieldToAccessor(boolean getter, DtoField field, AccessorMethod method, DtoDef converterList) {
+        if (field == null) {
+            return null;
+        }
+
+        MappedAccessor mappedAccessor = new MappedAccessor(field, method);
+
+        String fromType;
+        String toType;
+        if (getter) {
+            fromType = method.typeString;
+            toType = field.getTypeString();
+        } else {
+            toType = method.typeString;
+            fromType = field.getTypeString();
+        }
+
+        boolean map;
+        if (fromType.equals(toType)) {
+            map = true;
+
+        } else { // try to find converter
+            Method converter = converterList.getConverter(toType, fromType);
+            if (converter != null) {
+                map = true;
+                mappedAccessor.converterMethod = converter;
+
+            } else {
+                map = false;
+                processingEnv.getMessager().printMessage(Kind.WARNING, "Type Mismatch(" + toType + ":" + fromType + ") for " + field.getAccessorName());
+            }
+        }
+
+        if (map) {
+            return mappedAccessor;
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Finds all the accessor methods for a specified class
+     */
+    private SourceDef createSourceDef(String className) {
+        SourceDef sourceDef = new SourceDef();
+        Elements elementUtils = processingEnv.getElementUtils();
+        sourceDef.type = className;
+        TypeElement sourceType = elementUtils.getTypeElement(className);
+        while (sourceType != null) {
+            for (Element sourceSubEl : sourceType.getEnclosedElements()) {
+                if (sourceSubEl instanceof ExecutableElement) {
+
+                    AccessorMethod method = createAccessorMethod(sourceSubEl);
+                    if (method != null) {
+                        if (method.isGetter) {
+                            sourceDef.getters.put(method.accessorName, method);
+                        } else {
+                            sourceDef.setters.put(method.accessorName, method);
+                        }
+                    }
+                }
+            }
+
+            if (sourceType.getSuperclass() instanceof NoType) {
+                sourceType = null;
+            } else {
+                sourceType = (TypeElement) ((DeclaredType) sourceType.getSuperclass()).asElement();
+            }
+        }
+
+        return sourceDef;
+    }
+
+    /**
+     * Collects information about an accessor method.
+     *
+     * @return 'null' if wasn't an accessor.
+     */
+    private AccessorMethod createAccessorMethod(Element sourceSubEl) {
+        AccessorMethod method = new AccessorMethod();
+        method.methodName = sourceSubEl.getSimpleName().toString();
+
+        int numParams = ((ExecutableElement) sourceSubEl).getParameters().size();
+        if (method.methodName.startsWith("set") && numParams == 1) {
+            method.isGetter = false;
+            method.accessorName = method.methodName.substring(3);
+
+            VariableElement paramElement = ((ExecutableElement) sourceSubEl).getParameters().get(0);
+            method.type = paramElement.asType();
+            method.typeString = method.type.toString();
+
+        } else if (method.methodName.startsWith("get") && numParams == 0) {
+            method.isGetter = true;
+            method.accessorName = method.methodName.substring(3);
+
+            method.type = ((ExecutableElement) sourceSubEl).getReturnType();
+            method.typeString = method.type.toString();
+
+        } else if (method.methodName.startsWith("is") && numParams == 0) {
+            method.isGetter = true;
+            method.accessorName = method.methodName.substring(2);
+
+            method.type = ((ExecutableElement) sourceSubEl).getReturnType();
+            method.typeString = method.type.toString();
+
+        } else {
+            method = null;
+        }
+        return method;
     }
 
 

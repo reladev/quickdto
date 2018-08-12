@@ -5,15 +5,16 @@ import java.io.IOException;
 import org.reladev.quickdto.processor.DtoDef;
 import org.reladev.quickdto.processor.DtoField;
 import org.reladev.quickdto.processor.IndentWriter;
-import org.reladev.quickdto.processor.Source;
+import org.reladev.quickdto.processor.SourceCopyMap;
 
 public class DirtyFeature extends QuickDtoFeature {
 
-
+    @Override
     public void writeFields(DtoDef dtoDef, IndentWriter bw) throws IOException {
         bw.line(0, "protected Set<Fields> dirtyFields = new HashSet<Fields>();");
     }
 
+    @Override
     public void writeMethods(DtoDef dtoDef, IndentWriter bw) throws IOException {
         bw.newLine();
         bw.line(0, "public void markDirty(boolean dirty, Fields... fields) { ");
@@ -49,44 +50,53 @@ public class DirtyFeature extends QuickDtoFeature {
 
     }
 
+    @Override
     public void preGetterLogic(DtoField field, DtoDef dtoDef, IndentWriter bw) throws IOException {
     }
 
+    @Override
     public void postGetterLogic(DtoField field, DtoDef dtoDef, IndentWriter bw) throws IOException {
     }
 
+    @Override
     public void preSetterLogic(DtoField field, DtoDef dtoDef, IndentWriter bw) throws IOException {
         bw.line(0, "if (this.").append(field.getFieldName()).append(" == null || !Objects.equals(this.").append(field.getFieldName()).append(", ").append(field.getFieldName()).append(")) {");
         bw.line(1, "markDirty(true, Fields.").append(field.getEnumName()).append(");");
         bw.line(0, "}");
     }
 
+    @Override
     public void postSetterLogic(DtoField field, DtoDef dtoDef, IndentWriter bw) throws IOException {
     }
 
-    public void writeCopyTo(Source source, DtoDef dtoDef, IndentWriter bw) throws IOException {
+    @Override
+    public void writeCopyTo(SourceCopyMap source, DtoDef dtoDef, IndentWriter bw) throws IOException {
         bw.line(0, "@GwtIncompatible");
-        bw.line(0, "public void copyDirtyTo(").append(source.type).append(" dest) {");
+        bw.line(0, "public void copyDirtyTo(").append(source.sourceDef.type).append(" dest) {");
         bw.line(1, "copyTo(dest, listDirtyFields());");
         bw.line(0, "}");
         bw.newLine();
     }
 
-    public void writeCopyFrom(Source source, DtoDef dtoDef, IndentWriter bw) throws IOException {
+    @Override
+    public void writeCopyFrom(SourceCopyMap source, DtoDef dtoDef, IndentWriter bw) throws IOException {
     }
 
-    public void writeHelperCopyTo(Source source, DtoDef dtoDef, IndentWriter bw) throws IOException {
+    @Override
+    public void writeHelperCopyTo(SourceCopyMap source, DtoDef dtoDef, IndentWriter bw) throws IOException {
         bw.line(0, "@GwtIncompatible");
         bw.line(0, "public static void copyDirtyTo(").append(dtoDef.name).append(" dto, ");
-        bw.append(source.type).append(" dest, ").append(dtoDef.name).append(".Fields... fields) {");
+        bw.append(source.sourceDef.type).append(" dest, ").append(dtoDef.name).append(".Fields... fields) {");
         bw.line(1, "copyTo(dto, dest, dto.listDirtyFields());");
         bw.line(0, "}");
         bw.newLine();
     }
 
-    public void writeHelperCopyFrom(Source source, DtoDef dtoDef, IndentWriter bw) throws IOException {
+    @Override
+    public void writeHelperCopyFrom(SourceCopyMap source, DtoDef dtoDef, IndentWriter bw) throws IOException {
     }
 
+    @Override
     public void writeInnerClasses(DtoDef dtoDef, IndentWriter bw) throws IOException {
     }
 }
