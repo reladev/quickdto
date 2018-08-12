@@ -21,6 +21,7 @@ import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic.Kind;
 import javax.tools.JavaFileObject;
 
+import com.sun.tools.javac.code.Symbol.ClassSymbol;
 import org.reladev.quickdto.feature.QuickDtoFeature;
 import org.reladev.quickdto.shared.QuickDto;
 import org.reladev.quickdto.shared.QuickDtoHelper;
@@ -53,7 +54,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
             if (!element.getSimpleName().toString().endsWith(DefSuffix)) {
                 processingEnv.getMessager().printMessage(Kind.ERROR, element.getSimpleName() + " DtoDef must end in '" + DefSuffix + "'");
             } else {
-                DtoDef dtoDef = classAnalyzer.processDtoDef(element);
+                DtoDef dtoDef = classAnalyzer.processDtoDef((ClassSymbol) element);
                 defs.put(dtoDef.qualifiedName + DefSuffix, dtoDef);
                 writeDto(dtoDef);
             }
@@ -155,7 +156,10 @@ public class QuickDtoProcessor extends AbstractProcessor {
                 bw.newLine();
             }
             bw.line("public class ").append(dtoDef.name);
-            if (dtoDef.extend != null) {
+            if (dtoDef.dtoExtend != null) {
+                bw.append(" extends ").append(dtoDef.dtoExtend);
+
+            } else if (dtoDef.extend != null) {
                 bw.append(" extends ").append(dtoDef.extend);
             }
             if (!dtoDef.implementList.isEmpty()) {

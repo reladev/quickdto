@@ -21,6 +21,8 @@ import javax.lang.model.util.Elements;
 import javax.tools.Diagnostic.Kind;
 
 import com.sun.source.util.Trees;
+import com.sun.tools.javac.code.Symbol.ClassSymbol;
+import com.sun.tools.javac.code.Type.ClassType;
 import org.reladev.quickdto.feature.QuickDtoFeature;
 import org.reladev.quickdto.shared.CopyFromOnly;
 import org.reladev.quickdto.shared.CopyToOnly;
@@ -36,7 +38,7 @@ public class ClassAnalyzer {
         this.processingEnv = processingEnv;
     }
 
-    public DtoDef processDtoDef(Element defElement) {
+    public DtoDef processDtoDef(ClassSymbol defElement) {
         processingEnv.getMessager().printMessage(Kind.NOTE, "QuickDto: " + defElement.getSimpleName());
         DtoDef dtoDef = new DtoDef();
         PackageElement packageElement = (PackageElement) defElement.getEnclosingElement();
@@ -45,9 +47,18 @@ public class ClassAnalyzer {
         dtoDef.name = dtoDef.name.substring(0, dtoDef.name.length() - 3);
         dtoDef.qualifiedName = dtoDef.packageString + "." + dtoDef.name;
 
+        ClassType superClassType = (ClassType) defElement.getSuperclass();
+        if (superClassType != null) {
+            TypeElement superElement = processingEnv.getElementUtils().getTypeElement(superClassType.toString());
+            if (superElement.getAnnotation(QuickDto.class) != null) {
+                dtoDef.dtoExtend = superClassType.toString();
+                dtoDef.dtoExtend = dtoDef.dtoExtend.substring(0, dtoDef.dtoExtend.length() - 3);
+            }
+        }
+
         addClassAnnotations(defElement, dtoDef);
         addFieldMethods(defElement, dtoDef);
-        addSources(defElement, dtoDef);
+        addAnnotationParams(defElement, dtoDef);
 
         return dtoDef;
     }
@@ -69,19 +80,30 @@ public class ClassAnalyzer {
     private void addFieldMethods(Element defElement, DtoDef dtoDef) {
         TypeVisitor<Component, Element> getType = new FieldVisitor(processingEnv, trees);
 
-        for (Element subelement : defElement.getEnclosedElements()) {
-            if (subelement.getKind() != ElementKind.CONSTRUCTOR) {
-                TypeMirror mirror = subelement.asType();
-                Component component = mirror.accept(getType, subelement);
-                if (component instanceof DtoField) {
-                    addField(subelement, (DtoField) component, dtoDef);
+        TypeElement sourceType = (TypeElement) defElement;
+        while (sourceType != null) {
+            for (Element subelement : sourceType.getEnclosedElements()) {
+                if (subelement.getKind() != ElementKind.CONSTRUCTOR) {
+                    TypeMirror mirror = subelement.asType();
+                    Component component = mirror.accept(getType, subelement);
+                    if (component instanceof DtoField) {
+                        addField(subelement, (DtoField) component, dtoDef);
 
-                } else if (component instanceof Method) {
-                    Method method = (Method) component;
-                    dtoDef.methods.add(method);
-                    if (method.converter) {
-                        dtoDef.addConverter(method);
+                    } else if (component instanceof Method) {
+                        Method method = (Method) component;
+                        dtoDef.methods.add(method);
+                        if (method.converter) {
+                            dtoDef.addConverter(method);
+                        }
                     }
+                }
+            }
+            if (sourceType.getSuperclass() instanceof NoType) {
+                sourceType = null;
+            } else {
+                sourceType = (TypeElement) ((DeclaredType) sourceType.getSuperclass()).asElement();
+                if ("java.lang.Object".equals(sourceType.toString())) {
+                    sourceType = null;
                 }
             }
         }
@@ -123,7 +145,7 @@ public class ClassAnalyzer {
         }
     }
 
-    private void addSources(Element element, DtoDef dtoDef) {
+    private void addAnnotationParams(Element element, DtoDef dtoDef) {
         final String annotationName = QuickDto.class.getName();
         element.getAnnotationMirrors();
         for (AnnotationMirror am : element.getAnnotationMirrors()) {

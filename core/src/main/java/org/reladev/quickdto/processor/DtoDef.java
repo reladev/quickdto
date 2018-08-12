@@ -14,6 +14,7 @@ public class DtoDef extends ClassDef {
 
     public LinkedList<String> annotations = new LinkedList<>();
     public String extend;
+    public String dtoExtend;
     public LinkedList<String> implementList = new LinkedList<>();
 
     public boolean fieldAnnotationsOnGetter = false;
