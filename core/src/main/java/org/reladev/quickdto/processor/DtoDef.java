@@ -18,17 +18,29 @@ public class DtoDef extends ClassDef implements FieldList {
 
     public boolean fieldAnnotationsOnGetter = false;
 
-    public boolean strictCopy = true;
-    public LinkedList<SourceCopyMap> sourceMaps = new LinkedList<>();
-
-    public DtoDef() {
-        //features.add(new DirtyFeature());
-    }
-
     /**
      * List of methods in the DtoDef that should be copied to the DTO.
      *
      * @see QuickDto#copyMethods()
      */
     LinkedList<ConverterMethod> methods = new LinkedList<>();
+
+    public DtoDef() {
+        //features.add(new DirtyFeature());
+    }
+
+    public SourceDef convertToSourceDef() {
+        SourceDef sourceDef = new SourceDef();
+        sourceDef.type = getTypeString();
+
+
+        for (Field field : getFields().values()) {
+            sourceDef.getters.put(field.getAccessorName(), field);
+            sourceDef.setters.put(field.getAccessorName(), field);
+        }
+
+        return sourceDef;
+    }
+
+
 }

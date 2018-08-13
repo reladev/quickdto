@@ -58,7 +58,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
         }
 
         for (Element element : env.getElementsAnnotatedWith(QuickDtoHelper.class)) {
-            HelperDef helperDef = classAnalyzer.createHelperDef(element);
+            HelperDef helperDef = classAnalyzer.createHelperDef(element, defs);
             writeHelper(helperDef);
         }
 
@@ -140,7 +140,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
 
     private void writeHelper(HelperDef helperDef) {
         try {
-            JavaFileObject jfo = processingEnv.getFiler().createSourceFile(helperDef.getQualifiedName() + HelperSuffix);
+            JavaFileObject jfo = processingEnv.getFiler().createSourceFile(helperDef.getPackageString() + "." + helperDef.getName() + HelperSuffix);
 
             IndentWriter bw = new IndentWriter(new BufferedWriter(jfo.openWriter()), "\t");
             bw.append("package ").append(helperDef.getPackageString()).append(";");
@@ -153,28 +153,33 @@ public class QuickDtoProcessor extends AbstractProcessor {
             bw.line("import java.util.Objects;");
             bw.line("import org.reladev.quickdto.shared.GwtIncompatible;");
             bw.newLine();
-            //todo helper
-            //for (DtoDef dtoDef : dtoDefs) {
-            //    bw.line("import ").append(dtoDef.qualifiedName).append(";");
-            //}
-            //bw.newLine();
-            //bw.line("public class ").append(sourceClassName).append(HelperSuffix).append(" {");
-            //bw.newLine();
-            //writeHelperCopyMethods(dtoDefs, bw);
-            //bw.line("}");
-            //
-            //bw.flush();
-            //bw.close();
+
+            bw.newLine();
+            bw.line("public class ").append(helperDef.name).append(HelperSuffix).append(" {");
+            bw.indent();
+            bw.newLine();
+
+            writeHelperCopyMethods(helperDef, bw);
+
+            bw.newLine();
+
+            writeFieldsEnum(helperDef, bw);
+
+            bw.unindent();
+            bw.line("}");
+
+            bw.flush();
+            bw.close();
 
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void writeFieldsEnum(DtoDef dtoDef, IndentWriter bw) throws IOException {
+    private void writeFieldsEnum(ClassDef classDef, IndentWriter bw) throws IOException {
         bw.line(0, "public static enum Fields {");
         bw.startLineList(",");
-        for (Field field : dtoDef.getFields().values()) {
+        for (Field field : classDef.getFields().values()) {
             bw.line(1, "").append(field.getEnumName()).append("(\"").append(field.getFieldName()).append("\")");
         }
         bw.endLineList();
@@ -228,13 +233,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
             for (String annotation : dtoField.getGetterAnnotations()) {
                 bw.line("").append(annotation).append("");
             }
-            bw.line("public ").append(dtoField.getTypeString());
-            if ("boolean".equals(dtoField.getTypeString()) || "java.lang.Boolean".equals(dtoField.getTypeString())) {
-                bw.append(" is");
-            } else {
-                bw.append(" get");
-            }
-            bw.append(dtoField.getAccessorName()).append("() {");
+            bw.line("public ").append(dtoField.getTypeString()).append(" ").append(dtoField.getGetAccessorName()).append("() {");
 
             bw.indent();
             for (QuickDtoFeature feature : dtoDef.features) {
@@ -364,8 +363,8 @@ public class QuickDtoProcessor extends AbstractProcessor {
     }
 
     private void writeCopyMethods(DtoDef dtoDef, IndentWriter bw) throws IOException {
-        if (!dtoDef.sourceMaps.isEmpty()) {
-            for (SourceCopyMap source : dtoDef.sourceMaps) {
+        if (!dtoDef.getSourceMaps().isEmpty()) {
+            for (SourceCopyMap source : dtoDef.getSourceMaps()) {
                 writeCopyTo(source, dtoDef, bw);
                 for (QuickDtoFeature feature : dtoDef.features) {
                     feature.writeCopyTo(source, dtoDef, bw);
@@ -445,42 +444,40 @@ public class QuickDtoProcessor extends AbstractProcessor {
         bw.newLine();
     }
 
-    private void writeHelperCopyMethods(List<DtoDef> dtoDefs, IndentWriter bw) throws IOException {
-        for (DtoDef dtoDef : dtoDefs) {
-            if (!dtoDef.sourceMaps.isEmpty()) {
-                for (SourceCopyMap source : dtoDef.sourceMaps) {
-                    writeHelperCopyTo(source, dtoDef, bw);
-                    for (QuickDtoFeature feature : dtoDef.features) {
-                        feature.writeHelperCopyTo(source, dtoDef, bw);
-                    }
+    private void writeHelperCopyMethods(HelperDef helperDef, IndentWriter bw) throws IOException {
+        if (!helperDef.getSourceMaps().isEmpty()) {
+            for (SourceCopyMap source : helperDef.getSourceMaps()) {
+                writeHelperCopyTo(source, helperDef, bw);
+                //for (QuickDtoFeature feature : helperDef.features) {
+                //    feature.writeHelperCopyTo(source, helperDef, bw);
+                //}
 
-                    writeHelperCopyFrom(source, dtoDef, bw);
-                    for (QuickDtoFeature feature : dtoDef.features) {
-                        feature.writeHelperCopyFrom(source, dtoDef, bw);
-                    }
-                }
-                if (dtoDef.strictCopy) {
-                    writeUnmapped(dtoDef, bw);
-                }
+                writeHelperCopyFrom(source, helperDef, bw);
+                //for (QuickDtoFeature feature : helperDef.features) {
+                //    feature.writeHelperCopyFrom(source, helperDef, bw);
+                //}
+            }
+            if (helperDef.isStrictCopy()) {
+                writeUnmapped(helperDef, bw);
             }
         }
     }
 
-    private void writeHelperCopyTo(SourceCopyMap source, DtoDef dtoDef, IndentWriter bw) throws IOException {
+    private void writeHelperCopyTo(SourceCopyMap source, ClassDef dtoDef, IndentWriter bw) throws IOException {
         bw.line(0, "@GwtIncompatible");
-        bw.line(0, "public static void copyTo(").append(dtoDef.name).append(" dto, ");
-        bw.append(source.sourceDef.type).append(" dest, ").append(dtoDef.name).append(".Fields... fields) {");
+        bw.line(0, "public static void copy(").append(dtoDef.name).append(" source, ");
+        bw.append(source.sourceDef.type).append(" dest, Fields... fields) {");
         bw.line(1, "if (fields.length > 0) {");
-        bw.line(2, "copyTo(dto, dest, Arrays.asList(fields));");
+        bw.line(2, "copy(source, dest, Arrays.asList(fields));");
         bw.line(1, "} else {");
-        bw.line(2, "copyTo(dto, dest, ").append(dtoDef.name).append(".Fields.values());");
+        bw.line(2, "copy(source, dest, Fields.values());");
         bw.line(1, "}");
         bw.line(0, "}");
         bw.newLine();
         bw.line(0, "@GwtIncompatible");
-        bw.line(0, "public static void copyTo(").append(dtoDef.name).append(" dto, ");
-        bw.append(source.sourceDef.type).append(" dest, Iterable<").append(dtoDef.name).append(".Fields> fields) {");
-        bw.line(1, "for (").append(dtoDef.name).append(".Fields field: fields) {");
+        bw.line(0, "public static void copy(").append(dtoDef.name).append(" source, ");
+        bw.append(source.sourceDef.type).append(" dest, Iterable<Fields> fields) {");
+        bw.line(1, "for (Fields field: fields) {");
         bw.line(2, "switch (field) {");
         for (MappedAccessor setter : source.mappedSetters.values()) {
             Field field = setter.field;
@@ -488,9 +485,9 @@ public class QuickDtoProcessor extends AbstractProcessor {
                 bw.line(3, "case ").append(field.getEnumName()).append(":");
                 bw.line(4, "dest.set").append(field.getAccessorName()).append("(");
                 if (setter.converterMethod != null) {
-                    bw.append(dtoDef.qualifiedName).append("Def.convert(dto.").append(field.getGetAccessorName()).append("())");
+                    bw.append(dtoDef.qualifiedName).append("Def.convert(source.").append(field.getGetAccessorName()).append("())");
                 } else {
-                    bw.append("dto.").append(field.getGetAccessorName()).append("()");
+                    bw.append("source.").append(field.getGetAccessorName()).append("()");
                 }
 
                 bw.append(");");
@@ -503,29 +500,28 @@ public class QuickDtoProcessor extends AbstractProcessor {
         bw.newLine();
     }
 
-    private void writeHelperCopyFrom(SourceCopyMap source, DtoDef dtoDef, IndentWriter bw) {
-        //todo Helpers
-        //bw.line(0, "@GwtIncompatible");
-        //bw.line(0, "public static void copyFrom(").append(dtoDef.name).append(" dto, ");
-        //bw.append(source.sourceDef.type).append(" source) {");
-        //for (MappedAccessor getter : source.mappedGetters.values()) {
-        //    DtoField field = getter.dtoField;
-        //    bw.line(1, "dto.set").append(field.getAccessorName()).append("(");
-        //    if (getter.getValue() != null) {
-        //        bw.append(dtoDef.qualifiedName).append("Def.convert(");
-        //    }
-        //    bw.append("source.").append(field.getGetAccessorName()).append("()");
-        //    if (getter.getValue() != null) {
-        //        bw.append(")");
-        //    }
-        //    bw.append(");");
-        //}
-        //
-        //bw.line(0, "}");
-        //bw.newLine();
+    private void writeHelperCopyFrom(SourceCopyMap source, ClassDef dtoDef, IndentWriter bw) throws IOException {
+        bw.line(0, "@GwtIncompatible");
+        bw.line(0, "public static void copy(").append(source.sourceDef.type).append(" source, ");
+        bw.append(dtoDef.name).append(" dest) {");
+        for (MappedAccessor getter : source.mappedGetters.values()) {
+            Field field = getter.field;
+            bw.line(1, "dest.set").append(field.getAccessorName()).append("(");
+            if (getter.converterMethod != null) {
+                bw.append(dtoDef.qualifiedName).append("Def.convert(");
+            }
+            bw.append("source.").append(field.getGetAccessorName()).append("()");
+            if (getter.converterMethod != null) {
+                bw.append(")");
+            }
+            bw.append(");");
+        }
+
+        bw.line(0, "}");
+        bw.newLine();
     }
 
-    private void writeUnmapped(DtoDef dtoDef, IndentWriter bw) throws IOException {
+    private void writeUnmapped(ClassDef dtoDef, IndentWriter bw) throws IOException {
         LinkedList<Field> unmapped = new LinkedList<>();
         for (Field field : dtoDef.getFields().values()) {
             if (field.getFlags().isStrictCopy(dtoDef) && !field.isSourceMapped()) {

@@ -86,7 +86,7 @@ public class Field implements Component {
     }
 
     public String getGetAccessorName() {
-        if ("boolean".equals(getTypeString()) || "java.lang.Boolean".equals(getTypeString())) {
+        if ("boolean".equals(getTypeString())) {
             return "is" + getAccessorName();
         } else {
             return "get" + getAccessorName();

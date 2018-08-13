@@ -21,6 +21,7 @@ public class IndentWriter {
      * Sets the ident that should be prepended to each line.
      *
      * @param indent the number of indent values to prepend.
+     * @return 'this' to allow for chaining.
      */
     public IndentWriter indent(int indent) {
         this.indent = indent;
@@ -29,6 +30,7 @@ public class IndentWriter {
 
     /**
      * Increase the indent amount by one.
+     * @return 'this' to allow for chaining.
      */
     public IndentWriter indent() {
         indent++;
@@ -37,6 +39,7 @@ public class IndentWriter {
 
     /**
      * Decrease the indent amount by one.
+     * @return 'this' to allow for chaining.
      */
     public IndentWriter unindent() {
         indent--;
@@ -45,6 +48,8 @@ public class IndentWriter {
 
     /**
      * Creates a blank line by adding '\n'
+     * @return 'this' to allow for chaining.
+     * @throws IOException If any I/O error occurs
      */
     public IndentWriter newLine() throws IOException {
         writer.append(lineValue);
@@ -55,6 +60,7 @@ public class IndentWriter {
      * Completes the previous line by adding '\n' and adds the number of indents specified.
      *
      * @param csq The text that should be added after the indents.
+     * @return 'this' to allow for chaining.
      * @throws IOException If any I/O error occurs
      */
     public IndentWriter line(CharSequence csq) throws IOException {
@@ -66,6 +72,7 @@ public class IndentWriter {
      *
      * @param indent the number of indent values to prepend only for this line.
      * @param csq    The text that should be added after the indents.
+     * @return 'this' to allow for chaining.
      * @throws IOException If any I/O error occurs
      */
     public IndentWriter line(int indent, CharSequence csq) throws IOException {
@@ -86,7 +93,8 @@ public class IndentWriter {
     /**
      * Appends the text without adding any indent values.
      *
-     * @param csq
+     * @param csq Text to append
+     * @return 'this' to allow for chaining.
      * @throws IOException If any I/O error occurs
      */
     public IndentWriter append(CharSequence csq) throws IOException {
@@ -116,6 +124,7 @@ public class IndentWriter {
 
     /**
      * @see Writer#close()
+     * @throws IOException If any I/O error occurs
      */
     public void flush() throws IOException {
         writer.flush();
@@ -123,6 +132,7 @@ public class IndentWriter {
 
     /**
      * @see Writer#flush()
+     * @throws IOException If any I/O error occurs
      */
     public void close() throws IOException {
         writer.close();

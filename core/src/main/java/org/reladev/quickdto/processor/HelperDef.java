@@ -39,5 +39,12 @@ public class HelperDef extends ClassDef {
 
     public void setSourceDef(SourceDef sourceDef) {
         this.sourceDef = sourceDef;
+        getFields().putAll(sourceDef.getters);
+        getFields().putAll(sourceDef.setters);
+    }
+
+    @Override
+    public String toString() {
+        return sourceDef.toString();
     }
 }

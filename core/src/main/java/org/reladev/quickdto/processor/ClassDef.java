@@ -12,9 +12,11 @@ public class ClassDef {
     public String packageString;
     public String name;
     public String qualifiedName;
+    public boolean strictCopy = true;
 
     private LinkedHashMap<String, Field> fields = new LinkedHashMap<>();
     private HashMap<String, List<ConverterMethod>> converters = new HashMap<>();
+    private LinkedList<SourceCopyMap> sourceMaps = new LinkedList<>();
 
     public Field getField(String accessorName) {
         return fields.get(accessorName);
@@ -62,16 +64,12 @@ public class ClassDef {
         return name;
     }
 
+    public String getTypeString() {
+        return packageString + "." + name;
+    }
+
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getQualifiedName() {
-        return qualifiedName;
-    }
-
-    public void setQualifiedName(String qualifiedName) {
-        this.qualifiedName = qualifiedName;
     }
 
     public LinkedHashMap<String, Field> getFields() {
@@ -80,5 +78,17 @@ public class ClassDef {
 
     public HashMap<String, List<ConverterMethod>> getConverters() {
         return converters;
+    }
+
+    public LinkedList<SourceCopyMap> getSourceMaps() {
+        return sourceMaps;
+    }
+
+    public boolean isStrictCopy() {
+        return strictCopy;
+    }
+
+    public void setStrictCopy(boolean strictCopy) {
+        this.strictCopy = strictCopy;
     }
 }

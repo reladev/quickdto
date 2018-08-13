@@ -1,9 +1,6 @@
 package org.reladev.quickdto.testharness.impl;
 
-import org.reladev.quickdto.jartest.JarredDtoDef;
-import org.reladev.quickdto.shared.QuickDtoHelper;
-
-@QuickDtoHelper(copyClass = {JarredDtoDef.class})
+//@QuickDtoHelper(copyClass = {JarredDtoDef.class})
 public class Simple {
     private int normal;
     private int readOnly;

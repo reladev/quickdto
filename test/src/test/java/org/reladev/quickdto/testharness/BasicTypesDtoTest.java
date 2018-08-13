@@ -9,7 +9,7 @@ import static org.junit.Assert.*;
 public class BasicTypesDtoTest {
 
     @Test
-    public void testPrimitiveEmpty() throws Exception {
+    public void testPrimitiveEmpty() {
         BasicTypesDto dto = new BasicTypesDto();
 
         assertEquals(0, dto.getMyInt());
@@ -25,12 +25,12 @@ public class BasicTypesDtoTest {
         assertEquals(0, dto.getMyFloat(), 0);
         assertEquals(null, dto.getObjFloat());
         assertEquals(false, dto.isMyBoolean());
-        assertEquals(null, dto.isObjBoolean());
+        assertEquals(null, dto.getObjBoolean());
         assertEquals(null, dto.getMyString());
     }
 
     @Test
-    public void testPrimitiveDirty() throws Exception {
+    public void testPrimitiveDirty() {
         BasicTypesDto dto = new BasicTypesDto();
 
         assertFalse(dto.checkDirty(Fields.MY_INT));
@@ -88,7 +88,7 @@ public class BasicTypesDtoTest {
     }
 
     @Test
-    public void testDirtyResetAssignSame() throws Exception {
+    public void testDirtyResetAssignSame() {
         BasicTypesDto dto = new BasicTypesDto();
 
         dto.setMyInt(2);
