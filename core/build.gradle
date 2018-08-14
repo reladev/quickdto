@@ -5,7 +5,7 @@ apply plugin: 'idea'
 
 archivesBaseName = 'quickdto'
 group = 'org.reladev.quickdto'
-version = '0.7.0'
+version = '1.0.0-SNAPSHOT'
 
 repositories {
     mavenCentral()

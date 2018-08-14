@@ -338,6 +338,12 @@ public class ClassAnalyzer {
                 map = true;
                 mappedAccessor.converterMethod = converter;
 
+            } else if (field.isQuickDto()) {
+                map = true;
+
+            } else if (field.isQuickDtoList() && getter) {
+                map = true;
+
             } else {
                 map = false;
                 processingEnv.getMessager().printMessage(Kind.WARNING, "Type Mismatch(" + toType + ":" + fromType + ") for " + field.getAccessorName());

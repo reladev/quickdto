@@ -387,7 +387,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
         bw.line(1, "if (fields.length > 0) {");
         bw.line(2, "copyTo(dest, Arrays.asList(fields));");
         bw.line(1, "} else {");
-        bw.line(2, "copyTo(dest, Fields.values());");
+        bw.line(2, "copyTo(dest, Arrays.asList(Fields.values()));");
         bw.line(1, "}");
         bw.line(0, "}");
         bw.newLine();
@@ -425,19 +425,38 @@ public class QuickDtoProcessor extends AbstractProcessor {
         bw.line(0, "public void copyFrom(").append(source.sourceDef.type).append(" source) {");
         for (MappedAccessor getter : source.mappedGetters.values()) {
             Field field = getter.field;
-            bw.line(1, "").append(field.getFieldName()).append(" = ");
+            bw.line(1, field.getFieldName()).append(" = ");
             ConverterMethod converter = getter.converterMethod;
             if (converter != null) {
-                bw.append(dtoDef.name).append("Def.convert(");
-            }
-            bw.append("source.").append(field.getGetAccessorName()).append("()");
-            if (converter != null) {
+                bw.append("source.").append(field.getGetAccessorName()).append("() == null ? null : ").append(dtoDef.name).append("Def.convert(");
+                bw.append("source.").append(field.getGetAccessorName()).append("()");
                 if (converter.existingParam) {
                     bw.append(", ").append(field.getFieldName());
                 }
-                bw.append(")");
+                bw.append(");");
+
+            } else if (field.isQuickDto()) {
+                bw.append("source.").append(field.getGetAccessorName()).append("() == null ? null : new ").append(field.getTypeString()).append("();");
+                bw.line(1, "if (").append(field.getFieldName()).append(" != null) {");
+                bw.line(2, field.getFieldName()).append(".copyFrom(");
+                bw.append("source.").append(field.getGetAccessorName()).append("());");
+                bw.line(1, "}");
+
+            } else if (field.isQuickDtoList()) {
+                bw.append("source.").append(field.getGetAccessorName()).append("() == null ? null : new java.util.ArrayList<>();");
+                bw.line(1, "if (").append(field.getFieldName()).append(" != null) {");
+                bw.line(2, "for (").append(getter.accessorMethod.getListTypeString()).append(" _i_: source.").append(field.getGetAccessorName()).append("()) {");
+                bw.line(3, field.getListTypeString()).append(" _d_ = _i_ == null ? null : new ").append(field.getListTypeString()).append("();");
+                bw.line(3, field.getFieldName()).append(".add(_d_);");
+                bw.line(3, "if (_d_ != null) {");
+                bw.line(4, "_d_.copyFrom(_i_);");
+                bw.line(3, "}");
+                bw.line(2, "}");
+                bw.line(1, "}");
+
+            } else {
+                bw.append("source.").append(field.getGetAccessorName()).append("();");
             }
-            bw.append(";");
         }
 
         bw.line(0, "}");

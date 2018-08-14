@@ -18,5 +18,8 @@
         <outputRelativeToContentRoot value="true" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="core" target="1.7" />
+    </bytecodeTargetLevel>
   </component>
 </project>

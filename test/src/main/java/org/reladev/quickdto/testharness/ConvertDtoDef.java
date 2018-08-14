@@ -11,17 +11,8 @@ import org.reladev.quickdto.testharness.impl.ExistingParamImpl;
 @QuickDto(source = ConvertImpl.class)
 public class ConvertDtoDef {
     BasicDtoDef basic;
-    List<BasicDto> basicList;
+    List<BasicDtoDef> basicList;
     ExistingParamDtoDef existing;
-
-    public static BasicDto convert(BasicImpl basic) {
-        if (basic == null) {
-            return null;
-        }
-        BasicDto basicDto = new BasicDto();
-        basicDto.copyFrom(basic);
-        return basicDto;
-    }
 
     public static BasicImpl convert(BasicDto basicDto) {
         if (basicDto == null) {
@@ -32,18 +23,18 @@ public class ConvertDtoDef {
         return basic;
     }
 
-    public static List<BasicDto> convert(List<BasicImpl> basicList) {
-        if (basicList == null) {
-            return null;
-        }
-        List<BasicDto> dtoList = new ArrayList<>();
-        for (BasicImpl basic : basicList) {
-            BasicDto basicDto = new BasicDto();
-            basicDto.copyFrom(basic);
-            dtoList.add(basicDto);
-        }
-        return dtoList;
-    }
+    //public static List<BasicDto> convert(List<BasicImpl> basicList) {
+    //    if (basicList == null) {
+    //        return null;
+    //    }
+    //    List<BasicDto> dtoList = new ArrayList<>();
+    //    for (BasicImpl basic : basicList) {
+    //        BasicDto basicDto = new BasicDto();
+    //        basicDto.copyFrom(basic);
+    //        dtoList.add(basicDto);
+    //    }
+    //    return dtoList;
+    //}
 
     public static List<BasicImpl> convert(List<BasicDto> basicDtoList, List<BasicImpl> existing) {
         if (basicDtoList == null) {

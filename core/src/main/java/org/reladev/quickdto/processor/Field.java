@@ -10,6 +10,9 @@ public class Field implements Component {
     private String fieldName;
     private String accessorName;
     private String enumName;
+    private boolean isQuickDto;
+    private boolean isQuickDtoList;
+    private String listTypeString;
     private QuickDtoFlags flags = new QuickDtoFlags();
 
     private boolean sourceMapped;
@@ -27,6 +30,15 @@ public class Field implements Component {
         this.typeString = type.toString();
         if (typeString.endsWith("DtoDef")) {
             typeString = typeString.substring(0, typeString.length() - 3);
+            isQuickDto = true;
+
+        } else if (typeString.startsWith("java.util.List<")) {
+            listTypeString = typeString.substring(15, typeString.length() - 1);
+            if (listTypeString.endsWith("DtoDef")) {
+                listTypeString = listTypeString.substring(listTypeString.lastIndexOf(".") + 1, listTypeString.length() - 3);
+                typeString = "java.util.List<" + listTypeString + ">";
+                isQuickDtoList = true;
+            }
         }
     }
 
@@ -106,6 +118,18 @@ public class Field implements Component {
 
     public void setSourceMapped() {
         this.sourceMapped = true;
+    }
+
+    public boolean isQuickDto() {
+        return isQuickDto;
+    }
+
+    public boolean isQuickDtoList() {
+        return isQuickDtoList;
+    }
+
+    public String getListTypeString() {
+        return listTypeString;
     }
 
     public QuickDtoFlags getFlags() {
