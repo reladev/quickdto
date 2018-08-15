@@ -114,6 +114,8 @@ public class ClassAnalyzer {
         addClassAnnotations(defElement, dtoDef);
         addFieldMethods(defElement, dtoDef);
         addAnnotationParams(defElement, dtoDef);
+        addConverters(dtoDef.getConverterElements(), dtoDef);
+        addSourceMap(dtoDef);
 
         return dtoDef;
     }
@@ -147,6 +149,7 @@ public class ClassAnalyzer {
 
                     } else if (component instanceof ConverterMethod) {
                         ConverterMethod method = (ConverterMethod) component;
+                        method.classTypeString = dtoDef.getTypeString() + "Def";
                         dtoDef.methods.add(method);
                         if (method.converter) {
                             dtoDef.addConverter(method);
@@ -156,6 +159,36 @@ public class ClassAnalyzer {
             }
 
             sourceType = getSuperElement(sourceType);
+        }
+    }
+
+    private void addConverters(List<TypeElement> converterClasses, DtoDef dtoDef) {
+        TypeVisitor<Component, Element> getType = new FieldVisitor(processingEnv, trees);
+
+        for (TypeElement sourceType : converterClasses) {
+            while (sourceType != null) {
+                for (Element subelement : sourceType.getEnclosedElements()) {
+                    if (subelement.getKind() != ElementKind.CONSTRUCTOR) {
+                        TypeMirror mirror = subelement.asType();
+                        Component component = mirror.accept(getType, subelement);
+                        if (component instanceof ConverterMethod) {
+                            ConverterMethod method = (ConverterMethod) component;
+                            method.classTypeString = sourceType.toString();
+                            dtoDef.addConverter(method);
+                        }
+                    }
+                }
+
+                sourceType = getSuperElement(sourceType);
+            }
+        }
+    }
+
+    private void addSourceMap(DtoDef dtoDef) {
+        for (String className : dtoDef.sourceClasses) {
+            SourceDef sourceDef = createSourceDef(className);
+            SourceCopyMap sourceCopyMap = createSourceCopyMap(dtoDef, sourceDef);
+            dtoDef.getSourceMaps().add(sourceCopyMap);
         }
     }
 
@@ -220,10 +253,7 @@ public class ClassAnalyzer {
                         List sources = (List) action.getValue();
                         for (Object source : sources) {
                             String className = annotationParamToClassName(source);
-                            //todo this is in the wrong location
-                            SourceDef sourceDef = createSourceDef(className);
-                            SourceCopyMap sourceCopyMap = createSourceCopyMap(dtoDef, sourceDef);
-                            dtoDef.getSourceMaps().add(sourceCopyMap);
+                            dtoDef.sourceClasses.add(className);
                         }
 
                     } else if ("strictCopy".equals(entry.getKey().getSimpleName().toString())) {
@@ -255,6 +285,19 @@ public class ClassAnalyzer {
                         boolean copyMethods = (boolean) action.getValue();
                         if (copyMethods) {
                             trees = Trees.instance(processingEnv);
+                        }
+
+                    } else if ("converter".equals(entry.getKey().getSimpleName().toString())) {
+                        action = entry.getValue();
+                        List actionValues = (List) action.getValue();
+                        for (Object value : actionValues) {
+                            String className = annotationParamToClassName(value);
+                            try {
+                                TypeElement converterElement = processingEnv.getElementUtils().getTypeElement(className);
+                                dtoDef.getConverterElements().add(converterElement);
+                            } catch (Exception e) {
+                                processingEnv.getMessager().printMessage(Kind.WARNING, "Problem with converter:" + className);
+                            }
                         }
                     } else if ("feature".equals(entry.getKey().getSimpleName().toString())) {
                         action = entry.getValue();
@@ -311,7 +354,7 @@ public class ClassAnalyzer {
      *
      * @return 'null' if type mismatch and no converter found.
      */
-    private MappedAccessor mapFieldToAccessor(boolean getter, Field field, Field method, ClassDef converterList) {
+    private MappedAccessor mapFieldToAccessor(boolean getter, Field field, Field method, ClassDef classDef) {
         if (field == null) {
             return null;
         }
@@ -333,12 +376,12 @@ public class ClassAnalyzer {
             map = true;
 
         } else { // try to find converter
-            ConverterMethod converter = converterList.getConverter(toType, fromType);
+            ConverterMethod converter = classDef.getConverter(toType, fromType);
             if (converter != null) {
                 map = true;
                 mappedAccessor.converterMethod = converter;
 
-            } else if (field.isQuickDto()) {
+            } else if (field.isQuickDto() && getter) {
                 map = true;
 
             } else if (field.isQuickDtoList() && getter) {

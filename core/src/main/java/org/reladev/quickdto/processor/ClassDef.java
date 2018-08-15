@@ -5,6 +5,8 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.lang.model.element.TypeElement;
+
 public class ClassDef {
     ///////////////////////////////////
     // Class definition
@@ -15,6 +17,7 @@ public class ClassDef {
     public boolean strictCopy = true;
 
     private LinkedHashMap<String, Field> fields = new LinkedHashMap<>();
+    private List<TypeElement> converterElements = new LinkedList<>();
     private HashMap<String, List<ConverterMethod>> converters = new HashMap<>();
     private LinkedList<SourceCopyMap> sourceMaps = new LinkedList<>();
 
@@ -78,6 +81,10 @@ public class ClassDef {
 
     public HashMap<String, List<ConverterMethod>> getConverters() {
         return converters;
+    }
+
+    public List<TypeElement> getConverterElements() {
+        return converterElements;
     }
 
     public LinkedList<SourceCopyMap> getSourceMaps() {

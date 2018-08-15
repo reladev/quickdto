@@ -8,32 +8,19 @@ import org.reladev.quickdto.testharness.impl.BasicImpl;
 import org.reladev.quickdto.testharness.impl.ConvertImpl;
 import org.reladev.quickdto.testharness.impl.ExistingParamImpl;
 
-@QuickDto(source = ConvertImpl.class)
+@QuickDto(source = ConvertImpl.class, converter = BasicDtoConverter.class)
 public class ConvertDtoDef {
     BasicDtoDef basic;
     List<BasicDtoDef> basicList;
     ExistingParamDtoDef existing;
 
-    public static BasicImpl convert(BasicDto basicDto) {
-        if (basicDto == null) {
-            return null;
-        }
-        BasicImpl basic = new BasicImpl();
-        basicDto.copyTo(basic);
-        return basic;
-    }
-
-    //public static List<BasicDto> convert(List<BasicImpl> basicList) {
-    //    if (basicList == null) {
+    //public static BasicImpl convert(BasicDto basicDto) {
+    //    if (basicDto == null) {
     //        return null;
     //    }
-    //    List<BasicDto> dtoList = new ArrayList<>();
-    //    for (BasicImpl basic : basicList) {
-    //        BasicDto basicDto = new BasicDto();
-    //        basicDto.copyFrom(basic);
-    //        dtoList.add(basicDto);
-    //    }
-    //    return dtoList;
+    //    BasicImpl basic = new BasicImpl();
+    //    basicDto.copyTo(basic);
+    //    return basic;
     //}
 
     public static List<BasicImpl> convert(List<BasicDto> basicDtoList, List<BasicImpl> existing) {

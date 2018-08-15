@@ -18,6 +18,8 @@ public class DtoDef extends ClassDef implements FieldList {
 
     public boolean fieldAnnotationsOnGetter = false;
 
+    public List<String> sourceClasses = new ArrayList<>();
+
     /**
      * List of methods in the DtoDef that should be copied to the DTO.
      *

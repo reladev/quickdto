@@ -402,7 +402,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
                 bw.line(4, "dest.set").append(field.getAccessorName()).append("(");
                 ConverterMethod converter = setter.converterMethod;
                 if (converter != null) {
-                    bw.append(dtoDef.name).append("Def.convert(").append(field.getFieldName());
+                    bw.append(converter.classTypeString).append(".convert(").append(field.getFieldName());
                     if (converter.existingParam) {
                         bw.append(", dest.get").append(field.getAccessorName()).append("()");
                     }
@@ -428,7 +428,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
             bw.line(1, field.getFieldName()).append(" = ");
             ConverterMethod converter = getter.converterMethod;
             if (converter != null) {
-                bw.append("source.").append(field.getGetAccessorName()).append("() == null ? null : ").append(dtoDef.name).append("Def.convert(");
+                bw.append("source.").append(field.getGetAccessorName()).append("() == null ? null : ").append(converter.classTypeString).append(".convert(");
                 bw.append("source.").append(field.getGetAccessorName()).append("()");
                 if (converter.existingParam) {
                     bw.append(", ").append(field.getFieldName());

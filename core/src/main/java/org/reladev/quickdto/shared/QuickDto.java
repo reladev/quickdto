@@ -57,5 +57,6 @@ public @interface QuickDto {
 	 */
 	boolean copyMethods() default false;
 
+    Class[] converter() default {};
     Class<? extends QuickDtoFeature>[] feature() default {};
 }
