@@ -48,9 +48,9 @@ public class ClassAnalyzer {
         processingEnv.getMessager().printMessage(Kind.NOTE, "QuickDtoHelper: " + helperDef.getName());
 
         parseHelperAnnotation(helperDef, element);
+        addConverters(helperDef.getConverterElements(), helperDef);
 
         helperDef.setSourceDef(createSourceDef(helperDef.getTypeString()));
-
 
         for (String className : helperDef.getCopyToClasses()) {
             SourceDef sourceDef;
@@ -77,15 +77,24 @@ public class ClassAnalyzer {
                     if ("strictCopy".equals(entry.getKey().getSimpleName().toString())) {
                         action = entry.getValue();
                         helperDef.setStrictCopy((boolean) action.getValue());
-                    }
-                }
-                for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : am.getElementValues().entrySet()) {
-                    if ("copyClass".equals(entry.getKey().getSimpleName().toString())) {
+                    } else if ("copyClass".equals(entry.getKey().getSimpleName().toString())) {
                         action = entry.getValue();
                         List sources = (List) action.getValue();
                         for (Object source : sources) {
                             String className = annotationParamToClassName(source);
                             helperDef.getCopyToClasses().add(className);
+                        }
+                    } else if ("converter".equals(entry.getKey().getSimpleName().toString())) {
+                        action = entry.getValue();
+                        List actionValues = (List) action.getValue();
+                        for (Object value : actionValues) {
+                            String className = annotationParamToClassName(value);
+                            try {
+                                TypeElement converterElement = processingEnv.getElementUtils().getTypeElement(className);
+                                helperDef.getConverterElements().add(converterElement);
+                            } catch (Exception e) {
+                                processingEnv.getMessager().printMessage(Kind.WARNING, "Problem with converter:" + className);
+                            }
                         }
                     }
                 }
@@ -162,7 +171,7 @@ public class ClassAnalyzer {
         }
     }
 
-    private void addConverters(List<TypeElement> converterClasses, DtoDef dtoDef) {
+    private void addConverters(List<TypeElement> converterClasses, ClassDef dtoDef) {
         TypeVisitor<Component, Element> getType = new FieldVisitor(processingEnv, trees);
 
         for (TypeElement sourceType : converterClasses) {

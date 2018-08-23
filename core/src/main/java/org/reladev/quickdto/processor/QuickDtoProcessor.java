@@ -541,22 +541,21 @@ public class QuickDtoProcessor extends AbstractProcessor {
     }
 
     private void writeUnmapped(ClassDef dtoDef, IndentWriter bw) throws IOException {
-        LinkedList<Field> unmapped = new LinkedList<>();
-        for (Field field : dtoDef.getFields().values()) {
-            if (field.getFlags().isStrictCopy(dtoDef) && !field.isSourceMapped()) {
-                unmapped.add(field);
-            }
-        }
-        if (!unmapped.isEmpty()) {
-            bw.line(0, "public void fieldsNotMappedToSource() {");
-            for (Field field : unmapped) {
-                bw.line(1, "");
-                bw.append(field.getFieldName());
-                bw.append(";");
-            }
-            bw.line(0, "}");
+        bw.line(0, "public void fieldsNotMappedToSource() {");
 
+        for (Field field : dtoDef.getFields().values()) {
+            if (!field.isSourceMapped()) {
+                if (field.getFlags().isStrictCopy(dtoDef)) {
+                    bw.line(1, "//").append(field.getFieldName()).append(";");
+                } else {
+                    bw.line(1, field.getFieldName()).append(";");
+
+                }
+            }
         }
+
+        bw.line(0, "}");
+        bw.newLine();
     }
 
     private void writeOtherMethods(DtoDef dtoDef, IndentWriter bw) throws IOException {

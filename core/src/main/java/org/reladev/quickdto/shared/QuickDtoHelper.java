@@ -25,4 +25,6 @@ public @interface QuickDtoHelper {
      * Defaults to true.
      */
     boolean strictCopy() default true;
+
+    Class[] converter() default {};
 }
