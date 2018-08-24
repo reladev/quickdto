@@ -31,17 +31,17 @@ public class DtoDef extends ClassDef implements FieldList {
         //features.add(new DirtyFeature());
     }
 
-    public SourceDef convertToSourceDef() {
-        SourceDef sourceDef = new SourceDef();
-        sourceDef.type = getTypeString();
+    public AccessorDef convertToSourceDef() {
+        AccessorDef accessorDef = new AccessorDef();
+        accessorDef.type = getTypeString();
 
 
         for (Field field : getFields().values()) {
-            sourceDef.getters.put(field.getAccessorName(), field);
-            sourceDef.setters.put(field.getAccessorName(), field);
+            accessorDef.getters.put(field.getAccessorName(), field);
+            accessorDef.setters.put(field.getAccessorName(), field);
         }
 
-        return sourceDef;
+        return accessorDef;
     }
 
 

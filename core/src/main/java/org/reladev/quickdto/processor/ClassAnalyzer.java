@@ -53,15 +53,15 @@ public class ClassAnalyzer {
         helperDef.setSourceDef(createSourceDef(helperDef.getTypeString()));
 
         for (String className : helperDef.getCopyToClasses()) {
-            SourceDef sourceDef;
+            AccessorDef sourceDef;
             if (defs.containsKey(className)) {
                 sourceDef = defs.get(className).convertToSourceDef();
             } else {
                 sourceDef = createSourceDef(className);
             }
 
-            SourceCopyMap sourceCopyMap = createSourceCopyMap(helperDef, sourceDef);
-            helperDef.getSourceMaps().add(sourceCopyMap);
+            CopyMap copyMap = createCopyMap(helperDef, sourceDef);
+            helperDef.getCopyMaps().add(copyMap);
         }
 
         return helperDef;
@@ -195,9 +195,9 @@ public class ClassAnalyzer {
 
     private void addSourceMap(DtoDef dtoDef) {
         for (String className : dtoDef.sourceClasses) {
-            SourceDef sourceDef = createSourceDef(className);
-            SourceCopyMap sourceCopyMap = createSourceCopyMap(dtoDef, sourceDef);
-            dtoDef.getSourceMaps().add(sourceCopyMap);
+            AccessorDef sourceDef = createSourceDef(className);
+            CopyMap copyMap = createCopyMap(dtoDef, sourceDef);
+            dtoDef.getCopyMaps().add(copyMap);
         }
     }
 
@@ -332,16 +332,16 @@ public class ClassAnalyzer {
     /**
      * Creates a map of fields to accessor methods and adds a converter if on is needed.
      */
-    private SourceCopyMap createSourceCopyMap(ClassDef classDef, SourceDef sourceDef) {
-        SourceCopyMap sourceCopyMap = new SourceCopyMap();
-        sourceCopyMap.sourceDef = sourceDef;
+    private CopyMap createCopyMap(ClassDef classDef, AccessorDef sourceDef) {
+        CopyMap copyMap = new CopyMap();
+        copyMap.sourceDef = sourceDef;
 
         for (Field getter : sourceDef.getters.values()) {
             Field field = classDef.getField(getter.getAccessorName());
             MappedAccessor mappedGetter = mapFieldToAccessor(true, field, getter, classDef);
             if (mappedGetter != null) {
                 field.setSourceMapped();
-                sourceCopyMap.mappedGetters.put(field.getAccessorName(), mappedGetter);
+                copyMap.mappedGetters.put(field.getAccessorName(), mappedGetter);
             }
         }
 
@@ -350,11 +350,11 @@ public class ClassAnalyzer {
             MappedAccessor mappedSetter = mapFieldToAccessor(false, field, setter, classDef);
             if (mappedSetter != null) {
                 field.setSourceMapped();
-                sourceCopyMap.mappedSetters.put(field.getAccessorName(), mappedSetter);
+                copyMap.mappedSetters.put(field.getAccessorName(), mappedSetter);
             }
         }
 
-        return sourceCopyMap;
+        return copyMap;
     }
 
     /**
@@ -412,10 +412,10 @@ public class ClassAnalyzer {
     /**
      * Finds all the accessor methods for a specified class
      */
-    private SourceDef createSourceDef(String className) {
-        SourceDef sourceDef = new SourceDef();
+    private AccessorDef createSourceDef(String className) {
+        AccessorDef accessorDef = new AccessorDef();
         Elements elementUtils = processingEnv.getElementUtils();
-        sourceDef.type = className;
+        accessorDef.type = className;
         TypeElement sourceType = elementUtils.getTypeElement(className);
         while (sourceType != null) {
             for (Element sourceSubEl : sourceType.getEnclosedElements()) {
@@ -424,9 +424,9 @@ public class ClassAnalyzer {
                     AccessorMethod method = createAccessorMethod(sourceSubEl);
                     if (method != null) {
                         if (method.isGetter) {
-                            sourceDef.getters.put(method.getAccessorName(), method);
+                            accessorDef.getters.put(method.getAccessorName(), method);
                         } else {
-                            sourceDef.setters.put(method.getAccessorName(), method);
+                            accessorDef.setters.put(method.getAccessorName(), method);
                         }
                     }
                 }
@@ -435,7 +435,7 @@ public class ClassAnalyzer {
             sourceType = getSuperElement(sourceType);
         }
 
-        return sourceDef;
+        return accessorDef;
     }
 
     /**

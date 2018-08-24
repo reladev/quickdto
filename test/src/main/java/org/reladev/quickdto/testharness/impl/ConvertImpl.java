@@ -2,11 +2,7 @@ package org.reladev.quickdto.testharness.impl;
 
 import java.util.List;
 
-import org.reladev.quickdto.shared.QuickDtoHelper;
-import org.reladev.quickdto.testharness.BasicDtoConverter;
-import org.reladev.quickdto.testharness.ConvertDtoDef;
-
-@QuickDtoHelper(copyClass = ConvertDtoDef.class, converter = BasicDtoConverter.class, strictCopy = false)
+//@QuickDtoHelper(copyClass = ConvertDtoDef.class, converter = BasicDtoConverter.class, strictCopy = false)
 public class ConvertImpl {
     private BasicImpl basic;
     private List<BasicImpl> basicList;

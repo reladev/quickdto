@@ -2,7 +2,7 @@ package org.reladev.quickdto.processor;
 
 import java.util.HashMap;
 
-public class SourceDef {
+public class AccessorDef {
     public String type;
 
     /**

@@ -6,7 +6,7 @@ import java.util.List;
 public class HelperDef extends ClassDef {
     private boolean strictCopy = true;
     private List<String> copyToClasses = new ArrayList<>();
-    private SourceDef sourceDef;
+    private AccessorDef sourceDef;
 
 
     public String getPackageString() {
@@ -33,11 +33,11 @@ public class HelperDef extends ClassDef {
         this.copyToClasses = copyToClasses;
     }
 
-    public SourceDef getSourceDef() {
+    public AccessorDef getSourceDef() {
         return sourceDef;
     }
 
-    public void setSourceDef(SourceDef sourceDef) {
+    public void setSourceDef(AccessorDef sourceDef) {
         this.sourceDef = sourceDef;
         getFields().putAll(sourceDef.getters);
         getFields().putAll(sourceDef.setters);

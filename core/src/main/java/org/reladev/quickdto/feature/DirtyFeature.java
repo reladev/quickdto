@@ -2,10 +2,10 @@ package org.reladev.quickdto.feature;
 
 import java.io.IOException;
 
+import org.reladev.quickdto.processor.CopyMap;
 import org.reladev.quickdto.processor.DtoDef;
 import org.reladev.quickdto.processor.DtoField;
 import org.reladev.quickdto.processor.IndentWriter;
-import org.reladev.quickdto.processor.SourceCopyMap;
 
 public class DirtyFeature extends QuickDtoFeature {
 
@@ -70,7 +70,7 @@ public class DirtyFeature extends QuickDtoFeature {
     }
 
     @Override
-    public void writeCopyTo(SourceCopyMap source, DtoDef dtoDef, IndentWriter bw) throws IOException {
+    public void writeCopyTo(CopyMap source, DtoDef dtoDef, IndentWriter bw) throws IOException {
         bw.line(0, "@GwtIncompatible");
         bw.line(0, "public void copyDirtyTo(").append(source.sourceDef.type).append(" dest) {");
         bw.line(1, "copyTo(dest, listDirtyFields());");
@@ -79,11 +79,11 @@ public class DirtyFeature extends QuickDtoFeature {
     }
 
     @Override
-    public void writeCopyFrom(SourceCopyMap source, DtoDef dtoDef, IndentWriter bw) throws IOException {
+    public void writeCopyFrom(CopyMap source, DtoDef dtoDef, IndentWriter bw) throws IOException {
     }
 
     @Override
-    public void writeHelperCopyTo(SourceCopyMap source, DtoDef dtoDef, IndentWriter bw) throws IOException {
+    public void writeHelperCopyTo(CopyMap source, DtoDef dtoDef, IndentWriter bw) throws IOException {
         bw.line(0, "@GwtIncompatible");
         bw.line(0, "public static void copyDirtyTo(").append(dtoDef.name).append(" dto, ");
         bw.append(source.sourceDef.type).append(" dest, ").append(dtoDef.name).append(".Fields... fields) {");
@@ -93,7 +93,7 @@ public class DirtyFeature extends QuickDtoFeature {
     }
 
     @Override
-    public void writeHelperCopyFrom(SourceCopyMap source, DtoDef dtoDef, IndentWriter bw) throws IOException {
+    public void writeHelperCopyFrom(CopyMap source, DtoDef dtoDef, IndentWriter bw) throws IOException {
     }
 
     @Override

@@ -2,10 +2,10 @@ package org.reladev.quickdto.feature;
 
 import java.io.IOException;
 
+import org.reladev.quickdto.processor.CopyMap;
 import org.reladev.quickdto.processor.DtoDef;
 import org.reladev.quickdto.processor.DtoField;
 import org.reladev.quickdto.processor.IndentWriter;
-import org.reladev.quickdto.processor.SourceCopyMap;
 
 abstract public class QuickDtoFeature {
 
@@ -21,13 +21,13 @@ abstract public class QuickDtoFeature {
 
     abstract public void postSetterLogic(DtoField field, DtoDef dtoDef, IndentWriter bw) throws IOException;
 
-    abstract public void writeCopyTo(SourceCopyMap source, DtoDef dtoDef, IndentWriter bw) throws IOException;
+    abstract public void writeCopyTo(CopyMap source, DtoDef dtoDef, IndentWriter bw) throws IOException;
 
-    abstract public void writeCopyFrom(SourceCopyMap source, DtoDef dtoDef, IndentWriter bw) throws IOException;
+    abstract public void writeCopyFrom(CopyMap source, DtoDef dtoDef, IndentWriter bw) throws IOException;
 
-    abstract public void writeHelperCopyTo(SourceCopyMap source, DtoDef dtoDef, IndentWriter bw) throws IOException;
+    abstract public void writeHelperCopyTo(CopyMap source, DtoDef dtoDef, IndentWriter bw) throws IOException;
 
-    abstract public void writeHelperCopyFrom(SourceCopyMap source, DtoDef dtoDef, IndentWriter bw) throws IOException;
+    abstract public void writeHelperCopyFrom(CopyMap source, DtoDef dtoDef, IndentWriter bw) throws IOException;
 
     abstract public void writeInnerClasses(DtoDef dtoDef, IndentWriter bw) throws IOException;
 

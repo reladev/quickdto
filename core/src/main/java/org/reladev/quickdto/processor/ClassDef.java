@@ -19,7 +19,7 @@ public class ClassDef {
     private LinkedHashMap<String, Field> fields = new LinkedHashMap<>();
     private List<TypeElement> converterElements = new LinkedList<>();
     private HashMap<String, List<ConverterMethod>> converters = new HashMap<>();
-    private LinkedList<SourceCopyMap> sourceMaps = new LinkedList<>();
+    private LinkedList<CopyMap> copyMaps = new LinkedList<>();
 
     public Field getField(String accessorName) {
         return fields.get(accessorName);
@@ -87,8 +87,8 @@ public class ClassDef {
         return converterElements;
     }
 
-    public LinkedList<SourceCopyMap> getSourceMaps() {
-        return sourceMaps;
+    public LinkedList<CopyMap> getCopyMaps() {
+        return copyMaps;
     }
 
     public boolean isStrictCopy() {

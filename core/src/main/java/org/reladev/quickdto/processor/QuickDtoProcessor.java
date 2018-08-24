@@ -363,8 +363,8 @@ public class QuickDtoProcessor extends AbstractProcessor {
     }
 
     private void writeCopyMethods(DtoDef dtoDef, IndentWriter bw) throws IOException {
-        if (!dtoDef.getSourceMaps().isEmpty()) {
-            for (SourceCopyMap source : dtoDef.getSourceMaps()) {
+        if (!dtoDef.getCopyMaps().isEmpty()) {
+            for (CopyMap source : dtoDef.getCopyMaps()) {
                 writeCopyTo(source, dtoDef, bw);
                 for (QuickDtoFeature feature : dtoDef.features) {
                     feature.writeCopyTo(source, dtoDef, bw);
@@ -381,7 +381,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
         }
     }
 
-    private void writeCopyTo(SourceCopyMap source, DtoDef dtoDef, IndentWriter bw) throws IOException {
+    private void writeCopyTo(CopyMap source, DtoDef dtoDef, IndentWriter bw) throws IOException {
         bw.line(0, "@GwtIncompatible");
         bw.line(0, "public void copyTo(").append(source.sourceDef.type).append(" dest, Fields... fields) {");
         bw.line(1, "if (fields.length > 0) {");
@@ -420,7 +420,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
         bw.newLine();
     }
 
-    private void writeCopyFrom(SourceCopyMap source, DtoDef dtoDef, IndentWriter bw) throws IOException {
+    private void writeCopyFrom(CopyMap source, DtoDef dtoDef, IndentWriter bw) throws IOException {
         bw.line(0, "@GwtIncompatible");
         bw.line(0, "public void copyFrom(").append(source.sourceDef.type).append(" source) {");
         for (MappedAccessor getter : source.mappedGetters.values()) {
@@ -464,8 +464,8 @@ public class QuickDtoProcessor extends AbstractProcessor {
     }
 
     private void writeHelperCopyMethods(HelperDef helperDef, IndentWriter bw) throws IOException {
-        if (!helperDef.getSourceMaps().isEmpty()) {
-            for (SourceCopyMap source : helperDef.getSourceMaps()) {
+        if (!helperDef.getCopyMaps().isEmpty()) {
+            for (CopyMap source : helperDef.getCopyMaps()) {
                 writeHelperCopyTo(source, helperDef, bw);
                 //for (QuickDtoFeature feature : helperDef.features) {
                 //    feature.writeHelperCopyTo(source, helperDef, bw);
@@ -482,7 +482,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
         }
     }
 
-    private void writeHelperCopyTo(SourceCopyMap source, ClassDef dtoDef, IndentWriter bw) throws IOException {
+    private void writeHelperCopyTo(CopyMap source, ClassDef dtoDef, IndentWriter bw) throws IOException {
         bw.line(0, "@GwtIncompatible");
         bw.line(0, "public static void copy(").append(dtoDef.name).append(" source, ");
         bw.append(source.sourceDef.type).append(" dest, Fields... fields) {");
@@ -519,7 +519,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
         bw.newLine();
     }
 
-    private void writeHelperCopyFrom(SourceCopyMap source, ClassDef dtoDef, IndentWriter bw) throws IOException {
+    private void writeHelperCopyFrom(CopyMap source, ClassDef dtoDef, IndentWriter bw) throws IOException {
         bw.line(0, "@GwtIncompatible");
         bw.line(0, "public static void copy(").append(source.sourceDef.type).append(" source, ");
         bw.append(dtoDef.name).append(" dest) {");
