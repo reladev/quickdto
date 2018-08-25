@@ -1,5 +1,8 @@
 package org.reladev.quickdto.processor;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.ExecutableType;
@@ -17,7 +20,8 @@ public class Field2 implements Component {
     private boolean isGettable;
     private boolean isSettable;
 
-
+    //todo populate the annotations
+    private List<String> fieldAnnotations = new LinkedList<>();
     private QuickDtoFlags flags = new QuickDtoFlags();
 
 
@@ -110,6 +114,10 @@ public class Field2 implements Component {
         return accessorName;
     }
 
+    public String getFullGetAccessorName() {
+        return type.getGetAccessorPrefix() + accessorName;
+    }
+
     public String getEnumName() {
         return enumName;
     }
@@ -132,6 +140,10 @@ public class Field2 implements Component {
         } else {
             return "get" + getAccessorName();
         }
+    }
+
+    public List<String> getFieldAnnotations() {
+        return fieldAnnotations;
     }
 
     public QuickDtoFlags getFlags() {

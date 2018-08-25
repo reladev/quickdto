@@ -1,11 +1,11 @@
-package org.reladev.quickdto.processor;
+package org.reladev.quickdto;
 
 import java.util.List;
 
 import org.reladev.quickdto.shared.QuickDto;
 
-@QuickDto(source = ClassTesterImpl.class, converter = ClassTesterImpl.class)
-public class ClassTesterDtoDef {
+@QuickDto(source = TestClassImpl.class, converter = TestClassImpl.class)
+public class TestClassDtoDef {
 
     private int primitive;
     private Integer boxed;

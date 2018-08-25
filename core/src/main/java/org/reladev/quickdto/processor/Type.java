@@ -14,7 +14,8 @@ public class Type {
     private TypeMirror typeMirror;
     private TypeKind typeKind;
 
-    private String name;
+    // todo remove 2
+    public String name;
     private String packageString;
     private String qualifiedName;
 
@@ -36,6 +37,8 @@ public class Type {
             QuickDto[] annotations = typeElement.getAnnotationsByType(QuickDto.class);
             if (annotations.length > 0) {
                 isQuickDto = true;
+                name = name.substring(0, name.length() - 3);
+                qualifiedName = qualifiedName.substring(0, qualifiedName.length() - 3);
             }
 
         } else {
@@ -81,6 +84,22 @@ public class Type {
         return primitiveBoxType;
     }
 
+    public String getDefaultPrimitiveValue() {
+        if ("boolean".equals(name)) {
+            return "false";
+        } else {
+            return "0";
+        }
+    }
+
+    public String getGetAccessorPrefix() {
+        if ("boolean".equals(name)) {
+            return "is";
+        } else {
+            return "get";
+        }
+    }
+
 
     public boolean isBoolean() {
         return "boolean".equals(name) || "Boolean".equals(name);
@@ -121,5 +140,10 @@ public class Type {
     @Override
     public int hashCode() {
         return Objects.hash(packageString, name);
+    }
+
+    @Override
+    public String toString() {
+        return qualifiedName;
     }
 }

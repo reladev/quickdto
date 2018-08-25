@@ -5,13 +5,8 @@ import java.util.Set;
 
 import org.reladev.quickdto.shared.CopyFromOnly;
 import org.reladev.quickdto.shared.EqualsHashCode;
-import org.reladev.quickdto.shared.QuickDto;
-import org.reladev.quickdto.testharness.impl.AnotherInterface;
-import org.reladev.quickdto.testharness.impl.ExClass;
-import org.reladev.quickdto.testharness.impl.ImpInterface;
-import org.reladev.quickdto.testharness.impl.TestImpl;
 
-@QuickDto(source = TestImpl.class, extend = ExClass.class, implement = {ImpInterface.class, AnotherInterface.class}, strictCopy = false)
+//@QuickDto(source = TestImpl.class, extend = ExClass.class, implement = {ImpInterface.class, AnotherInterface.class}, strictCopy = false)
 abstract public class TestDtoDef {
     @EqualsHashCode int id;
 

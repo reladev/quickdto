@@ -55,4 +55,9 @@ public class ClassDef2 {
     public ConverterMap getConverterMap() {
         return converterMap;
     }
+
+    @Override
+    public String toString() {
+        return type.toString();
+    }
 }

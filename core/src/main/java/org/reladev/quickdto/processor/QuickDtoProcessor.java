@@ -31,7 +31,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
     private static final String DefSuffix = "Def";
     private static final String HelperSuffix = "Helper";
 
-    protected static ProcessingEnvironment processingEnv;
+    public static ProcessingEnvironment processingEnv;
     private ClassAnalyzer classAnalyzer;
 
     @Override
@@ -54,8 +54,10 @@ public class QuickDtoProcessor extends AbstractProcessor {
 
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment env) {
         HashMap<String, DtoDef> defs = new HashMap<>();
+        CodeGenerator generator = new CodeGenerator();
         for (Element element : env.getElementsAnnotatedWith(QuickDto.class)) {
             ParsedDtoDef parsedDtoDef = new ParsedDtoDef((TypeElement) element);
+            generator.writeDto(parsedDtoDef);
             if (!element.getSimpleName().toString().endsWith(DefSuffix)) {
                 processingEnv.getMessager().printMessage(Kind.ERROR, element.getSimpleName() + " DtoDef must end in '" + DefSuffix + "'");
             } else {

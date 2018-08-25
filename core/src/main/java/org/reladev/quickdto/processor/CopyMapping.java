@@ -1,18 +1,22 @@
 package org.reladev.quickdto.processor;
 
+import java.util.Arrays;
+import java.util.Collection;
+
 import javax.tools.Diagnostic.Kind;
 
 import static org.reladev.quickdto.processor.QuickDtoProcessor.processingEnv;
 
 public class CopyMapping implements Component {
-    private Field2 field;
-    private Field2 accessorMethod;
+    private String name;
+    private Field2 getField;
+    private Field2 setField;
     private ConverterMethod2 converterMethod;
     private boolean isQuickDtoConvert;
     private boolean isQuickDtoListConvert;
 
     public static CopyMapping build(Field2 getField, Field2 setField, ConverterMap converterMap) {
-        if (getField == null || setField == null || !getField.isGettable() || !setField.isSettable()) {
+        if (getField == null || setField == null || (!getField.isGettable() && !setField.isSettable())) {
             return null;
         }
 
@@ -52,8 +56,38 @@ public class CopyMapping implements Component {
         }
     }
 
-    public CopyMapping(Field2 field, Field2 accessorMethod) {
-        this.field = field;
-        this.accessorMethod = accessorMethod;
+    public CopyMapping(Field2 getField, Field2 setField) {
+        this.getField = getField;
+        this.setField = setField;
+
+        name = getField.getName();
+    }
+
+    public Collection<Type> getImports() {
+        return Arrays.asList(getField.getType(), setField.getType());
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Field2 getGetField() {
+        return getField;
+    }
+
+    public Field2 getSetField() {
+        return setField;
+    }
+
+    public ConverterMethod2 getConverterMethod() {
+        return converterMethod;
+    }
+
+    public boolean isQuickDtoConvert() {
+        return isQuickDtoConvert;
+    }
+
+    public boolean isQuickDtoListConvert() {
+        return isQuickDtoListConvert;
     }
 }
