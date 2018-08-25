@@ -13,6 +13,7 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.lang.model.SourceVersion;
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic.Kind;
@@ -30,7 +31,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
     private static final String DefSuffix = "Def";
     private static final String HelperSuffix = "Helper";
 
-    private ProcessingEnvironment processingEnv;
+    protected static ProcessingEnvironment processingEnv;
     private ClassAnalyzer classAnalyzer;
 
     @Override
@@ -40,14 +41,21 @@ public class QuickDtoProcessor extends AbstractProcessor {
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
+        //noinspection AccessStaticViaInstance
         this.processingEnv = processingEnv;
         classAnalyzer = new ClassAnalyzer(processingEnv);
         super.init(processingEnv);
     }
 
+    public static boolean isQuickDtoAnntoation(AnnotationMirror an) {
+        return an.toString().startsWith("@org.reladev.quickdto");
+    }
+
+
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment env) {
         HashMap<String, DtoDef> defs = new HashMap<>();
         for (Element element : env.getElementsAnnotatedWith(QuickDto.class)) {
+            ParsedDtoDef parsedDtoDef = new ParsedDtoDef((TypeElement) element);
             if (!element.getSimpleName().toString().endsWith(DefSuffix)) {
                 processingEnv.getMessager().printMessage(Kind.ERROR, element.getSimpleName() + " DtoDef must end in '" + DefSuffix + "'");
             } else {

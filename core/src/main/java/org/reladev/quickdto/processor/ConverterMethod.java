@@ -1,6 +1,6 @@
 package org.reladev.quickdto.processor;
 
-public class ConverterMethod implements MethodType {
+public class ConverterMethod implements Component {
 	String body;
     String classTypeString;
 	boolean converter;

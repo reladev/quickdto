@@ -9,6 +9,8 @@ import org.reladev.quickdto.shared.QuickDto;
 
 public class DtoDef extends ClassDef implements FieldList {
     public boolean makeDto = true;
+
+
     public List<QuickDtoFeature> features = new ArrayList<>();
 
     public LinkedList<String> annotations = new LinkedList<>();
