@@ -16,7 +16,7 @@ public class CopyMapping implements Component {
     private boolean isQuickDtoListConvert;
 
     public static CopyMapping build(Field2 getField, Field2 setField, ConverterMap converterMap) {
-        if (getField == null || setField == null || (!getField.isGettable() && !setField.isSettable())) {
+        if (getField == null || setField == null || !getField.isGettable() || !setField.isSettable()) {
             return null;
         }
 

@@ -20,7 +20,7 @@ public class ClassDef2 {
 
         for (Element subElement : typeElement.getEnclosedElements()) {
             if (subElement.getKind() == ElementKind.FIELD) {
-                Field2 field = Field2.build((VariableElement) subElement);
+                Field2 field = Field2.build((VariableElement) subElement, type.isQuickDto());
                 nameFieldMap.put(field.getName(), field);
 
             } else if (subElement.getKind() == ElementKind.METHOD) {

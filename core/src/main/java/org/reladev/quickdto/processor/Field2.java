@@ -30,8 +30,13 @@ public class Field2 implements Component {
 
     private boolean sourceMapped;
 
-    public static Field2 build(VariableElement variableElement) {
+    public static Field2 build(VariableElement variableElement, boolean isQuickDto) {
         Field2 field = new Field2(variableElement.toString(), variableElement.asType());
+        if (isQuickDto) {
+            //todo add support to fix this
+            field.isGettable = true;
+            field.isSettable = true;
+        }
         return field;
     }
 
@@ -41,20 +46,33 @@ public class Field2 implements Component {
         ExecutableType t = (ExecutableType) element.asType();
         String accessorName = element.toString();
         if (accessorName.startsWith("get") && t.getReturnType().getKind() != TypeKind.VOID && t.getParameterTypes().size() == 0) {
-            field = new Field2(accessorName.substring(3), t.getReturnType());
+            field = new Field2(accessorName.substring(3, accessorName.indexOf('(')), t.getReturnType());
             field.isGettable = true;
 
         } else if (accessorName.startsWith("is") && t.getReturnType().getKind() != TypeKind.VOID && t.getParameterTypes().size() == 0) {
-            field = new Field2(accessorName.substring(2), t.getReturnType());
+            field = new Field2(accessorName.substring(2, accessorName.indexOf('(')), t.getReturnType());
             field.isGettable = true;
 
         } else if (accessorName.startsWith("set") && t.getReturnType().getKind() == TypeKind.VOID && t.getParameterTypes().size() == 1) {
-            field = new Field2(accessorName.substring(3), t.getParameterTypes().get(0));
+            field = new Field2(accessorName.substring(3, accessorName.indexOf('(')), t.getParameterTypes().get(0));
             field.isSettable = true;
         }
 
         return field;
     }
+
+    private String getFieldName(String name) {
+        int start = 3;
+        if (name.startsWith("is")) {
+            start = 2;
+        }
+        int end = name.indexOf('(');
+        if (end == -1) {
+            end = name.length();
+        }
+        return name.substring(start, end);
+    }
+
 
     public Field2(String name, TypeMirror typeMirror) {
         type = new Type(typeMirror);
@@ -92,7 +110,7 @@ public class Field2 implements Component {
         }
         char firstChar = fieldName.charAt(0);
         if (Character.isLowerCase(firstChar)) {
-            firstChar = Character.toLowerCase(firstChar);
+            firstChar = Character.toUpperCase(firstChar);
             fieldName = firstChar + fieldName.substring(1);
         }
         return fieldName;

@@ -100,6 +100,9 @@ public class Type {
         }
     }
 
+    public boolean isImportable() {
+        return !isPrimitive() && !"java.lang".equals(packageString);
+    }
 
     public boolean isBoolean() {
         return "boolean".equals(name) || "Boolean".equals(name);

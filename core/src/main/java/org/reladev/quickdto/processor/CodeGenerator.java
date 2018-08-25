@@ -33,7 +33,9 @@ public class CodeGenerator {
             bw.line("import org.reladev.quickdto.shared.GwtIncompatible;");
             bw.newLine();
             for (Type type : dtoDef.getImports()) {
-                bw.line("import ").append(type.getQualifiedName()).append(";");
+                if (type.isImportable()) {
+                    bw.line("import ").append(type.getQualifiedName()).append(";");
+                }
             }
             bw.newLine();
 
@@ -167,7 +169,7 @@ public class CodeGenerator {
             if (type.isPrimitive()) {
                 bw.line(0, "private ").append(type.getPrimitiveBoxType()).append(" ").append(field.getName()).append(";");
             } else {
-                bw.line(0, "private ").append(type.getQualifiedName()).append(" ").append(field.getName()).append(";");
+                bw.line(0, "private ").append(type.getName()).append(" ").append(field.getName()).append(";");
             }
         }
     }
@@ -185,7 +187,7 @@ public class CodeGenerator {
             //for (String annotation : field.getGetterAnnotations()) {
             //    bw.line("").append(annotation).append("");
             //}
-            bw.line("public ").append(type.getQualifiedName()).append(" ").append(field.getAccessorName()).append("() {");
+            bw.line("public ").append(type.getName()).append(" ").append(field.getFullGetAccessorName()).append("() {");
 
             bw.indent();
             for (QuickDtoFeature2 feature : parsedDtoDef.getFeatures()) {

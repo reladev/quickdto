@@ -11,9 +11,17 @@ import org.junit.Rule;
 import org.reladev.quickdto.processor.QuickDtoProcessor;
 
 public class QuickDtoTest {
-    @Rule
-    public final AvatarRule rule = AvatarRule.builder().withSourcesAt("src/test/java/org/reladev/quickdto/TestClassDtoDef.java", "src/test/java/org/reladev/quickdto/TestClassImpl.java").build();
 
+    public String[] testClasses = {"src/test/java/org/reladev/quickdto/test_classes/BasicTypesDtoDef.java",
+          "src/test/java/org/reladev/quickdto/test_classes/BasicTypesImpl.java",
+          "src/test/java/org/reladev/quickdto/test_classes/TestClassDtoDef.java",
+          "src/test/java/org/reladev/quickdto/test_classes/TestClassImpl.java",};
+
+    @Rule
+    public final AvatarRule rule = AvatarRule.builder().withSourcesAt(testClasses).build();
+
+    public TypeElement elementBasicTypesDtoDef;
+    public TypeElement elementBasicTypesImpl;
     public TypeElement elementTestClassDtoDef;
     public TypeElement elementTestClassImpl;
 
@@ -24,10 +32,16 @@ public class QuickDtoTest {
         Set<Element> elements = rule.getRootElements();
         for (Element element : elements) {
             switch (element.toString()) {
-                case "org.reladev.quickdto.TestClassDtoDef":
+                case "org.reladev.quickdto.test_classes.BasicTypesDtoDef":
+                    elementBasicTypesDtoDef = (TypeElement) element;
+                    break;
+                case "org.reladev.quickdto.test_classes.BasicTypesImpl":
+                    elementBasicTypesImpl = (TypeElement) element;
+                    break;
+                case "org.reladev.quickdto.test_classes.TestClassDtoDef":
                     elementTestClassDtoDef = (TypeElement) element;
                     break;
-                case "org.reladev.quickdto.TestClassImpl":
+                case "org.reladev.quickdto.test_classes.TestClassImpl":
                     elementTestClassImpl = (TypeElement) element;
                     break;
             }

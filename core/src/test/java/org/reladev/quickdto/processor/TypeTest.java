@@ -17,8 +17,8 @@ public class TypeTest extends QuickDtoTest {
 
         Type type = new Type(element.asType());
         assertEquals("TestClassDto", type.getName());
-        assertEquals("org.reladev.quickdto", type.getPackageString());
-        assertEquals("org.reladev.quickdto.TestClassDto", type.getQualifiedName());
+        assertEquals("org.reladev.quickdto.test_classes", type.getPackageString());
+        assertEquals("org.reladev.quickdto.test_classes.TestClassDto", type.getQualifiedName());
         assertTrue(type.isQuickDto());
         assertFalse(type.isPrimitive());
 
@@ -65,8 +65,8 @@ public class TypeTest extends QuickDtoTest {
 
         Type type = new Type(element.asType());
         assertEquals("TestClassImpl", type.getName());
-        assertEquals("org.reladev.quickdto", type.getPackageString());
-        assertEquals("org.reladev.quickdto.TestClassImpl", type.getQualifiedName());
+        assertEquals("org.reladev.quickdto.test_classes", type.getPackageString());
+        assertEquals("org.reladev.quickdto.test_classes.TestClassImpl", type.getQualifiedName());
         assertFalse(type.isQuickDto());
         assertFalse(type.isPrimitive());
 
