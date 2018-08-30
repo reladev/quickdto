@@ -1,6 +1,6 @@
 package org.reladev.quickdto.testharness.impl;
 
-public class BasicImpl {
+public class ConvertExistingImpl {
     private String text;
 
     public String getText() {

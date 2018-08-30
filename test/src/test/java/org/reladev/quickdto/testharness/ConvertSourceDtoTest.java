@@ -4,38 +4,38 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
-import org.reladev.quickdto.testharness.impl.BasicImpl;
+import org.reladev.quickdto.testharness.impl.ConvertChildImpl;
+import org.reladev.quickdto.testharness.impl.ConvertExistingImpl;
 import org.reladev.quickdto.testharness.impl.ConvertImpl;
-import org.reladev.quickdto.testharness.impl.ExistingParamImpl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 
-public class ConvertDtoTest {
+public class ConvertSourceDtoTest {
     @Test
     public void testCopy() {
         ConvertImpl convert = new ConvertImpl();
 
-        BasicImpl basic = new BasicImpl();
+        ConvertChildImpl basic = new ConvertChildImpl();
         basic.setText("basic");
         convert.setBasic(basic);
         convert.setBasicList(Arrays.asList(basic));
 
-        ConvertDto convertDto = new ConvertDto();
+        ConvertSourceDto convertDto = new ConvertSourceDto();
         convertDto.copyFrom(convert);
 
-        BasicDto basicDto = convertDto.getBasic();
-        assertEquals("basic", basicDto.getText());
+        ConvertChildSourceDto convertChildDto = convertDto.getChild();
+        assertEquals("basic", convertChildDto.getText());
 
-        List<BasicDto> basicList = convertDto.getBasicList();
+        List<ConvertChildSourceDto> basicList = convertDto.getChildList();
         assertEquals(1, basicList.size());
         assertEquals("basic", basicList.get(0).getText());
 
         ConvertImpl newConvert = new ConvertImpl();
         convertDto.copyTo(newConvert);
 
-        BasicImpl newBasic = newConvert.getBasic();
+        ConvertChildImpl newBasic = newConvert.getBasic();
         assertNotNull(newBasic);
         assertEquals("basic", newBasic.getText());
         assertEquals(1, newConvert.getBasicList().size());
@@ -44,22 +44,22 @@ public class ConvertDtoTest {
 
     @Test
     public void testNullCopy() {
-        BasicImpl basic = new BasicImpl();
+        ConvertChildImpl basic = new ConvertChildImpl();
         basic.setText("foo");
 
         ConvertImpl convert = new ConvertImpl();
         convert.setBasic(basic);
 
-        ConvertDto convertDto = new ConvertDto();
+        ConvertSourceDto convertDto = new ConvertSourceDto();
         convertDto.copyFrom(convert);
 
-        BasicDto basicDto = convertDto.getBasic();
-        assertEquals("foo", basicDto.getText());
+        ConvertChildSourceDto convertChildDto = convertDto.getChild();
+        assertEquals("foo", convertChildDto.getText());
 
         ConvertImpl newConvert = new ConvertImpl();
         convertDto.copyTo(newConvert);
 
-        BasicImpl newBasic = newConvert.getBasic();
+        ConvertChildImpl newBasic = newConvert.getBasic();
         assertNotNull(newBasic);
         assertEquals("foo", newBasic.getText());
     }
@@ -68,14 +68,14 @@ public class ConvertDtoTest {
     public void testExisting() {
         ConvertImpl convert = new ConvertImpl();
 
-        ExistingParamImpl existingParam = new ExistingParamImpl();
+        ConvertExistingImpl existingParam = new ConvertExistingImpl();
         existingParam.setText("existingParam");
         convert.setExisting(existingParam);
 
-        ConvertDto convertDto = new ConvertDto();
+        ConvertSourceDto convertDto = new ConvertSourceDto();
         convertDto.copyFrom(convert);
 
-        ExistingParamDto existingDto = convertDto.getExisting();
+        ConvertExistingSourceDto existingDto = convertDto.getExisting();
         assertEquals("existingParam", existingDto.getText());
 
         existingParam.setText("changed");

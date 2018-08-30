@@ -12,6 +12,46 @@ import static org.junit.Assert.*;
 @SuppressWarnings("Duplicates")
 public class TypeTest extends QuickDtoTest {
     @Test
+    public void verifyBasicConvertType() {
+        TypeElement element = elementBasicConvertDtoDef;
+
+        Type type = new Type(element.asType());
+        assertEquals("BasicConvertDto", type.getName());
+        assertEquals("org.reladev.quickdto.test_classes", type.getPackageString());
+        assertEquals("org.reladev.quickdto.test_classes.BasicConvertDto", type.getQualifiedName());
+        assertTrue(type.isQuickDto());
+        assertFalse(type.isPrimitive());
+
+        for (Element subElement: element.getEnclosedElements()) {
+            if ("basic".equals(subElement.toString())) {
+                type = new Type(subElement.asType());
+                assertEquals("BasicTypesDto", type.getName());
+                assertEquals("org.reladev.quickdto.test_classes", type.getPackageString());
+                assertEquals("org.reladev.quickdto.test_classes.BasicTypesDto", type.getQualifiedName());
+                assertTrue(type.isQuickDto());
+                assertFalse(type.isPrimitive());
+                assertFalse(type.isQuickDtoList());
+
+            } else if ("basicList".equals(subElement.toString())) {
+                type = new Type(subElement.asType());
+                assertEquals("List", type.getName());
+                assertEquals("java.util", type.getPackageString());
+                assertEquals("java.util.List", type.getQualifiedName());
+                assertFalse(type.isQuickDto());
+                assertFalse(type.isPrimitive());
+                assertTrue(type.isQuickDtoList());
+                Type listType = type.getListType();
+                assertEquals("BasicTypesDto", listType.getName());
+                assertEquals("org.reladev.quickdto.test_classes", listType.getPackageString());
+                assertEquals("org.reladev.quickdto.test_classes.BasicTypesDto", listType.getQualifiedName());
+                assertTrue(listType.isQuickDto());
+                assertFalse(listType.isPrimitive());
+                assertFalse(listType.isQuickDtoList());
+            }
+        }
+    }
+
+    @Test
     public void verifyTestClassDtoDefType() {
         TypeElement element = elementTestClassDtoDef;
 

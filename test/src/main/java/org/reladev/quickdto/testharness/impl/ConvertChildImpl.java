@@ -1,6 +1,6 @@
 package org.reladev.quickdto.testharness.impl;
 
-public class ExistingParamImpl {
+public class ConvertChildImpl {
     private String text;
 
     public String getText() {

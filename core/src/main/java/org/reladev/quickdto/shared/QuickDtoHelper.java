@@ -17,14 +17,5 @@ public @interface QuickDtoHelper {
      */
     Class[] copyClass() default {};
 
-    /**
-     * @return whether the QuickDto should enforce that all the fields in the
-     * DTO are copied to at least one source.  If not copied, then a compile error is created.  This
-     * is beneficial for ensuring that name refactoring doesn't break copy methods.
-     * <p>
-     * Defaults to true.
-     */
-    boolean strictCopy() default true;
-
     Class[] converter() default {};
 }

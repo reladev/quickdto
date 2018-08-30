@@ -1,6 +1,6 @@
 package org.reladev.quickdto.testharness.impl;
 
-public class BaseInheritanceImpl {
+public class InheritanceBaseImpl {
     private String baseText = "base";
 
     public String getBaseText() {

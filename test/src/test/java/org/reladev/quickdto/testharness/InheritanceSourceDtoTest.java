@@ -6,17 +6,17 @@ import org.reladev.quickdto.testharness.impl.InheritanceImpl;
 import static org.junit.Assert.assertEquals;
 
 
-public class InheritanceDtoTest {
+public class InheritanceSourceDtoTest {
     @Test
     public void testCopy() {
         InheritanceImpl inheritance = new InheritanceImpl();
-        InheritanceDto dto = new InheritanceDto();
+        InheritanceSourceDto dto = new InheritanceSourceDto();
         dto.copyFrom(inheritance);
 
         assertEquals(inheritance.getText(), dto.getText());
         assertEquals(inheritance.getBaseText(), dto.getBaseText());
 
-        BaseInheritanceDto baseDto = dto;
+        InheritanceBaseDto baseDto = dto;
         assertEquals(inheritance.getBaseText(), dto.getBaseText());
 
         dto.setText("bar");

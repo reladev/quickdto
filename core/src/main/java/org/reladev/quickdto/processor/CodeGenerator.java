@@ -3,6 +3,7 @@ package org.reladev.quickdto.processor;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -10,6 +11,7 @@ import javax.tools.JavaFileObject;
 
 import org.reladev.quickdto.feature.QuickDtoFeature2;
 
+import static org.reladev.quickdto.processor.QuickDtoProcessor.HelperSuffix;
 import static org.reladev.quickdto.processor.QuickDtoProcessor.processingEnv;
 import static org.reladev.quickdto.processor.Reversed.reversed;
 
@@ -90,43 +92,53 @@ public class CodeGenerator {
         }
     }
 
-    //private void writeHelper(HelperDef helperDef) {
-    //    try {
-    //        JavaFileObject jfo = processingEnv.getFiler().createSourceFile(helperDef.getPackageString() + "." + helperDef.getName() + HelperSuffix);
-    //
-    //        IndentWriter bw = new IndentWriter(new BufferedWriter(jfo.openWriter()), "\t");
-    //        bw.append("package ").append(helperDef.getPackageString()).append(";");
-    //        bw.newLine();
-    //        bw.line("import java.util.Arrays;");
-    //        bw.line("import java.util.HashSet;");
-    //        bw.line("import java.util.List;");
-    //        bw.line("import java.util.Map;");
-    //        bw.line("import java.util.Set;");
-    //        bw.line("import java.util.Objects;");
-    //        bw.line("import org.reladev.quickdto.shared.GwtIncompatible;");
-    //        bw.newLine();
-    //
-    //        bw.newLine();
-    //        bw.line("public class ").append(helperDef.name).append(HelperSuffix).append(" {");
-    //        bw.indent();
-    //        bw.newLine();
-    //
-    //        writeHelperCopyMethods(helperDef, bw);
-    //
-    //        bw.newLine();
-    //
-    //        writeFieldsEnum(helperDef, bw);
-    //
-    //        bw.unindent();
-    //        bw.line("}");
-    //
-    //        bw.flush();
-    //        bw.close();
-    //
-    //    } catch (IOException e) {
-    //        e.printStackTrace();
-    //    }
-    //}
+    public void writeHelper(ParsedHelperDef helperDef) {
+        try {
+            Type sourceType = helperDef.getSourceDef().getType();
+
+            //todo remove 2
+            JavaFileObject jfo = processingEnv.getFiler().createSourceFile(
+                  sourceType.getPackageString() + "." + sourceType.getName() + HelperSuffix + 2);
+
+            IndentWriter bw = new IndentWriter(new BufferedWriter(jfo.openWriter()), "\t");
+            bw.append("package ").append(sourceType.getPackageString()).append(";");
+            bw.newLine();
+            bw.line("import java.util.Arrays;");
+            bw.line("import java.util.HashSet;");
+            bw.line("import java.util.List;");
+            bw.line("import java.util.Map;");
+            bw.line("import java.util.Set;");
+            bw.line("import java.util.Objects;");
+            bw.line("import org.reladev.quickdto.shared.GwtIncompatible;");
+            bw.newLine();
+            for (Type type: helperDef.getImports()) {
+                if (type.isImportable()) {
+                    bw.line("import ").append(type.getQualifiedName()).append(";");
+                }
+            }
+
+            bw.newLine();
+            //todo remove 2
+            bw.line("public class ").append(sourceType.getName()).append(HelperSuffix).append("2 {");
+            bw.indent();
+            bw.newLine();
+
+            writeHelperCopyMethods(helperDef, bw);
+
+            bw.newLine();
+
+            writeFieldsEnum(helperDef.getSourceDef(), bw);
+
+            bw.unindent();
+            bw.line("}");
+
+            bw.flush();
+            bw.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     private void writeFieldsEnum(ClassDef2 classDef, IndentWriter bw) throws IOException {
         bw.line(0, "public static enum Fields {");
@@ -422,63 +434,104 @@ public class CodeGenerator {
         bw.newLine();
     }
 
-    //private void writeHelperCopyMethods(HelperDef helperDef, IndentWriter bw) throws IOException {
-    //    if (!helperDef.getCopyMaps().isEmpty()) {
-    //        for (CopyMap source : helperDef.getCopyMaps()) {
-    //            writeHelperCopyTo(source, helperDef, bw);
-    //            //for (QuickDtoFeature feature : helperDef.features) {
-    //            //    feature.writeHelperCopyTo(source, helperDef, bw);
-    //            //}
-    //
-    //            writeHelperCopyFrom(source, helperDef, bw);
-    //            //for (QuickDtoFeature feature : helperDef.features) {
-    //            //    feature.writeHelperCopyFrom(source, helperDef, bw);
-    //            //}
-    //        }
-    //        if (helperDef.isStrictCopy()) {
-    //            writeUnmapped(helperDef, bw);
-    //        }
-    //    }
-    //}
+    private void writeHelperCopyMethods(ParsedHelperDef helperDef, IndentWriter bw) throws IOException {
+        if (!helperDef.getCopyMaps().isEmpty()) {
+            for (CopyMap2 copyMap: helperDef.getCopyMaps()) {
+                writeHelperCopy(copyMap.getSourceDef(), copyMap.getTargetDef(), copyMap.getSourceToTargetMappings(), bw);
+                writeHelperCopy(copyMap.getTargetDef(), copyMap.getSourceDef(), copyMap.getTargetToSourceMappings(), bw);
 
-    //private void writeHelperCopyTo(CopyMap source, ClassDef dtoDef, IndentWriter bw) throws IOException {
-    //    bw.line(0, "@GwtIncompatible");
-    //    bw.line(0, "public static void copy(").append(dtoDef.name).append(" source, ");
-    //    bw.append(source.sourceDef.type).append(" dest, Fields... fields) {");
-    //    bw.line(1, "if (fields.length > 0) {");
-    //    bw.line(2, "copy(source, dest, Arrays.asList(fields));");
-    //    bw.line(1, "} else {");
-    //    bw.line(2, "copy(source, dest, Fields.values());");
-    //    bw.line(1, "}");
-    //    bw.line(0, "}");
-    //    bw.newLine();
-    //    bw.line(0, "@GwtIncompatible");
-    //    bw.line(0, "public static void copy(").append(dtoDef.name).append(" source, ");
-    //    bw.append(source.sourceDef.type).append(" dest, Iterable<Fields> fields) {");
-    //    bw.line(1, "for (Fields field: fields) {");
-    //    bw.line(2, "switch (field) {");
-    //    for (MappedAccessor setter : source.mappedSetters.values()) {
-    //        Field field = setter.field;
-    //        if (!field.getFlags().isCopyFrom()) {
-    //            bw.line(3, "case ").append(field.getEnumName()).append(":");
-    //            bw.line(4, "dest.set").append(field.getAccessorName()).append("(");
-    //            if (setter.converterMethod != null) {
-    //                bw.append(dtoDef.qualifiedName).append("Def.convert(source.").append(field.getGetAccessorName()).append("())");
-    //            } else {
-    //                bw.append("source.").append(field.getGetAccessorName()).append("()");
-    //            }
-    //
-    //            bw.append(");");
-    //            bw.line(4, "break;");
-    //        }
-    //    }
-    //    bw.line(2, "}");
-    //    bw.line(1, "}");
-    //    bw.line(0, "}");
-    //    bw.newLine();
-    //}
+                //todo add feature stuff
+                //for (QuickDtoFeature feature : helperDef.features) {
+                //    feature.writeHelperCopyTo(source, helperDef, bw);
+                //}
 
-    //private void writeHelperCopyFrom(CopyMap source, ClassDef dtoDef, IndentWriter bw) throws IOException {
+                //writeHelperCopyFrom(source, helperDef, bw);
+                //for (QuickDtoFeature feature : helperDef.features) {
+                //    feature.writeHelperCopyFrom(source, helperDef, bw);
+                //}
+            }
+        }
+    }
+
+    private void writeHelperCopy(ClassDef2 sourceDef, ClassDef2 targetDef, HashMap<String, CopyMapping> sourceToTargetMappings, IndentWriter bw)
+          throws IOException
+    {
+        bw.line(0, "@GwtIncompatible");
+        bw.line(0, "public static void copy(").append(sourceDef.getType().getName()).append(" source, ");
+        bw.append(targetDef.getType().getName()).append(" dest, Fields... fields) {");
+        bw.line(1, "if (fields.length > 0) {");
+        bw.line(2, "copy(source, dest, Arrays.asList(fields));");
+        bw.line(1, "} else {");
+        bw.line(2, "copy(source, dest, Fields.values());");
+        bw.line(1, "}");
+        bw.line(0, "}");
+        bw.newLine();
+        bw.line(0, "@GwtIncompatible");
+        bw.line(0, "public static void copy(").append(sourceDef.getType().getName()).append(" source, ");
+        bw.append(targetDef.getType().getName()).append(" dest, Iterable<Fields> fields) {");
+        bw.line(1, "for (Fields field: fields) {");
+        bw.line(2, "switch (field) {");
+        for (CopyMapping mapping: sourceToTargetMappings.values()) {
+            Field2 getField = mapping.getGetField();
+            Field2 setField = mapping.getSetField();
+
+            bw.line(3, "case ").append(getField.getEnumName()).append(":");
+            //if (mapping.getConverterMethod() != null) {
+            //    bw.append(dtoDef.qualifiedName).append("Def.convert(source.").append(field.getGetAccessorName()).append("())");
+            //} else {
+            //    bw.append("source.").append(field.getGetAccessorName()).append("()");
+            //}
+            ConverterMethod2 converter = mapping.getConverterMethod();
+            if (converter != null) {
+                bw.line(4, "dest.set").append(setField.getAccessorName()).append("(");
+                bw.append("source.").append(getField.getFullGetAccessorName()).append("() == null ? null : ").append(
+                      converter.getClassType().getName()).append(".convert(");
+                bw.append("source.").append(getField.getFullGetAccessorName()).append("()");
+                if (converter.isExistingParam()) {
+                    bw.append(", ").append(setField.getName());
+                }
+                bw.append(");");
+                bw.line(3, "}");
+
+            } else if (mapping.isQuickDtoConvert()) {
+                bw.append(" {");
+                bw.line(4, setField.getType().getName()).append(" _d_ = source.").append(getField.getFullGetAccessorName()).append(
+                      "() == null ? null : new ").append(setField.getType().getName()).append("();");
+                bw.line(4, "if (_d_ != null) {");
+                bw.line(5, "_d_.copyFrom(").append("source.").append(getField.getFullGetAccessorName()).append("());");
+                bw.line(4, "}");
+                bw.line(4, "break;");
+                bw.line(3, "}");
+
+            } else if (mapping.isQuickDtoListConvert()) {
+                bw.append("source.").append(getField.getFullGetAccessorName()).append("() == null ? null : new java.util.ArrayList<>());");
+                bw.line(1, "if (").append(setField.getName()).append(" != null) {");
+                bw.line(2, "for (").append(getField.getType().getListType().getName()).append(" _i_: source.").append(
+                      getField.getFullGetAccessorName()).append("()) {");
+                bw.line(3, setField.getType().getListType().getName()).append(" _d_ = _i_ == null ? null : new ").append(
+                      setField.getType().getListType().getName()).append("();");
+                bw.line(3, setField.getName()).append(".add(_d_);");
+                bw.line(3, "if (_d_ != null) {");
+                bw.line(4, "_d_.copyFrom(_i_);");
+                bw.line(3, "}");
+                bw.line(2, "}");
+                bw.line(1, "}");
+                bw.line(4, "break;");
+
+            } else {
+                bw.line(4, "dest.set").append(setField.getAccessorName()).append("(");
+                bw.append("source.").append(getField.getFullGetAccessorName()).append("());");
+                bw.line(4, "break;");
+            }
+
+        }
+        bw.line(2, "}");
+        bw.line(1, "}");
+        bw.line(0, "}");
+        bw.newLine();
+    }
+
+    //private void writeHelperCopyFrom(CopyMap2 source, ParsedHelperDef dtoDef, IndentWriter bw) throws IOException {
     //    bw.line(0, "@GwtIncompatible");
     //    bw.line(0, "public static void copy(").append(source.sourceDef.type).append(" source, ");
     //    bw.append(dtoDef.name).append(" dest) {");

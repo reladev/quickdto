@@ -4,7 +4,7 @@
 //import java.util.List;
 //
 //import org.junit.Test;
-//import org.reladev.quickdto.testharness.BasicDto;
+//import org.reladev.quickdto.testharness.ConvertChildDto;
 //import org.reladev.quickdto.testharness.ConvertDto;
 //import org.reladev.quickdto.testharness.ExistingParamDto;
 //
@@ -25,10 +25,10 @@
 //        ConvertDto convertDto = new ConvertDto();
 //        ConvertImplHelper.copy(convert, convertDto);
 //
-//        BasicDto basicDto = convertDto.getBasic();
-//        assertEquals("basic", basicDto.getText());
+//        ConvertChildDto convertChildDto = convertDto.getBasic();
+//        assertEquals("basic", convertChildDto.getText());
 //
-//        List<BasicDto> basicList = convertDto.getBasicList();
+//        List<ConvertChildDto> basicList = convertDto.getBasicList();
 //        assertEquals(1, basicList.size());
 //        assertEquals("basic", basicList.get(0).getText());
 //
@@ -53,8 +53,8 @@
 //        ConvertDto convertDto = new ConvertDto();
 //        ConvertImplHelper.copy(convert, convertDto);
 //
-//        BasicDto basicDto = convertDto.getBasic();
-//        assertEquals("foo", basicDto.getText());
+//        ConvertChildDto convertChildDto = convertDto.getBasic();
+//        assertEquals("foo", convertChildDto.getText());
 //
 //        ConvertImpl newConvert = new ConvertImpl();
 //        ConvertImplHelper.copy(convertDto, newConvert);

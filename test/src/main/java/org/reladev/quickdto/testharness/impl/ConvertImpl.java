@@ -2,33 +2,33 @@ package org.reladev.quickdto.testharness.impl;
 
 import java.util.List;
 
-//@QuickDtoHelper(copyClass = ConvertDtoDef.class, converter = BasicDtoConverter.class, strictCopy = false)
+//@QuickDtoHelper(copyClass = ConvertDtoDef.class, converter = ConvertChildDtoConverter.class)
 public class ConvertImpl {
-    private BasicImpl basic;
-    private List<BasicImpl> basicList;
-    private ExistingParamImpl existing;
+    private ConvertChildImpl basic;
+    private List<ConvertChildImpl> basicList;
+    private ConvertExistingImpl existing;
 
-    public BasicImpl getBasic() {
+    public ConvertChildImpl getBasic() {
         return basic;
     }
 
-    public void setBasic(BasicImpl basic) {
+    public void setBasic(ConvertChildImpl basic) {
         this.basic = basic;
     }
 
-    public List<BasicImpl> getBasicList() {
+    public List<ConvertChildImpl> getBasicList() {
         return basicList;
     }
 
-    public void setBasicList(List<BasicImpl> basicList) {
+    public void setBasicList(List<ConvertChildImpl> basicList) {
         this.basicList = basicList;
     }
 
-    public ExistingParamImpl getExisting() {
+    public ConvertExistingImpl getExisting() {
         return existing;
     }
 
-    public void setExisting(ExistingParamImpl existing) {
+    public void setExisting(ConvertExistingImpl existing) {
         this.existing = existing;
     }
 }

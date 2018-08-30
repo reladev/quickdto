@@ -28,8 +28,8 @@ import static org.reladev.quickdto.processor.Reversed.reversed;
 
 @SupportedAnnotationTypes({"org.reladev.quickdto.shared.QuickDto", "org.reladev.quickdto.shared.QuickDtoHelper"})
 public class QuickDtoProcessor extends AbstractProcessor {
-    private static final String DefSuffix = "Def";
-    private static final String HelperSuffix = "Helper";
+    public static final String DefSuffix = "Def";
+    public static final String HelperSuffix = "Helper";
 
     public static ProcessingEnvironment processingEnv;
     private ClassAnalyzer classAnalyzer;
@@ -68,6 +68,8 @@ public class QuickDtoProcessor extends AbstractProcessor {
         }
 
         for (Element element : env.getElementsAnnotatedWith(QuickDtoHelper.class)) {
+            ParsedHelperDef parsedHelperDef = new ParsedHelperDef((TypeElement) element);
+            generator.writeHelper(parsedHelperDef);
             HelperDef helperDef = classAnalyzer.createHelperDef(element, defs);
             writeHelper(helperDef);
         }

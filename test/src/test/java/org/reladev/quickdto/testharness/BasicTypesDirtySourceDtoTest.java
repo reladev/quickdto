@@ -1,16 +1,16 @@
 package org.reladev.quickdto.testharness;
 
 import org.junit.Test;
-import org.reladev.quickdto.testharness.BasicTypesDto.Fields;
+import org.reladev.quickdto.testharness.BasicTypesDirtySourceDto.Fields;
 
 import static org.junit.Assert.*;
 
 
-public class BasicTypesDtoTest {
+public class BasicTypesDirtySourceDtoTest {
 
     @Test
     public void testPrimitiveEmpty() {
-        BasicTypesDto dto = new BasicTypesDto();
+        BasicTypesDirtySourceDto dto = new BasicTypesDirtySourceDto();
 
         assertEquals(0, dto.getMyInt());
         assertEquals(null, dto.getObjInteger());
@@ -31,7 +31,7 @@ public class BasicTypesDtoTest {
 
     @Test
     public void testPrimitiveDirty() {
-        BasicTypesDto dto = new BasicTypesDto();
+        BasicTypesDirtySourceDto dto = new BasicTypesDirtySourceDto();
 
         assertFalse(dto.checkDirty(Fields.MY_INT));
         dto.setMyInt(0);
@@ -89,7 +89,7 @@ public class BasicTypesDtoTest {
 
     @Test
     public void testDirtyResetAssignSame() {
-        BasicTypesDto dto = new BasicTypesDto();
+        BasicTypesDirtySourceDto dto = new BasicTypesDirtySourceDto();
 
         dto.setMyInt(2);
         dto.setObjInteger(2);

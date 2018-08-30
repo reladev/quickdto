@@ -1,7 +1,7 @@
 package org.reladev.quickdto.testharness.impl;
 
-//@QuickDtoHelper(copyClass = {JarredDtoDef.class})
-public class Simple {
+//@QuickDtoHelper(copyClass = AnnotaitonDtoDef.class)
+public class AnnotationImpl {
     private int normal;
     private int readOnly;
     private int readOnlyWithSetter;

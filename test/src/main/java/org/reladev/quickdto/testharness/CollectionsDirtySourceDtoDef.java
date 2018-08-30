@@ -6,9 +6,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.reladev.quickdto.shared.QuickDto;
+import org.reladev.quickdto.testharness.impl.CollectionsImpl;
 
-@QuickDto
-public class CollectionsDtoDef {
+@QuickDto(source = CollectionsImpl.class)
+public class CollectionsDirtySourceDtoDef {
     int[] intArray;
     float[] floatArray;
     boolean[] booleanArray;

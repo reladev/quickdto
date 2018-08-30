@@ -1,8 +1,10 @@
 package org.reladev.quickdto.processor;
 
+import java.util.List;
 import java.util.Objects;
 
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
@@ -13,6 +15,7 @@ import static org.reladev.quickdto.processor.QuickDtoProcessor.processingEnv;
 public class Type {
     private TypeMirror typeMirror;
     private TypeKind typeKind;
+    private Type listType;
 
     // todo remove 2
     public String name;
@@ -20,6 +23,7 @@ public class Type {
     private String qualifiedName;
 
     private boolean isQuickDto;
+    private boolean isQuickDtoList;
 
     //transient
     private String primitiveBoxType;
@@ -41,6 +45,18 @@ public class Type {
                 qualifiedName = qualifiedName.substring(0, qualifiedName.length() - 3);
             }
 
+            if (qualifiedName.equals("java.util.List")) {
+                DeclaredType declaredType = (DeclaredType) typeMirror;
+                List<? extends TypeMirror> typeArguments = declaredType.getTypeArguments();
+                if (typeArguments.size() == 1) {
+                    listType = new Type(typeArguments.get(0));
+                    if (this.listType.isQuickDto()) {
+                        isQuickDtoList = true;
+                    }
+                }
+
+            }
+
         } else {
             name = typeMirror.toString();
             packageString = "";
@@ -53,8 +69,7 @@ public class Type {
     }
 
     public boolean isQuickDtoList() {
-        // todo implement
-        return false;
+        return isQuickDtoList;
     }
 
     public boolean isPrimitive() {
@@ -101,7 +116,7 @@ public class Type {
     }
 
     public boolean isImportable() {
-        return !isPrimitive() && !"java.lang".equals(packageString);
+        return !isPrimitive() && !"java.lang".equals(packageString) && !name.endsWith("[]");
     }
 
     public boolean isBoolean() {
@@ -113,7 +128,7 @@ public class Type {
     }
 
     public Type getListType() {
-        return null;
+        return listType;
     }
 
     public String getName() {
@@ -137,7 +152,7 @@ public class Type {
             return false;
         }
         Type type = (Type) o;
-        return Objects.equals(packageString, type.packageString) && Objects.equals(name, type.name);
+        return Objects.equals(packageString, type.packageString) && Objects.equals(name, type.name) && Objects.equals(listType, type.listType);
     }
 
     @Override

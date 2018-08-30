@@ -8,16 +8,17 @@ import java.util.Set;
 import org.reladev.quickdto.shared.QuickDto;
 import org.reladev.quickdto.testharness.impl.ConvertChildImpl;
 import org.reladev.quickdto.testharness.impl.ConvertExistingImpl;
+import org.reladev.quickdto.testharness.impl.ConvertImpl;
 
-@QuickDto
-public class ConvertDtoDef {
-    ConvertChildDtoDef child;
-    ConvertChildDtoDef[] childArray;
-    List<ConvertChildDtoDef> childList;
-    Set<ConvertChildDtoDef> childSet;
-    Map<String, ConvertChildDtoDef> childMap;
-    ConvertExistingDtoDef existing;
-    List<ConvertExistingDtoDef> existingList;
+@QuickDto(source = ConvertImpl.class, converter = ConvertDtoConverter.class)
+public class ConvertSourceDtoDef {
+    ConvertChildSourceDtoDef child;
+    ConvertChildSourceDtoDef[] childArray;
+    List<ConvertChildSourceDtoDef> childList;
+    Set<ConvertChildSourceDtoDef> childSet;
+    Map<String, ConvertChildSourceDtoDef> childMap;
+    ConvertExistingSourceDtoDef existing;
+    List<ConvertExistingSourceDtoDef> existingList;
 
     //public static BasicImpl convert(ConvertChildDto convertChildDto) {
     //    if (convertChildDto == null) {
