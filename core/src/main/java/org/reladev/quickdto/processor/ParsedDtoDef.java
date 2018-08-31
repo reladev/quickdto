@@ -11,7 +11,6 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.DeclaredType;
 import javax.tools.Diagnostic.Kind;
 
 import org.reladev.quickdto.feature.QuickDtoFeature2;
@@ -113,12 +112,8 @@ public class ParsedDtoDef {
     }
 
     private void createExtendType(TypeElement element) {
-        DeclaredType superClassType = (DeclaredType) element.getSuperclass();
-        if (superClassType != null) {
-            Type superType = new Type(superClassType);
-            if (superType.isQuickDto()) {
-                extendType = superType;
-            }
+        if (targetDef.getSuperClassDef() != null) {
+            extendType = targetDef.getSuperClassDef().getType();
 
         } else if (extendClassName != null && !extendClassName.equals(Object.class.getCanonicalName())) {
             TypeElement typeElement = processingEnv.getElementUtils().getTypeElement(extendClassName);

@@ -7,9 +7,13 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
 
 public class ClassDef2 {
     private Type type;
+    private ClassDef2 superClassDef;
 
     private LinkedHashMap<String, Field2> nameFieldMap = new LinkedHashMap<>();
     private ConverterMap converterMap = new ConverterMap();
@@ -42,10 +46,22 @@ public class ClassDef2 {
                 }
             }
         }
+
+        TypeMirror possibleSuperClass = typeElement.getSuperclass();
+        if (possibleSuperClass != null && possibleSuperClass.getKind() == TypeKind.DECLARED && !possibleSuperClass.toString().equals(
+              "java.lang.Object")) {
+            DeclaredType superClassType = (DeclaredType) possibleSuperClass;
+            superClassDef = new ClassDef2((TypeElement) superClassType.asElement());
+            nameFieldMap.putAll(superClassDef.nameFieldMap);
+        }
     }
 
     public Type getType() {
         return type;
+    }
+
+    public ClassDef2 getSuperClassDef() {
+        return superClassDef;
     }
 
     public LinkedHashMap<String, Field2> getNameFieldMap() {
