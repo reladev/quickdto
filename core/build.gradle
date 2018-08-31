@@ -18,6 +18,7 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.10'
     testCompile group: 'com.matthew-tamlin', name: 'avatar', version: '2.1.0'
     testCompile group: 'org.mockito', name: 'mockito-core', version: '2.21.0'
+    testCompile group: 'org.assertj', name: 'assertj-core', version: '3.11.0'
 }
 
 sourceCompatibility = 1.8

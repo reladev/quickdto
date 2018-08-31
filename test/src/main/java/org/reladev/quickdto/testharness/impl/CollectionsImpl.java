@@ -18,7 +18,7 @@ public class CollectionsImpl {
 
     private Set<Integer> integerSet;
     private Set<Float> floatSet;
-    private List<Boolean> booleanSet;
+    private Set<Boolean> booleanSet;
     private Set<String> stringSet;
 
     private Map<Integer, Integer> integerMap;
@@ -106,11 +106,11 @@ public class CollectionsImpl {
         this.floatSet = floatSet;
     }
 
-    public List<Boolean> getBooleanSet() {
+    public Set<Boolean> getBooleanSet() {
         return booleanSet;
     }
 
-    public void setBooleanSet(List<Boolean> booleanSet) {
+    public void setBooleanSet(Set<Boolean> booleanSet) {
         this.booleanSet = booleanSet;
     }
 

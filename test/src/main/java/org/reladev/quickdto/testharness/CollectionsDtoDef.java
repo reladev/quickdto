@@ -21,7 +21,7 @@ public class CollectionsDtoDef {
 
     Set<Integer> integerSet;
     Set<Float> floatSet;
-    List<Boolean> booleanSet;
+    Set<Boolean> booleanSet;
     Set<String> stringSet;
 
     Map<Integer, Integer> integerMap;

@@ -7,6 +7,8 @@ import java.util.List;
 public class BasicConvertImpl {
     BasicTypesImpl basic;
     List<BasicTypesImpl> basicList;
+    Integer value;
+    Integer toTargetOnly;
     Object noConvert;
     List<Object> noConvertList;
 
@@ -32,5 +34,25 @@ public class BasicConvertImpl {
 
     public void setNoConvert(Object noConvert) {
         this.noConvert = noConvert;
+    }
+
+    public Integer getValue() {
+        return value;
+    }
+
+    public void setValue(Integer value) {
+        this.value = value;
+    }
+
+    public Integer getToTargetOnly() {
+        return toTargetOnly;
+    }
+
+    public List<Object> getNoConvertList() {
+        return noConvertList;
+    }
+
+    public void setNoConvertList(List<Object> noConvertList) {
+        this.noConvertList = noConvertList;
     }
 }

@@ -1,7 +1,8 @@
 package org.reladev.quickdto.testharness.impl;
 
-public class GenericsBaseImpl<T> {
+public class GenericsBaseImpl<T, K> {
     private T id;
+    private K key;
 
     public T getId() {
         return id;
@@ -9,5 +10,13 @@ public class GenericsBaseImpl<T> {
 
     public void setId(T id) {
         this.id = id;
+    }
+
+    public K getKey() {
+        return key;
+    }
+
+    public void setKey(K key) {
+        this.key = key;
     }
 }

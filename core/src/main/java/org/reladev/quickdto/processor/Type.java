@@ -27,6 +27,30 @@ public class Type {
     //transient
     private String primitiveBoxType;
 
+    protected Type(Class type) {
+        name = type.getSimpleName();
+        packageString = type.getPackage()
+                            .getName();
+        qualifiedName = type.getCanonicalName();
+        if (name.endsWith("DtoDef")) {
+            name = name.substring(0, name.length() - 3);
+            qualifiedName = qualifiedName.substring(0, qualifiedName.length() - 3);
+        }
+    }
+
+    protected Type(Class type, Class listType) {
+        name = type.getSimpleName();
+        packageString = type.getPackage()
+                            .getName();
+        qualifiedName = type.getCanonicalName();
+        if (name.endsWith("DtoDef")) {
+            name = name.substring(0, name.length() - 3);
+            qualifiedName = qualifiedName.substring(0, qualifiedName.length() - 3);
+        }
+
+        this.listType = new Type(listType);
+    }
+
     public Type(TypeMirror typeMirror) {
         this.typeMirror = typeMirror;
         typeKind = typeMirror.getKind();
@@ -161,6 +185,9 @@ public class Type {
 
     @Override
     public String toString() {
-        return qualifiedName;
+        if (listType != null) {
+            return name + "<" + listType + ">";
+        }
+        return name;
     }
 }

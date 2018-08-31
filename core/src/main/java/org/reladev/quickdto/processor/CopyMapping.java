@@ -90,4 +90,9 @@ public class CopyMapping {
     public boolean isQuickDtoListConvert() {
         return isQuickDtoListConvert;
     }
+
+    @Override
+    public String toString() {
+        return name + "(" + getField.getType() + "->" + setField.getType() + ")";
+    }
 }

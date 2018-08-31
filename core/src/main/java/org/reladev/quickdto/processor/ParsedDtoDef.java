@@ -199,6 +199,10 @@ public class ParsedDtoDef {
         return copyMaps;
     }
 
+    public ConverterMap getConverterMap() {
+        return converterMap;
+    }
+
     public List<QuickDtoFeature2> getFeatures() {
         return features;
     }

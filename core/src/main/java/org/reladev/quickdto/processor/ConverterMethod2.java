@@ -1,6 +1,7 @@
 package org.reladev.quickdto.processor;
 
 import java.util.List;
+import java.util.Objects;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
@@ -53,6 +54,19 @@ public class ConverterMethod2 {
         return isValid ? converter : null;
     }
 
+    private ConverterMethod2() {
+    }
+
+    protected ConverterMethod2(Type fromType, Type toType) {
+        this.toType = toType;
+        this.fromType = fromType;
+    }
+
+    protected ConverterMethod2(Class fromType, Class toType) {
+        this.toType = new Type(toType);
+        this.fromType = new Type(fromType);
+    }
+
     public Type getToType() {
         return toType;
     }
@@ -67,6 +81,23 @@ public class ConverterMethod2 {
 
     public boolean isExistingParam() {
         return existingParam;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ConverterMethod2)) {
+            return false;
+        }
+        ConverterMethod2 that = (ConverterMethod2) o;
+        return Objects.equals(toType, that.toType) && Objects.equals(fromType, that.fromType);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(toType, fromType);
     }
 
     public String toString() {

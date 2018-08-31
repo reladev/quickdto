@@ -6,18 +6,20 @@ import java.util.List;
 import org.reladev.quickdto.feature.DirtyFeature;
 import org.reladev.quickdto.shared.QuickDto;
 
-@QuickDto(source = BasicTypesImpl.class, strictCopy = false, feature = DirtyFeature.class)
+@QuickDto(source = BasicConvertImpl.class, strictCopy = false, feature = DirtyFeature.class, converter = StringIntConverter.class)
 public class BasicConvertDtoDef {
     BasicTypesDtoDef basic;
     List<BasicTypesDtoDef> basicList;
+    String value;
+    String toTargetOnly;
     String noConvert;
     List<String> noConvertList;
 
-    public static BasicConvertImpl convert(BasicConvertDtoDef convertChildDto) {
+    public static BasicTypesImpl convert(BasicTypesDtoDef convertChildDto) {
         throw new IllegalStateException("Testing only");
     }
 
-    public static List<BasicConvertImpl> convert(List<BasicConvertDtoDef> convertChildDtoList, List<BasicConvertImpl> existing) {
+    public static List<BasicTypesImpl> convert(List<BasicTypesDtoDef> convertChildDtoList, List<BasicTypesImpl> existing) {
         throw new IllegalStateException("Testing only");
     }
 
