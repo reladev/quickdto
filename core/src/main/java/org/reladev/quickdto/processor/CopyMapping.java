@@ -5,7 +5,7 @@ import java.util.Collection;
 
 import javax.tools.Diagnostic.Kind;
 
-import static org.reladev.quickdto.processor.QuickDtoProcessor.processingEnv;
+import static org.reladev.quickdto.processor.QuickDtoProcessor.messager;
 
 public class CopyMapping {
     private String name;
@@ -45,7 +45,7 @@ public class CopyMapping {
 
             } else {
                 map = false;
-                processingEnv.getMessager().printMessage(Kind.WARNING, "Type Mismatch(" + setType + ":" + getType + ") for " + getField.getAccessorName());
+                messager.printMessage(Kind.WARNING, "Type Mismatch(" + setType + ":" + getType + ") for " + getField.getAccessorName());
             }
         }
 

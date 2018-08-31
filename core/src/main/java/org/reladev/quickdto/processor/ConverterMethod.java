@@ -9,6 +9,8 @@ import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic.Kind;
 
+import static org.reladev.quickdto.processor.QuickDtoProcessor.messager;
+
 public class ConverterMethod {
     private Type toType;
     private Type fromType;
@@ -30,7 +32,7 @@ public class ConverterMethod {
         List<? extends TypeMirror> parameterTypes = t.getParameterTypes();
         int numParams = parameterTypes.size();
         if (parameterTypes.isEmpty() || numParams > 2) {
-            QuickDtoProcessor.processingEnv.getMessager().printMessage(Kind.WARNING, "IGNORING (" + execElement + ") invalid parameters to be converter.");
+            messager.printMessage(Kind.WARNING, "IGNORING (" + execElement + ") invalid parameters to be converter.");
             isValid = false;
 
         } else {
@@ -40,14 +42,14 @@ public class ConverterMethod {
                     converter.existingParam = true;
 
                 } else {
-                    QuickDtoProcessor.processingEnv.getMessager().printMessage(Kind.WARNING, "IGNORING (" + execElement + ") invalid 2nd parameter to be converter.");
+                    messager.printMessage(Kind.WARNING, "IGNORING (" + execElement + ") invalid 2nd parameter to be converter.");
                     isValid = false;
                 }
             }
         }
 
         if (!execElement.getModifiers().contains(Modifier.STATIC)) {
-            QuickDtoProcessor.processingEnv.getMessager().printMessage(Kind.WARNING, "IGNORING (" + execElement + ") to be converter, must be static.");
+            messager.printMessage(Kind.WARNING, "IGNORING (" + execElement + ") to be converter, must be static.");
             isValid = false;
         }
 

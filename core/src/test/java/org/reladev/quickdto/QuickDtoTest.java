@@ -32,6 +32,7 @@ public class QuickDtoTest {
     @Before
     public void setupUtils() {
         QuickDtoProcessor.processingEnv = rule.getProcessingEnvironment();
+        QuickDtoProcessor.messager = rule.getMessager();
 
         Set<Element> elements = rule.getRootElements();
         for (Element element : elements) {

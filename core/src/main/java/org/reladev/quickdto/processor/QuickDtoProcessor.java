@@ -3,6 +3,7 @@ package org.reladev.quickdto.processor;
 import java.util.Set;
 
 import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
@@ -20,6 +21,7 @@ public class QuickDtoProcessor extends AbstractProcessor {
     public static final String HelperSuffix = "Helper";
 
     public static ProcessingEnvironment processingEnv;
+    public static Messager messager;
 
     @Override
     public SourceVersion getSupportedSourceVersion() {
@@ -27,9 +29,9 @@ public class QuickDtoProcessor extends AbstractProcessor {
     }
 
     @Override
-    public synchronized void init(ProcessingEnvironment processingEnv) {
-        //noinspection AccessStaticViaInstance
-        this.processingEnv = processingEnv;
+    public synchronized void init(ProcessingEnvironment env) {
+        processingEnv = env;
+        messager = processingEnv.getMessager();
         super.init(processingEnv);
     }
 

@@ -16,8 +16,7 @@ import javax.tools.Diagnostic.Kind;
 import org.reladev.quickdto.feature.QuickDtoFeature;
 import org.reladev.quickdto.shared.QuickDtoHelper;
 
-import static org.reladev.quickdto.processor.QuickDtoProcessor.isQuickDtoAnntoation;
-import static org.reladev.quickdto.processor.QuickDtoProcessor.processingEnv;
+import static org.reladev.quickdto.processor.QuickDtoProcessor.*;
 
 public class ParsedHelperDef {
     // QuickDto Params
@@ -133,7 +132,7 @@ public class ParsedHelperDef {
                     features.add(feature);
                 }
             } catch (Exception e) {
-                processingEnv.getMessager().printMessage(Kind.WARNING, "Can't create feature:" + className);
+                messager.printMessage(Kind.WARNING, "Can't create feature:" + className);
             }
         }
     }
