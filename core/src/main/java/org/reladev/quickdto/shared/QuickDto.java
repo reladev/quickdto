@@ -5,7 +5,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.reladev.quickdto.feature.QuickDtoFeature;
+import org.reladev.quickdto.feature.QuickDtoFeature2;
+
 
 /**
  * Main annotation needed for QuickDto and triggers the APT processing.
@@ -58,5 +59,6 @@ public @interface QuickDto {
 	boolean copyMethods() default false;
 
     Class[] converter() default {};
-    Class<? extends QuickDtoFeature>[] feature() default {};
+
+    Class<? extends QuickDtoFeature2>[] feature() default {};
 }

@@ -8,7 +8,7 @@ import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic.Kind;
 
-public class ConverterMethod2 implements Component {
+public class ConverterMethod2 {
     private Type toType;
     private Type fromType;
     private Type classType;

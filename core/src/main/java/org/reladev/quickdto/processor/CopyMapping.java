@@ -7,7 +7,7 @@ import javax.tools.Diagnostic.Kind;
 
 import static org.reladev.quickdto.processor.QuickDtoProcessor.processingEnv;
 
-public class CopyMapping implements Component {
+public class CopyMapping {
     private String name;
     private Field2 getField;
     private Field2 setField;

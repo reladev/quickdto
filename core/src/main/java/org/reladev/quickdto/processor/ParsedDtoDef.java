@@ -41,8 +41,6 @@ public class ParsedDtoDef {
 
     public ParsedDtoDef(TypeElement element) {
         targetDef = new ClassDef2(element);
-        //todo remove 2
-        targetDef.getType().name += "2";
         parseQuickDtoParams(element);
 
         addClassAnnotations(element);

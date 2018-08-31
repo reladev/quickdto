@@ -10,7 +10,7 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
 @SuppressWarnings("WeakerAccess")
-public class Field2 implements Component {
+public class Field2 {
     private Type type;
     private String name;
     private String accessorName;

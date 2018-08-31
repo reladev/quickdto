@@ -96,9 +96,7 @@ public class CodeGenerator {
         try {
             Type sourceType = helperDef.getSourceDef().getType();
 
-            //todo remove 2
-            JavaFileObject jfo = processingEnv.getFiler().createSourceFile(
-                  sourceType.getPackageString() + "." + sourceType.getName() + HelperSuffix + 2);
+            JavaFileObject jfo = processingEnv.getFiler().createSourceFile(sourceType.getPackageString() + "." + sourceType.getName() + HelperSuffix);
 
             IndentWriter bw = new IndentWriter(new BufferedWriter(jfo.openWriter()), "\t");
             bw.append("package ").append(sourceType.getPackageString()).append(";");
@@ -118,8 +116,7 @@ public class CodeGenerator {
             }
 
             bw.newLine();
-            //todo remove 2
-            bw.line("public class ").append(sourceType.getName()).append(HelperSuffix).append("2 {");
+            bw.line("public class ").append(sourceType.getName()).append(HelperSuffix).append(" {");
             bw.indent();
             bw.newLine();
 

@@ -49,13 +49,13 @@ public class QuickDtoFlags {
         this.equalsHashCode = true;
     }
 
-    public boolean isStrictCopy(ClassDef dtoDef) {
-        if (strictCopy != null) {
-            return strictCopy;
-        } else {
-            return dtoDef.strictCopy;
-        }
-    }
+    //public boolean isStrictCopy(ClassDef dtoDef) {
+    //    if (strictCopy != null) {
+    //        return strictCopy;
+    //    } else {
+    //        return dtoDef.strictCopy;
+    //    }
+    //}
 
     public void setStrictCopy(boolean strictCopy) {
         this.strictCopy = strictCopy;

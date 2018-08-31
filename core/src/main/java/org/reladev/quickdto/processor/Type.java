@@ -17,8 +17,7 @@ public class Type {
     private TypeKind typeKind;
     private Type listType;
 
-    // todo remove 2
-    public String name;
+    private String name;
     private String packageString;
     private String qualifiedName;
 
