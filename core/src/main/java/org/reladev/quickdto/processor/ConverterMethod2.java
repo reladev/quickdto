@@ -34,7 +34,7 @@ public class ConverterMethod2 {
             isValid = false;
 
         } else {
-            converter.fromType = new Type(parameterTypes.get(0));
+            converter.fromType = new Type(parameterTypes.get(0), classType.getPackageString());
             if (numParams > 1) {
                 if (converter.toType.equals(new Type(parameterTypes.get(1)))) {
                     converter.existingParam = true;

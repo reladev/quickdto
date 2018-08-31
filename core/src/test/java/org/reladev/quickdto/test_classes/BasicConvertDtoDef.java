@@ -15,11 +15,11 @@ public class BasicConvertDtoDef {
     String noConvert;
     List<String> noConvertList;
 
-    public static BasicTypesImpl convert(BasicTypesDtoDef convertChildDto) {
+    public static BasicTypesImpl convert(BasicTypesDto convertChildDto) {
         throw new IllegalStateException("Testing only");
     }
 
-    public static List<BasicTypesImpl> convert(List<BasicTypesDtoDef> convertChildDtoList, List<BasicTypesImpl> existing) {
+    public static List<BasicTypesImpl> convert(List<BasicTypesDto> convertChildDtoList, List<BasicTypesImpl> existing) {
         throw new IllegalStateException("Testing only");
     }
 

@@ -17,6 +17,7 @@ public class Type {
     private TypeKind typeKind;
     private Type listType;
 
+    private String originalName;
     private String name;
     private String packageString;
     private String qualifiedName;
@@ -28,6 +29,7 @@ public class Type {
     private String primitiveBoxType;
 
     protected Type(Class type) {
+        originalName = type.getSimpleName();
         name = type.getSimpleName();
         packageString = type.getPackage()
                             .getName();
@@ -39,6 +41,7 @@ public class Type {
     }
 
     protected Type(Class type, Class listType) {
+        originalName = type.getSimpleName();
         name = type.getSimpleName();
         packageString = type.getPackage()
                             .getName();
@@ -52,11 +55,16 @@ public class Type {
     }
 
     public Type(TypeMirror typeMirror) {
+        this(typeMirror, null);
+    }
+
+    public Type(TypeMirror typeMirror, String parentPackageString) {
         this.typeMirror = typeMirror;
         typeKind = typeMirror.getKind();
 
         if (typeKind == TypeKind.DECLARED) {
             TypeElement typeElement = (TypeElement) processingEnv.getTypeUtils().asElement(typeMirror);
+            originalName = typeElement.getSimpleName().toString();
             name = typeElement.getSimpleName().toString();
             packageString = typeElement.getEnclosingElement().toString();
             qualifiedName = typeElement.getQualifiedName().toString();
@@ -72,13 +80,18 @@ public class Type {
                 DeclaredType declaredType = (DeclaredType) typeMirror;
                 List<? extends TypeMirror> typeArguments = declaredType.getTypeArguments();
                 if (typeArguments.size() == 1) {
-                    listType = new Type(typeArguments.get(0));
+                    listType = new Type(typeArguments.get(0), parentPackageString);
                     if (this.listType.isQuickDto()) {
                         isQuickDtoList = true;
                     }
                 }
 
             }
+
+        } else if (typeKind == TypeKind.ERROR) {
+            name = typeMirror.toString();
+            packageString = parentPackageString;
+            qualifiedName = name;
 
         } else {
             name = typeMirror.toString();
@@ -152,6 +165,10 @@ public class Type {
 
     public Type getListType() {
         return listType;
+    }
+
+    public String getOriginalName() {
+        return originalName;
     }
 
     public String getName() {

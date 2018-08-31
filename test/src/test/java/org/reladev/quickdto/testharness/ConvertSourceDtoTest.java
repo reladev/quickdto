@@ -19,8 +19,8 @@ public class ConvertSourceDtoTest {
 
         ConvertChildImpl basic = new ConvertChildImpl();
         basic.setText("basic");
-        convert.setBasic(basic);
-        convert.setBasicList(Arrays.asList(basic));
+        convert.setChild(basic);
+        convert.setChildList(Arrays.asList(basic));
 
         ConvertSourceDto convertDto = new ConvertSourceDto();
         convertDto.copyFrom(convert);
@@ -35,11 +35,11 @@ public class ConvertSourceDtoTest {
         ConvertImpl newConvert = new ConvertImpl();
         convertDto.copyTo(newConvert);
 
-        ConvertChildImpl newBasic = newConvert.getBasic();
+        ConvertChildImpl newBasic = newConvert.getChild();
         assertNotNull(newBasic);
         assertEquals("basic", newBasic.getText());
-        assertEquals(1, newConvert.getBasicList().size());
-        assertEquals("basic", newConvert.getBasicList().get(0).getText());
+        assertEquals(1, newConvert.getChildList().size());
+        assertEquals("basic", newConvert.getChildList().get(0).getText());
     }
 
     @Test
@@ -48,7 +48,7 @@ public class ConvertSourceDtoTest {
         basic.setText("foo");
 
         ConvertImpl convert = new ConvertImpl();
-        convert.setBasic(basic);
+        convert.setChild(basic);
 
         ConvertSourceDto convertDto = new ConvertSourceDto();
         convertDto.copyFrom(convert);
@@ -59,7 +59,7 @@ public class ConvertSourceDtoTest {
         ConvertImpl newConvert = new ConvertImpl();
         convertDto.copyTo(newConvert);
 
-        ConvertChildImpl newBasic = newConvert.getBasic();
+        ConvertChildImpl newBasic = newConvert.getChild();
         assertNotNull(newBasic);
         assertEquals("foo", newBasic.getText());
     }
@@ -80,12 +80,12 @@ public class ConvertSourceDtoTest {
 
         existingParam.setText("changed");
         convertDto.copyFrom(convert);
-
+        existingDto = convertDto.getExisting();
         assertEquals("changed", existingDto.getText());
 
         existingDto.setText("changed2");
         convertDto.copyTo(convert);
-
+        existingDto = convertDto.getExisting();
         assertEquals("changed2", existingParam.getText());
     }
 

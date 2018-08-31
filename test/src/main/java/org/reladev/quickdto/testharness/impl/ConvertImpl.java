@@ -4,24 +4,24 @@ import java.util.List;
 
 //@QuickDtoHelper(copyClass = ConvertDtoDef.class, converter = ConvertChildDtoConverter.class)
 public class ConvertImpl {
-    private ConvertChildImpl basic;
-    private List<ConvertChildImpl> basicList;
+    private ConvertChildImpl child;
+    private List<ConvertChildImpl> childList;
     private ConvertExistingImpl existing;
 
-    public ConvertChildImpl getBasic() {
-        return basic;
+    public ConvertChildImpl getChild() {
+        return child;
     }
 
-    public void setBasic(ConvertChildImpl basic) {
-        this.basic = basic;
+    public void setChild(ConvertChildImpl child) {
+        this.child = child;
     }
 
-    public List<ConvertChildImpl> getBasicList() {
-        return basicList;
+    public List<ConvertChildImpl> getChildList() {
+        return childList;
     }
 
-    public void setBasicList(List<ConvertChildImpl> basicList) {
-        this.basicList = basicList;
+    public void setChildList(List<ConvertChildImpl> childList) {
+        this.childList = childList;
     }
 
     public ConvertExistingImpl getExisting() {

@@ -368,7 +368,7 @@ public class CodeGenerator {
                 bw.line(4, "dest.set").append(setField.getAccessorName()).append("(");
                 ConverterMethod2 converter = mapping.getConverterMethod();
                 if (converter != null) {
-                    bw.append(converter.getClassType().getName()).append(".convert(").append(getField.getName());
+                    bw.append(converter.getClassType().getOriginalName()).append(".convert(").append(getField.getName());
                     if (converter.isExistingParam()) {
                         bw.append(", dest.get").append(setField.getAccessorName()).append("()");
                     }
@@ -396,7 +396,8 @@ public class CodeGenerator {
             bw.line(1, setField.getName()).append(" = ");
             ConverterMethod2 converter = mapping.getConverterMethod();
             if (converter != null) {
-                bw.append("source.").append(getField.getFullGetAccessorName()).append("() == null ? null : ").append(converter.getClassType().getName()).append(".convert(");
+                bw.append("source.").append(getField.getFullGetAccessorName()).append("() == null ? null : ").append(
+                      converter.getClassType().getOriginalName()).append(".convert(");
                 bw.append("source.").append(getField.getFullGetAccessorName()).append("()");
                 if (converter.isExistingParam()) {
                     bw.append(", ").append(setField.getName());
@@ -482,7 +483,7 @@ public class CodeGenerator {
             if (converter != null) {
                 bw.line(4, "dest.set").append(setField.getAccessorName()).append("(");
                 bw.append("source.").append(getField.getFullGetAccessorName()).append("() == null ? null : ").append(
-                      converter.getClassType().getName()).append(".convert(");
+                      converter.getClassType().getOriginalName()).append(".convert(");
                 bw.append("source.").append(getField.getFullGetAccessorName()).append("()");
                 if (converter.isExistingParam()) {
                     bw.append(", ").append(setField.getName());
