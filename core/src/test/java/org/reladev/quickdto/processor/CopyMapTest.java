@@ -6,15 +6,15 @@ import org.reladev.quickdto.QuickDtoTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class CopyMap2Test extends QuickDtoTest {
+public class CopyMapTest extends QuickDtoTest {
 
 
     @Test
     public void verifyBasicTypes() {
-        ClassDef2 targetDef = new ClassDef2(elementBasicTypesDtoDef);
-        ClassDef2 sourceDef = new ClassDef2(elementBasicTypesImpl);
+        ClassDef targetDef = new ClassDef(elementBasicTypesDtoDef);
+        ClassDef sourceDef = new ClassDef(elementBasicTypesImpl);
 
-        CopyMap2 copyMap = new CopyMap2(sourceDef, targetDef, new ConverterMap());
+        CopyMap copyMap = new CopyMap(sourceDef, targetDef, new ConverterMap());
 
         assertThat(copyMap.getSourceToTargetMappings()).hasSize(17);
         assertThat(copyMap.getTargetToSourceMappings()).hasSize(17);
@@ -23,16 +23,16 @@ public class CopyMap2Test extends QuickDtoTest {
 
     @Test
     public void verifyBasicConvert() {
-        ClassDef2 targetDef = new ClassDef2(elementBasicConvertDtoDef);
-        ClassDef2 sourceDef = new ClassDef2(elementBasicConvertImpl);
+        ClassDef targetDef = new ClassDef(elementBasicConvertDtoDef);
+        ClassDef sourceDef = new ClassDef(elementBasicConvertImpl);
         ConverterMap converterMap = new ConverterMap();
-        converterMap.add(new ConverterMethod2(Integer.class, String.class));
-        converterMap.add(new ConverterMethod2(String.class, Integer.class));
+        converterMap.add(new ConverterMethod(Integer.class, String.class));
+        converterMap.add(new ConverterMethod(String.class, Integer.class));
         converterMap.addAll(targetDef.getConverterMap());
         converterMap.addAll(sourceDef.getConverterMap());
 
 
-        CopyMap2 copyMap = new CopyMap2(sourceDef, targetDef, converterMap);
+        CopyMap copyMap = new CopyMap(sourceDef, targetDef, converterMap);
 
         SoftAssertions.assertSoftly(soft -> soft.assertThat(copyMap.getSourceToTargetMappings())
                                                 .hasSize(4)

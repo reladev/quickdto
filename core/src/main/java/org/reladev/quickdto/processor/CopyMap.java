@@ -4,20 +4,20 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-public class CopyMap2 {
-    private ClassDef2 sourceDef;
-    private ClassDef2 targetDef;
+public class CopyMap {
+    private ClassDef sourceDef;
+    private ClassDef targetDef;
 
     private HashMap<String, CopyMapping> sourceToTargetMappings = new HashMap<>();
     private HashMap<String, CopyMapping> targetToSourceMappings = new HashMap<>();
     private Set<Type> imports = new HashSet<>();
 
-    public CopyMap2(ClassDef2 sourceDef, ClassDef2 targetDef, ConverterMap converterMap) {
+    public CopyMap(ClassDef sourceDef, ClassDef targetDef, ConverterMap converterMap) {
         this.targetDef = targetDef;
         this.sourceDef = sourceDef;
 
-        for (Field2 sourceField : sourceDef.getNameFieldMap().values()) {
-            Field2 targetField = targetDef.getNameFieldMap().get(sourceField.getName());
+        for (Field sourceField: sourceDef.getNameFieldMap().values()) {
+            Field targetField = targetDef.getNameFieldMap().get(sourceField.getName());
             CopyMapping sourceToTarget = CopyMapping.build(sourceField, targetField, converterMap);
             if (sourceToTarget != null) {
                 sourceToTargetMappings.put(sourceField.getName(), sourceToTarget);
@@ -35,11 +35,11 @@ public class CopyMap2 {
         return imports;
     }
 
-    public ClassDef2 getSourceDef() {
+    public ClassDef getSourceDef() {
         return sourceDef;
     }
 
-    public ClassDef2 getTargetDef() {
+    public ClassDef getTargetDef() {
         return targetDef;
     }
 

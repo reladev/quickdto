@@ -16,15 +16,15 @@ import org.reladev.quickdto.test_classes.BasicTypesImpl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ConverterMethod2Test extends QuickDtoTest {
+public class ConverterMethodTest extends QuickDtoTest {
 
     @Test
     public void verifyConvertMethods() {
-        List<ConverterMethod2> converters = new ArrayList<>();
+        List<ConverterMethod> converters = new ArrayList<>();
         for (Element subElement: elementBasicConvertDtoDef.getEnclosedElements()) {
             if (subElement.getKind() == ElementKind.METHOD) {
                 ExecutableElement execElement = (ExecutableElement) subElement;
-                ConverterMethod2 converter = ConverterMethod2.build(execElement, new Type(BasicConvertDtoDef.class));
+                ConverterMethod converter = ConverterMethod.build(execElement, new Type(BasicConvertDtoDef.class));
                 if (converter != null) {
                     converters.add(converter);
                 }
@@ -32,9 +32,8 @@ public class ConverterMethod2Test extends QuickDtoTest {
         }
 
 
-        assertThat(converters).hasSize(2)
-                              .contains(new ConverterMethod2(BasicTypesDtoDef.class, BasicTypesImpl.class))
+        assertThat(converters).hasSize(2).contains(new ConverterMethod(BasicTypesDtoDef.class, BasicTypesImpl.class))
                               .contains(
-                                    new ConverterMethod2(new Type(List.class, BasicTypesDtoDef.class), new Type(List.class, BasicTypesImpl.class)));
+                                    new ConverterMethod(new Type(List.class, BasicTypesDtoDef.class), new Type(List.class, BasicTypesImpl.class)));
     }
 }

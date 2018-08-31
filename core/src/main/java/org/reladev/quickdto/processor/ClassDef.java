@@ -11,27 +11,27 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
-public class ClassDef2 {
+public class ClassDef {
     private Type type;
-    private ClassDef2 superClassDef;
+    private ClassDef superClassDef;
 
-    private LinkedHashMap<String, Field2> nameFieldMap = new LinkedHashMap<>();
+    private LinkedHashMap<String, Field> nameFieldMap = new LinkedHashMap<>();
     private ConverterMap converterMap = new ConverterMap();
 
 
-    public ClassDef2(TypeElement typeElement) {
+    public ClassDef(TypeElement typeElement) {
         type = new Type(typeElement.asType());
 
         for (Element subElement : typeElement.getEnclosedElements()) {
             if (subElement.getKind() == ElementKind.FIELD) {
-                Field2 field = Field2.build((VariableElement) subElement, type.isQuickDto());
+                Field field = Field.build((VariableElement) subElement, type.isQuickDto());
                 nameFieldMap.put(field.getName(), field);
 
             } else if (subElement.getKind() == ElementKind.METHOD) {
                 ExecutableElement execElement = (ExecutableElement) subElement;
-                Field2 field = Field2.build(execElement);
+                Field field = Field.build(execElement);
                 if (field != null) {
-                    Field2 existing = nameFieldMap.get(field.getName());
+                    Field existing = nameFieldMap.get(field.getName());
                     if (existing != null) {
                         existing.merge(field);
                     } else {
@@ -39,7 +39,7 @@ public class ClassDef2 {
                     }
 
                 } else {
-                    ConverterMethod2 converter = ConverterMethod2.build(execElement, type);
+                    ConverterMethod converter = ConverterMethod.build(execElement, type);
                     if (converter != null) {
                         converterMap.add(converter);
                     }
@@ -51,7 +51,7 @@ public class ClassDef2 {
         if (possibleSuperClass != null && possibleSuperClass.getKind() == TypeKind.DECLARED && !possibleSuperClass.toString().equals(
               "java.lang.Object")) {
             DeclaredType superClassType = (DeclaredType) possibleSuperClass;
-            superClassDef = new ClassDef2((TypeElement) superClassType.asElement());
+            superClassDef = new ClassDef((TypeElement) superClassType.asElement());
             nameFieldMap.putAll(superClassDef.nameFieldMap);
         }
     }
@@ -60,11 +60,11 @@ public class ClassDef2 {
         return type;
     }
 
-    public ClassDef2 getSuperClassDef() {
+    public ClassDef getSuperClassDef() {
         return superClassDef;
     }
 
-    public LinkedHashMap<String, Field2> getNameFieldMap() {
+    public LinkedHashMap<String, Field> getNameFieldMap() {
         return nameFieldMap;
     }
 

@@ -13,7 +13,7 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic.Kind;
 
-import org.reladev.quickdto.feature.QuickDtoFeature2;
+import org.reladev.quickdto.feature.QuickDtoFeature;
 import org.reladev.quickdto.shared.QuickDtoHelper;
 
 import static org.reladev.quickdto.processor.QuickDtoProcessor.isQuickDtoAnntoation;
@@ -27,15 +27,15 @@ public class ParsedHelperDef {
     private List<String> featureClassNames = new ArrayList<>();
 
     // Definitions
-    private ClassDef2 sourceDef;
+    private ClassDef sourceDef;
     private LinkedList<String> typeAnnotationsToCopy = new LinkedList<>();
-    private List<CopyMap2> copyMaps = new ArrayList<>();
+    private List<CopyMap> copyMaps = new ArrayList<>();
     private ConverterMap converterMap = new ConverterMap();
-    private List<QuickDtoFeature2> features = new ArrayList<>();
+    private List<QuickDtoFeature> features = new ArrayList<>();
     private Set<Type> imports = new HashSet<>();
 
     public ParsedHelperDef(TypeElement element) {
-        sourceDef = new ClassDef2(element);
+        sourceDef = new ClassDef(element);
         parseQuickDtoParams(element);
 
         addClassAnnotations(element);
@@ -103,9 +103,9 @@ public class ParsedHelperDef {
         if (targetClassNames != null) {
             for (String className: targetClassNames) {
                 TypeElement typeElement = processingEnv.getElementUtils().getTypeElement(className);
-                ClassDef2 targetDef = new ClassDef2(typeElement);
+                ClassDef targetDef = new ClassDef(typeElement);
                 imports.add(targetDef.getType());
-                CopyMap2 copyMap = new CopyMap2(this.sourceDef, targetDef, converterMap);
+                CopyMap copyMap = new CopyMap(this.sourceDef, targetDef, converterMap);
                 copyMaps.add(copyMap);
                 imports.addAll(copyMap.getImports());
             }
@@ -118,7 +118,7 @@ public class ParsedHelperDef {
         if (converterClassNames != null) {
             for (String className: converterClassNames) {
                 TypeElement typeElement = processingEnv.getElementUtils().getTypeElement(className);
-                ClassDef2 classDef = new ClassDef2(typeElement);
+                ClassDef classDef = new ClassDef(typeElement);
                 converterMap.addAll(classDef.getConverterMap());
             }
         }
@@ -128,7 +128,7 @@ public class ParsedHelperDef {
         for (String className: featureClassNames) {
             try {
                 Class featureClass = Class.forName(className);
-                QuickDtoFeature2 feature = (QuickDtoFeature2) featureClass.newInstance();
+                QuickDtoFeature feature = (QuickDtoFeature) featureClass.newInstance();
                 if (!features.contains(feature)) {
                     features.add(feature);
                 }
@@ -138,7 +138,7 @@ public class ParsedHelperDef {
         }
     }
 
-    public ClassDef2 getSourceDef() {
+    public ClassDef getSourceDef() {
         return sourceDef;
     }
 
@@ -150,11 +150,11 @@ public class ParsedHelperDef {
         return typeAnnotationsToCopy;
     }
 
-    public List<CopyMap2> getCopyMaps() {
+    public List<CopyMap> getCopyMaps() {
         return copyMaps;
     }
 
-    public List<QuickDtoFeature2> getFeatures() {
+    public List<QuickDtoFeature> getFeatures() {
         return features;
     }
 

@@ -5,7 +5,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.reladev.quickdto.feature.QuickDtoFeature2;
+import org.reladev.quickdto.feature.QuickDtoFeature;
 
 
 /**
@@ -60,5 +60,5 @@ public @interface QuickDto {
 
     Class[] converter() default {};
 
-    Class<? extends QuickDtoFeature2>[] feature() default {};
+    Class<? extends QuickDtoFeature>[] feature() default {};
 }

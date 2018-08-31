@@ -9,13 +9,13 @@ import static org.reladev.quickdto.processor.QuickDtoProcessor.processingEnv;
 
 public class CopyMapping {
     private String name;
-    private Field2 getField;
-    private Field2 setField;
-    private ConverterMethod2 converterMethod;
+    private Field getField;
+    private Field setField;
+    private ConverterMethod converterMethod;
     private boolean isQuickDtoConvert;
     private boolean isQuickDtoListConvert;
 
-    public static CopyMapping build(Field2 getField, Field2 setField, ConverterMap converterMap) {
+    public static CopyMapping build(Field getField, Field setField, ConverterMap converterMap) {
         if (getField == null || setField == null || !getField.isGettable() || !setField.isSettable()) {
             return null;
         }
@@ -30,7 +30,7 @@ public class CopyMapping {
             map = true;
 
         } else { // try to find converter
-            ConverterMethod2 converter = converterMap.get(getType, setType);
+            ConverterMethod converter = converterMap.get(getType, setType);
             if (converter != null) {
                 map = true;
                 copyMapping.converterMethod = converter;
@@ -56,7 +56,7 @@ public class CopyMapping {
         }
     }
 
-    public CopyMapping(Field2 getField, Field2 setField) {
+    public CopyMapping(Field getField, Field setField) {
         this.getField = getField;
         this.setField = setField;
 
@@ -71,15 +71,15 @@ public class CopyMapping {
         return name;
     }
 
-    public Field2 getGetField() {
+    public Field getGetField() {
         return getField;
     }
 
-    public Field2 getSetField() {
+    public Field getSetField() {
         return setField;
     }
 
-    public ConverterMethod2 getConverterMethod() {
+    public ConverterMethod getConverterMethod() {
         return converterMethod;
     }
 

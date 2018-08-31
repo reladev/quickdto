@@ -9,13 +9,13 @@ import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic.Kind;
 
-public class ConverterMethod2 {
+public class ConverterMethod {
     private Type toType;
     private Type fromType;
     private Type classType;
     private boolean existingParam;
 
-    public static ConverterMethod2 build(ExecutableElement execElement, Type classType) {
+    public static ConverterMethod build(ExecutableElement execElement, Type classType) {
         if (!execElement.toString().startsWith("convert(")) {
             return null;
         }
@@ -23,7 +23,7 @@ public class ConverterMethod2 {
         ExecutableType t = (ExecutableType) execElement.asType();
         boolean isValid = true;
 
-        ConverterMethod2 converter = new ConverterMethod2();
+        ConverterMethod converter = new ConverterMethod();
         converter.classType = classType;
         converter.toType = new Type(t.getReturnType());
 
@@ -54,15 +54,15 @@ public class ConverterMethod2 {
         return isValid ? converter : null;
     }
 
-    private ConverterMethod2() {
+    private ConverterMethod() {
     }
 
-    protected ConverterMethod2(Type fromType, Type toType) {
+    protected ConverterMethod(Type fromType, Type toType) {
         this.toType = toType;
         this.fromType = fromType;
     }
 
-    protected ConverterMethod2(Class fromType, Class toType) {
+    protected ConverterMethod(Class fromType, Class toType) {
         this.toType = new Type(toType);
         this.fromType = new Type(fromType);
     }
@@ -88,10 +88,10 @@ public class ConverterMethod2 {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof ConverterMethod2)) {
+        if (!(o instanceof ConverterMethod)) {
             return false;
         }
-        ConverterMethod2 that = (ConverterMethod2) o;
+        ConverterMethod that = (ConverterMethod) o;
         return Objects.equals(toType, that.toType) && Objects.equals(fromType, that.fromType);
     }
 

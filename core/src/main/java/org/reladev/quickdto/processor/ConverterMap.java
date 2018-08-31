@@ -6,17 +6,17 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 public class ConverterMap {
-    private HashMap<Type, Set<ConverterMethod2>> toTypeConverterMap = new HashMap<>();
+    private HashMap<Type, Set<ConverterMethod>> toTypeConverterMap = new HashMap<>();
 
-    public void add(ConverterMethod2 converter) {
-        Set<ConverterMethod2> converterList = getConverterList(converter.getToType());
+    public void add(ConverterMethod converter) {
+        Set<ConverterMethod> converterList = getConverterList(converter.getToType());
         converterList.add(converter);
     }
 
-    public ConverterMethod2 get(Type from, Type to) {
-        Set<ConverterMethod2> converterList = toTypeConverterMap.get(to);
+    public ConverterMethod get(Type from, Type to) {
+        Set<ConverterMethod> converterList = toTypeConverterMap.get(to);
         if (converterList != null) {
-            for (ConverterMethod2 converter: converterList) {
+            for (ConverterMethod converter: converterList) {
                 if (converter.getFromType()
                              .equals(from)) {
                     return converter;
@@ -27,17 +27,17 @@ public class ConverterMap {
     }
 
     public void addAll(ConverterMap map) {
-        for (Entry<Type, Set<ConverterMethod2>> entry: map.toTypeConverterMap.entrySet()) {
-            Set<ConverterMethod2> converterList = getConverterList(entry.getKey());
+        for (Entry<Type, Set<ConverterMethod>> entry: map.toTypeConverterMap.entrySet()) {
+            Set<ConverterMethod> converterList = getConverterList(entry.getKey());
             converterList.addAll(entry.getValue());
         }
     }
 
-    private Set<ConverterMethod2> getConverterList(Type toType) {
+    private Set<ConverterMethod> getConverterList(Type toType) {
         return toTypeConverterMap.computeIfAbsent(toType, key -> new HashSet<>());
     }
 
-    public HashMap<Type, Set<ConverterMethod2>> getMap() {
+    public HashMap<Type, Set<ConverterMethod>> getMap() {
         return toTypeConverterMap;
     }
 

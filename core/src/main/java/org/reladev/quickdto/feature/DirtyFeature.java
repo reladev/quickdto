@@ -2,12 +2,12 @@ package org.reladev.quickdto.feature;
 
 import java.io.IOException;
 
-import org.reladev.quickdto.processor.CopyMap2;
-import org.reladev.quickdto.processor.Field2;
+import org.reladev.quickdto.processor.CopyMap;
+import org.reladev.quickdto.processor.Field;
 import org.reladev.quickdto.processor.IndentWriter;
 import org.reladev.quickdto.processor.ParsedDtoDef;
 
-public class DirtyFeature extends QuickDtoFeature2 {
+public class DirtyFeature extends QuickDtoFeature {
 
     @Override
     public void writeFields(ParsedDtoDef dtoDef, IndentWriter bw) throws IOException {
@@ -51,15 +51,15 @@ public class DirtyFeature extends QuickDtoFeature2 {
     }
 
     @Override
-    public void preGetterLogic(Field2 field, ParsedDtoDef dtoDef, IndentWriter bw) throws IOException {
+    public void preGetterLogic(Field field, ParsedDtoDef dtoDef, IndentWriter bw) {
     }
 
     @Override
-    public void postGetterLogic(Field2 field, ParsedDtoDef dtoDef, IndentWriter bw) throws IOException {
+    public void postGetterLogic(Field field, ParsedDtoDef dtoDef, IndentWriter bw) {
     }
 
     @Override
-    public void preSetterLogic(Field2 field, ParsedDtoDef dtoDef, IndentWriter bw) throws IOException {
+    public void preSetterLogic(Field field, ParsedDtoDef dtoDef, IndentWriter bw) throws IOException {
         bw.line(0, "if (this.").append(field.getName()).append(" == null || !Objects.equals(this.").append(field.getName()).append(", ").append(
               field.getName()).append(")) {");
         bw.line(1, "markDirty(true, Fields.").append(field.getEnumName()).append(");");
@@ -67,11 +67,11 @@ public class DirtyFeature extends QuickDtoFeature2 {
     }
 
     @Override
-    public void postSetterLogic(Field2 field, ParsedDtoDef dtoDef, IndentWriter bw) throws IOException {
+    public void postSetterLogic(Field field, ParsedDtoDef dtoDef, IndentWriter bw) {
     }
 
     @Override
-    public void writeCopyTo(CopyMap2 copyMap, ParsedDtoDef dtoDef, IndentWriter bw) throws IOException {
+    public void writeCopyTo(CopyMap copyMap, ParsedDtoDef dtoDef, IndentWriter bw) throws IOException {
         bw.line(0, "@GwtIncompatible");
         bw.line(0, "public void copyDirtyTo(").append(copyMap.getSourceDef().getType().getName()).append(" dest) {");
         bw.line(1, "copyTo(dest, listDirtyFields());");
@@ -80,11 +80,11 @@ public class DirtyFeature extends QuickDtoFeature2 {
     }
 
     @Override
-    public void writeCopyFrom(CopyMap2 copyMap, ParsedDtoDef dtoDef, IndentWriter bw) throws IOException {
+    public void writeCopyFrom(CopyMap copyMap, ParsedDtoDef dtoDef, IndentWriter bw) {
     }
 
     @Override
-    public void writeHelperCopyTo(CopyMap2 copyMap, ParsedDtoDef dtoDef, IndentWriter bw) throws IOException {
+    public void writeHelperCopyTo(CopyMap copyMap, ParsedDtoDef dtoDef, IndentWriter bw) {
         //bw.line(0, "@GwtIncompatible");
         //bw.line(0, "public static void copyDirtyTo(").append(dtoDef.name).append(" dto, ");
         //bw.append(source.sourceDef.type).append(" dest, ").append(dtoDef.name).append(".Fields... fields) {");
@@ -94,10 +94,10 @@ public class DirtyFeature extends QuickDtoFeature2 {
     }
 
     @Override
-    public void writeHelperCopyFrom(CopyMap2 copyMap, ParsedDtoDef dtoDef, IndentWriter bw) throws IOException {
+    public void writeHelperCopyFrom(CopyMap copyMap, ParsedDtoDef dtoDef, IndentWriter bw) {
     }
 
     @Override
-    public void writeInnerClasses(ParsedDtoDef dtoDef, IndentWriter bw) throws IOException {
+    public void writeInnerClasses(ParsedDtoDef dtoDef, IndentWriter bw) {
     }
 }

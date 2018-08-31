@@ -10,7 +10,7 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
 @SuppressWarnings("WeakerAccess")
-public class Field2 {
+public class Field {
     private Type type;
     private String name;
     private String accessorName;
@@ -30,8 +30,8 @@ public class Field2 {
 
     private boolean sourceMapped;
 
-    public static Field2 build(VariableElement variableElement, boolean isQuickDto) {
-        Field2 field = new Field2(variableElement.toString(), variableElement.asType());
+    public static Field build(VariableElement variableElement, boolean isQuickDto) {
+        Field field = new Field(variableElement.toString(), variableElement.asType());
         if (isQuickDto) {
             //todo add support to fix this
             field.isGettable = true;
@@ -40,21 +40,21 @@ public class Field2 {
         return field;
     }
 
-    public static Field2 build(ExecutableElement element) {
-        Field2 field = null;
+    public static Field build(ExecutableElement element) {
+        Field field = null;
 
         ExecutableType t = (ExecutableType) element.asType();
         String accessorName = element.toString();
         if (accessorName.startsWith("get") && t.getReturnType().getKind() != TypeKind.VOID && t.getParameterTypes().size() == 0) {
-            field = new Field2(accessorName.substring(3, accessorName.indexOf('(')), t.getReturnType());
+            field = new Field(accessorName.substring(3, accessorName.indexOf('(')), t.getReturnType());
             field.isGettable = true;
 
         } else if (accessorName.startsWith("is") && t.getReturnType().getKind() != TypeKind.VOID && t.getParameterTypes().size() == 0) {
-            field = new Field2(accessorName.substring(2, accessorName.indexOf('(')), t.getReturnType());
+            field = new Field(accessorName.substring(2, accessorName.indexOf('(')), t.getReturnType());
             field.isGettable = true;
 
         } else if (accessorName.startsWith("set") && t.getReturnType().getKind() == TypeKind.VOID && t.getParameterTypes().size() == 1) {
-            field = new Field2(accessorName.substring(3, accessorName.indexOf('(')), t.getParameterTypes().get(0));
+            field = new Field(accessorName.substring(3, accessorName.indexOf('(')), t.getParameterTypes().get(0));
             field.isSettable = true;
         }
 
@@ -74,14 +74,14 @@ public class Field2 {
     }
 
 
-    public Field2(String name, TypeMirror typeMirror) {
+    public Field(String name, TypeMirror typeMirror) {
         type = new Type(typeMirror);
         this.name = normalizeName(name);
         accessorName = normalizeAccessorName(name, type);
         enumName = normalizeEnumName(name);
     }
 
-    public void merge(Field2 field) {
+    public void merge(Field field) {
         assert name.equals(field.name);
 
         if (!type.equals(field.type)) {

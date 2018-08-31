@@ -9,7 +9,7 @@ import java.util.List;
 
 import javax.tools.JavaFileObject;
 
-import org.reladev.quickdto.feature.QuickDtoFeature2;
+import org.reladev.quickdto.feature.QuickDtoFeature;
 
 import static org.reladev.quickdto.processor.QuickDtoProcessor.HelperSuffix;
 import static org.reladev.quickdto.processor.QuickDtoProcessor.processingEnv;
@@ -66,18 +66,18 @@ public class CodeGenerator {
 
             bw.newLine();
             writeFields(dtoDef.getTargetDef(), dtoDef.isFieldAnnotationsOnGetter(), bw);
-            for (QuickDtoFeature2 feature : dtoDef.getFeatures()) {
+            for (QuickDtoFeature feature: dtoDef.getFeatures()) {
                 feature.writeFields(dtoDef, bw);
             }
             bw.newLine();
             writeGettersSetters(dtoDef, bw);
-            for (QuickDtoFeature2 feature : dtoDef.getFeatures()) {
+            for (QuickDtoFeature feature: dtoDef.getFeatures()) {
                 feature.writeMethods(dtoDef, bw);
             }
             writeEqualsHash(dtoDef.getTargetDef(), bw);
             writeCopyMethods(dtoDef, bw);
             writeFieldsEnum(dtoDef.getTargetDef(), bw);
-            for (QuickDtoFeature2 feature : dtoDef.getFeatures()) {
+            for (QuickDtoFeature feature: dtoDef.getFeatures()) {
                 feature.writeInnerClasses(dtoDef, bw);
             }
 
@@ -137,10 +137,10 @@ public class CodeGenerator {
         }
     }
 
-    private void writeFieldsEnum(ClassDef2 classDef, IndentWriter bw) throws IOException {
+    private void writeFieldsEnum(ClassDef classDef, IndentWriter bw) throws IOException {
         bw.line(0, "public static enum Fields {");
         bw.startLineList(",");
-        for (Field2 field : classDef.getNameFieldMap().values()) {
+        for (Field field: classDef.getNameFieldMap().values()) {
             bw.line(1, "").append(field.getEnumName()).append("(\"").append(field.getName()).append("\")");
         }
         bw.endLineList();
@@ -167,8 +167,8 @@ public class CodeGenerator {
         bw.line(0, "}");
     }
 
-    private void writeFields(ClassDef2 classDef, boolean fieldAnnotationsOnGetter, IndentWriter bw) throws IOException {
-        for (Field2 field : classDef.getNameFieldMap().values()) {
+    private void writeFields(ClassDef classDef, boolean fieldAnnotationsOnGetter, IndentWriter bw) throws IOException {
+        for (Field field: classDef.getNameFieldMap().values()) {
             Type type = field.getType();
             if (!fieldAnnotationsOnGetter) {
                 for (String annotation : field.getFieldAnnotations()) {
@@ -184,8 +184,8 @@ public class CodeGenerator {
     }
 
     private void writeGettersSetters(ParsedDtoDef parsedDtoDef, IndentWriter bw) throws IOException {
-        ClassDef2 classDef = parsedDtoDef.getTargetDef();
-        for (Field2 field : classDef.getNameFieldMap().values()) {
+        ClassDef classDef = parsedDtoDef.getTargetDef();
+        for (Field field: classDef.getNameFieldMap().values()) {
             Type type = field.getType();
             if (parsedDtoDef.isFieldAnnotationsOnGetter()) {
                 for (String annotation : field.getFieldAnnotations()) {
@@ -199,7 +199,7 @@ public class CodeGenerator {
             bw.line("public ").append(type.getName()).append(" ").append(field.getFullGetAccessorName()).append("() {");
 
             bw.indent();
-            for (QuickDtoFeature2 feature : parsedDtoDef.getFeatures()) {
+            for (QuickDtoFeature feature: parsedDtoDef.getFeatures()) {
                 feature.preGetterLogic(field, parsedDtoDef, bw);
             }
             if (type.isPrimitive()) {
@@ -212,7 +212,7 @@ public class CodeGenerator {
             } else {
                 bw.line(0, "return ").append(field.getName()).append(";");
             }
-            for (QuickDtoFeature2 feature : reversed(parsedDtoDef.getFeatures())) {
+            for (QuickDtoFeature feature: reversed(parsedDtoDef.getFeatures())) {
                 feature.postGetterLogic(field, parsedDtoDef, bw);
             }
             bw.unindent();
@@ -227,11 +227,11 @@ public class CodeGenerator {
                 bw.line("public void set").append(field.getAccessorName()).append("(").append(type.getName()).append(" ").append(field.getName()).append(") {");
 
                 bw.indent();
-                for (QuickDtoFeature2 feature : parsedDtoDef.getFeatures()) {
+                for (QuickDtoFeature feature: parsedDtoDef.getFeatures()) {
                     feature.preSetterLogic(field, parsedDtoDef, bw);
                 }
                 bw.line("this.").append(field.getName()).append(" = ").append(field.getName()).append(";");
-                for (QuickDtoFeature2 feature : reversed(parsedDtoDef.getFeatures())) {
+                for (QuickDtoFeature feature: reversed(parsedDtoDef.getFeatures())) {
                     feature.postSetterLogic(field, parsedDtoDef, bw);
                 }
                 bw.unindent();
@@ -242,14 +242,14 @@ public class CodeGenerator {
         }
     }
 
-    private void writeEqualsHash(ClassDef2 dtoDef, IndentWriter bw) throws IOException {
-        List<Field2> equalsFields = new LinkedList<>();
-        for (Field2 field : dtoDef.getNameFieldMap().values()) {
+    private void writeEqualsHash(ClassDef dtoDef, IndentWriter bw) throws IOException {
+        List<Field> equalsFields = new LinkedList<>();
+        for (Field field: dtoDef.getNameFieldMap().values()) {
             if (field.getFlags().isEqualsHashCode()) {
                 equalsFields.add(field);
             }
         }
-        Collection<Field2> genFields;
+        Collection<Field> genFields;
         if (equalsFields.isEmpty()) {
             genFields = dtoDef.getNameFieldMap().values();
 
@@ -269,7 +269,7 @@ public class CodeGenerator {
         bw.line(1, "").append(dtoDef.getType().getName()).append(" that = (").append(dtoDef.getType().getName()).append(") o;");
         bw.newLine();
 
-        for (Field2 field : genFields) {
+        for (Field field: genFields) {
             Type type = field.getType();
             if (type.getName().equals("float")) {
                 bw.line(1, "if (Float.compare(").append(field.getName()).append(", that.").append(field.getName()).append(") != 0) {");
@@ -296,7 +296,7 @@ public class CodeGenerator {
         bw.line(1, "long _l_;");
         bw.newLine();
         boolean first = true;
-        for (Field2 field : genFields) {
+        for (Field field: genFields) {
             Type type = field.getType();
             if (type.getName().equals("double")) {
                 bw.line(1, "_l_ = Double.doubleToLongBits(").append(field.getName()).append(");");
@@ -330,21 +330,21 @@ public class CodeGenerator {
 
     private void writeCopyMethods(ParsedDtoDef dtoDef, IndentWriter bw) throws IOException {
         if (!dtoDef.getCopyMaps().isEmpty()) {
-            for (CopyMap2 copyMap : dtoDef.getCopyMaps()) {
+            for (CopyMap copyMap: dtoDef.getCopyMaps()) {
                 writeCopyToSource(copyMap, dtoDef, bw);
-                for (QuickDtoFeature2 feature : dtoDef.getFeatures()) {
+                for (QuickDtoFeature feature: dtoDef.getFeatures()) {
                     feature.writeCopyTo(copyMap, dtoDef, bw);
                 }
 
                 writeCopyFromSource(copyMap, dtoDef, bw);
-                for (QuickDtoFeature2 feature : dtoDef.getFeatures()) {
+                for (QuickDtoFeature feature: dtoDef.getFeatures()) {
                     feature.writeCopyFrom(copyMap, dtoDef, bw);
                 }
             }
         }
     }
 
-    private void writeCopyToSource(CopyMap2 copyMap, ParsedDtoDef dtoDef, IndentWriter bw) throws IOException {
+    private void writeCopyToSource(CopyMap copyMap, ParsedDtoDef dtoDef, IndentWriter bw) throws IOException {
         Type sourceType = copyMap.getSourceDef().getType();
         bw.line(0, "@GwtIncompatible");
         bw.line(0, "public void copyTo(").append(sourceType.getName()).append(" dest, Fields... fields) {");
@@ -360,13 +360,13 @@ public class CodeGenerator {
         bw.line(1, "for (Fields field: fields) {");
         bw.line(2, "switch (field) {");
         for (CopyMapping mapping : copyMap.getTargetToSourceMappings().values()) {
-            Field2 getField = mapping.getGetField();
-            Field2 setField = mapping.getSetField();
+            Field getField = mapping.getGetField();
+            Field setField = mapping.getSetField();
             // todo look at moving this to CopyMap
             if (!getField.getFlags().isCopyFrom()) {
                 bw.line(3, "case ").append(getField.getEnumName()).append(":");
                 bw.line(4, "dest.set").append(setField.getAccessorName()).append("(");
-                ConverterMethod2 converter = mapping.getConverterMethod();
+                ConverterMethod converter = mapping.getConverterMethod();
                 if (converter != null) {
                     bw.append(converter.getClassType().getOriginalName()).append(".convert(").append(getField.getName());
                     if (converter.isExistingParam()) {
@@ -386,15 +386,15 @@ public class CodeGenerator {
         bw.newLine();
     }
 
-    private void writeCopyFromSource(CopyMap2 copyMap, ParsedDtoDef dtoDef, IndentWriter bw) throws IOException {
+    private void writeCopyFromSource(CopyMap copyMap, ParsedDtoDef dtoDef, IndentWriter bw) throws IOException {
         Type sourceType = copyMap.getSourceDef().getType();
         bw.line(0, "@GwtIncompatible");
         bw.line(0, "public void copyFrom(").append(sourceType.getName()).append(" source) {");
         for (CopyMapping mapping : copyMap.getSourceToTargetMappings().values()) {
-            Field2 getField = mapping.getGetField();
-            Field2 setField = mapping.getSetField();
+            Field getField = mapping.getGetField();
+            Field setField = mapping.getSetField();
             bw.line(1, setField.getName()).append(" = ");
-            ConverterMethod2 converter = mapping.getConverterMethod();
+            ConverterMethod converter = mapping.getConverterMethod();
             if (converter != null) {
                 bw.append("source.").append(getField.getFullGetAccessorName()).append("() == null ? null : ").append(
                       converter.getClassType().getOriginalName()).append(".convert(");
@@ -434,7 +434,7 @@ public class CodeGenerator {
 
     private void writeHelperCopyMethods(ParsedHelperDef helperDef, IndentWriter bw) throws IOException {
         if (!helperDef.getCopyMaps().isEmpty()) {
-            for (CopyMap2 copyMap: helperDef.getCopyMaps()) {
+            for (CopyMap copyMap: helperDef.getCopyMaps()) {
                 writeHelperCopy(copyMap.getSourceDef(), copyMap.getTargetDef(), copyMap.getSourceToTargetMappings(), bw);
                 writeHelperCopy(copyMap.getTargetDef(), copyMap.getSourceDef(), copyMap.getTargetToSourceMappings(), bw);
 
@@ -451,7 +451,7 @@ public class CodeGenerator {
         }
     }
 
-    private void writeHelperCopy(ClassDef2 sourceDef, ClassDef2 targetDef, HashMap<String, CopyMapping> sourceToTargetMappings, IndentWriter bw)
+    private void writeHelperCopy(ClassDef sourceDef, ClassDef targetDef, HashMap<String, CopyMapping> sourceToTargetMappings, IndentWriter bw)
           throws IOException
     {
         bw.line(0, "@GwtIncompatible");
@@ -470,8 +470,8 @@ public class CodeGenerator {
         bw.line(1, "for (Fields field: fields) {");
         bw.line(2, "switch (field) {");
         for (CopyMapping mapping: sourceToTargetMappings.values()) {
-            Field2 getField = mapping.getGetField();
-            Field2 setField = mapping.getSetField();
+            Field getField = mapping.getGetField();
+            Field setField = mapping.getSetField();
 
             bw.line(3, "case ").append(getField.getEnumName()).append(":");
             //if (mapping.getConverterMethod() != null) {
@@ -479,7 +479,7 @@ public class CodeGenerator {
             //} else {
             //    bw.append("source.").append(field.getGetAccessorName()).append("()");
             //}
-            ConverterMethod2 converter = mapping.getConverterMethod();
+            ConverterMethod converter = mapping.getConverterMethod();
             if (converter != null) {
                 bw.line(4, "dest.set").append(setField.getAccessorName()).append("(");
                 bw.append("source.").append(getField.getFullGetAccessorName()).append("() == null ? null : ").append(

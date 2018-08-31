@@ -24,11 +24,11 @@ public class ParsedDtoDefTest extends QuickDtoTest {
                                          .containsKeys(new Type(BasicTypesImpl.class))
                                          .containsKeys(new Type(List.class, BasicTypesImpl.class));
 
-        CopyMap2 copyMap2 = parsedDtoDef.getCopyMaps()
+        CopyMap copyMap = parsedDtoDef.getCopyMaps()
                                         .get(0);
-        assertEquals(4, copyMap2.getSourceToTargetMappings()
+        assertEquals(4, copyMap.getSourceToTargetMappings()
                                 .size());
-        assertEquals(3, copyMap2.getTargetToSourceMappings()
+        assertEquals(3, copyMap.getTargetToSourceMappings()
                                 .size());
 
 

@@ -8,11 +8,11 @@ import org.reladev.quickdto.test_classes.BasicTypesImpl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ClassDef2Test extends QuickDtoTest {
+public class ClassDefTest extends QuickDtoTest {
 
     @Test
     public void verifyConvertMap() {
-        ClassDef2 classDef = new ClassDef2(elementBasicConvertDtoDef);
+        ClassDef classDef = new ClassDef(elementBasicConvertDtoDef);
 
         assertThat(classDef.getConverterMap()
                            .getMap()).hasSize(2)
