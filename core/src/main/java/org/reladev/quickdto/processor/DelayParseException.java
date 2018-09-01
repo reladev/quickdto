@@ -1,3 +1,9 @@
 package org.reladev.quickdto.processor;
 
-public class DelayParseException extends RuntimeException {}
+import javax.lang.model.type.TypeMirror;
+
+public class DelayParseException extends RuntimeException {
+    public DelayParseException(TypeMirror typeMirror) {
+        super(typeMirror.toString());
+    }
+}

@@ -12,6 +12,7 @@ import org.reladev.quickdto.shared.QuickDto;
 import org.reladev.quickdto.shared.QuickDtoHelper;
 
 import static org.reladev.quickdto.processor.QuickDtoProcessor.processingEnv;
+import static org.reladev.quickdto.processor.QuickDtoProcessor.processingType;
 
 public class Type {
     private TypeMirror typeMirror;
@@ -62,10 +63,6 @@ public class Type {
     }
 
     public Type(TypeMirror typeMirror) {
-        this(typeMirror, null);
-    }
-
-    public Type(TypeMirror typeMirror, String parentPackageString) {
         this.typeMirror = typeMirror;
         typeKind = typeMirror.getKind();
 
@@ -92,18 +89,15 @@ public class Type {
                 DeclaredType declaredType = (DeclaredType) typeMirror;
                 List<? extends TypeMirror> typeArguments = declaredType.getTypeArguments();
                 if (typeArguments.size() == 1) {
-                    listType = new Type(typeArguments.get(0), parentPackageString);
+                    listType = new Type(typeArguments.get(0));
                     if (this.listType.isQuickDto()) {
                         isQuickDtoList = true;
                     }
                 }
-
             }
 
-        } else if (typeKind == TypeKind.ERROR) {
-            name = typeMirror.toString();
-            packageString = parentPackageString;
-            qualifiedName = name;
+        } else if (typeKind == TypeKind.ERROR && !processingType.name.equals(typeMirror.toString())) {
+            throw new DelayParseException(typeMirror);
 
         } else {
             name = typeMirror.toString();
@@ -197,6 +191,14 @@ public class Type {
 
     public String getQualifiedName() {
         return qualifiedName;
+    }
+
+    public TypeMirror getTypeMirror() {
+        return typeMirror;
+    }
+
+    public TypeKind getTypeKind() {
+        return typeKind;
     }
 
     @Override
