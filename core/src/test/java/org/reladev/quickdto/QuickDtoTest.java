@@ -16,6 +16,8 @@ public class QuickDtoTest {
           "src/test/java/org/reladev/quickdto/test_classes/BasicConvertImpl.java",
           "src/test/java/org/reladev/quickdto/test_classes/BasicTypesDtoDef.java",
           "src/test/java/org/reladev/quickdto/test_classes/BasicTypesImpl.java",
+          "src/test/java/org/reladev/quickdto/test_classes/GenericsBaseImpl.java",
+          "src/test/java/org/reladev/quickdto/test_classes/GenericsImpl.java",
           "src/test/java/org/reladev/quickdto/test_classes/TestClassDtoDef.java",
           "src/test/java/org/reladev/quickdto/test_classes/TestClassImpl.java",};
 
@@ -26,6 +28,8 @@ public class QuickDtoTest {
     public TypeElement elementBasicConvertImpl;
     public TypeElement elementBasicTypesDtoDef;
     public TypeElement elementBasicTypesImpl;
+    public TypeElement elementGenericsBaseImpl;
+    public TypeElement elementGenericsImpl;
     public TypeElement elementTestClassDtoDef;
     public TypeElement elementTestClassImpl;
 
@@ -48,6 +52,12 @@ public class QuickDtoTest {
                     break;
                 case "org.reladev.quickdto.test_classes.BasicTypesImpl":
                     elementBasicTypesImpl = (TypeElement) element;
+                    break;
+                case "org.reladev.quickdto.test_classes.GenericsBaseImpl":
+                    elementGenericsBaseImpl = (TypeElement) element;
+                    break;
+                case "org.reladev.quickdto.test_classes.GenericsImpl":
+                    elementGenericsImpl = (TypeElement) element;
                     break;
                 case "org.reladev.quickdto.test_classes.TestClassDtoDef":
                     elementTestClassDtoDef = (TypeElement) element;

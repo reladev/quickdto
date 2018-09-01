@@ -1,6 +1,6 @@
-package org.reladev.quickdto.testharness.impl;
+package org.reladev.quickdto.test_classes;
 
-public class GenericsImpl extends GenericsBaseImpl<String, BasicTypesImpl> {
+public class GenericsImpl extends GenericsBaseImpl<String, Integer> {
     private String text;
 
     public String getText() {

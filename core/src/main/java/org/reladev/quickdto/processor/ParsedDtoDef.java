@@ -41,6 +41,7 @@ public class ParsedDtoDef {
         messager.printMessage(Kind.NOTE, "QuickDto:" + element);
 
         targetDef = new ClassDef(element);
+        imports.addAll(targetDef.getImports());
         parseQuickDtoParams(element);
 
         addClassAnnotations(element);
@@ -127,7 +128,6 @@ public class ParsedDtoDef {
             for (String className : implementClassNames) {
                 TypeElement typeElement = processingEnv.getElementUtils().getTypeElement(className);
                 implementTypes.add(new Type(typeElement.asType()));
-
             }
         }
     }

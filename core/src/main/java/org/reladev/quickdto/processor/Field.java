@@ -2,6 +2,7 @@ package org.reladev.quickdto.processor;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.VariableElement;
@@ -170,5 +171,12 @@ public class Field {
 
     public String toString() {
         return type + " " + name;
+    }
+
+    public void fixGenericTypes(Map<Type, Type> generics) {
+        Type genericType = generics.get(this.type);
+        if (genericType != null) {
+            type = genericType;
+        }
     }
 }

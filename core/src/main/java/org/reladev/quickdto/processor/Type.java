@@ -28,6 +28,11 @@ public class Type {
     //transient
     private String primitiveBoxType;
 
+    public Type(String packageString, String name) {
+        this.name = name;
+        this.packageString = packageString;
+    }
+
     protected Type(Class type) {
         originalName = type.getSimpleName();
         name = type.getSimpleName();
