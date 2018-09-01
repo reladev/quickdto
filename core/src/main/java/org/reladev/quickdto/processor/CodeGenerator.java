@@ -486,34 +486,58 @@ public class CodeGenerator {
                       converter.getClassType().getOriginalName()).append(".convert(");
                 bw.append("source.").append(getField.getFullGetAccessorName()).append("()");
                 if (converter.isExistingParam()) {
-                    bw.append(", ").append(setField.getName());
+                    bw.append(", dest.").append(setField.getFullGetAccessorName()).append("()");
                 }
-                bw.append(");");
-                bw.line(3, "}");
+                bw.append("));");
+                bw.line(4, "break;");
 
             } else if (mapping.isQuickDtoConvert()) {
                 bw.append(" {");
                 bw.line(4, setField.getType().getName()).append(" _d_ = source.").append(getField.getFullGetAccessorName()).append(
                       "() == null ? null : new ").append(setField.getType().getName()).append("();");
+                bw.line(4, "dest.set").append(setField.getAccessorName()).append("(_d_);");
                 bw.line(4, "if (_d_ != null) {");
-                bw.line(5, "_d_.copyFrom(").append("source.").append(getField.getFullGetAccessorName()).append("());");
+
+                String helperType = "Missing";
+                if (getField.getType().isQuickHelper()) {
+                    helperType = getField.getType().getName();
+                } else if (setField.getType().isQuickHelper()) {
+                    helperType = setField.getType().getName();
+                }
+                bw.line(5, helperType)
+                      .append(HelperSuffix)
+                      .append(".copy(")
+                      .append("source.")
+                      .append(getField.getFullGetAccessorName())
+                      .append("(), _d_);");
                 bw.line(4, "}");
                 bw.line(4, "break;");
                 bw.line(3, "}");
 
             } else if (mapping.isQuickDtoListConvert()) {
-                bw.append("source.").append(getField.getFullGetAccessorName()).append("() == null ? null : new java.util.ArrayList<>());");
-                bw.line(1, "if (").append(setField.getName()).append(" != null) {");
-                bw.line(2, "for (").append(getField.getType().getListType().getName()).append(" _i_: source.").append(
+                bw.line(4, "java.util.List<")
+                      .append(setField.getType().getListType().getName())
+                      .append("> _a_ = source.")
+                      .append(getField.getFullGetAccessorName())
+                      .append("() == null ? null : new java.util.ArrayList<>();");
+                bw.line(4, "dest.set").append(setField.getAccessorName()).append("(_a_);");
+                bw.line(4, "if (_a_ != null) {");
+                bw.line(5, "for (").append(getField.getType().getListType().getName()).append(" _i_: source.").append(
                       getField.getFullGetAccessorName()).append("()) {");
-                bw.line(3, setField.getType().getListType().getName()).append(" _d_ = _i_ == null ? null : new ").append(
+                bw.line(6, setField.getType().getListType().getName()).append(" _d_ = _i_ == null ? null : new ").append(
                       setField.getType().getListType().getName()).append("();");
-                bw.line(3, setField.getName()).append(".add(_d_);");
-                bw.line(3, "if (_d_ != null) {");
-                bw.line(4, "_d_.copyFrom(_i_);");
-                bw.line(3, "}");
-                bw.line(2, "}");
-                bw.line(1, "}");
+                bw.line(6, "_a_.add(_d_);");
+                bw.line(6, "if (_d_ != null) {");
+                String helperType = "Missing";
+                if (getField.getType().getListType().isQuickHelper()) {
+                    helperType = getField.getType().getListType().getName();
+                } else if (setField.getType().getListType().isQuickHelper()) {
+                    helperType = setField.getType().getListType().getName();
+                }
+                bw.line(7, helperType).append(HelperSuffix).append(".copy(_i_, _d_);");
+                bw.line(6, "}");
+                bw.line(5, "}");
+                bw.line(4, "}");
                 bw.line(4, "break;");
 
             } else {

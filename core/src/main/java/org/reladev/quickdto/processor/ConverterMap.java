@@ -37,6 +37,16 @@ public class ConverterMap {
         return toTypeConverterMap.computeIfAbsent(toType, key -> new HashSet<>());
     }
 
+    public Set<Type> getImports() {
+        Set<Type> imports = new HashSet<>();
+        for (Set<ConverterMethod> methods: toTypeConverterMap.values()) {
+            for (ConverterMethod method: methods) {
+                imports.add(method.getClassType());
+            }
+        }
+        return imports;
+    }
+
     public HashMap<Type, Set<ConverterMethod>> getMap() {
         return toTypeConverterMap;
     }

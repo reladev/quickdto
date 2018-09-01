@@ -4,26 +4,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.reladev.quickdto.testharness.impl.ConvertChildImpl;
-import org.reladev.quickdto.testharness.impl.ConvertChildImplHelper;
 
-public class ConvertDtoConverter {
-    public static ConvertChildImpl convert(ConvertChildDto convertChildDto) {
+public class ConvertSourceDtoConverter {
+    public static ConvertChildImpl convert(ConvertChildSourceDto convertChildDto) {
         if (convertChildDto == null) {
             return null;
         }
         ConvertChildImpl basic = new ConvertChildImpl();
-        ConvertChildImplHelper.copy(convertChildDto, basic);
+        convertChildDto.copyTo(basic);
         return basic;
     }
 
-    public static List<ConvertChildImpl> convert(List<ConvertChildDto> convertChildDtoList, List<ConvertChildImpl> existing) {
+    public static List<ConvertChildImpl> convert(List<ConvertChildSourceDto> convertChildDtoList, List<ConvertChildImpl> existing) {
         if (convertChildDtoList == null) {
             return null;
         }
         List<ConvertChildImpl> basicList = new ArrayList<>();
-        for (ConvertChildDto convertChildDto: convertChildDtoList) {
+        for (ConvertChildSourceDto convertChildDto: convertChildDtoList) {
             ConvertChildImpl basic = new ConvertChildImpl();
-            ConvertChildImplHelper.copy(convertChildDto, basic);
+            convertChildDto.copyTo(basic);
             basicList.add(basic);
         }
         return basicList;

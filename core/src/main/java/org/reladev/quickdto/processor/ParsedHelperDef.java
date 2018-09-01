@@ -119,6 +119,7 @@ public class ParsedHelperDef {
                 TypeElement typeElement = processingEnv.getElementUtils().getTypeElement(className);
                 ClassDef classDef = new ClassDef(typeElement);
                 converterMap.addAll(classDef.getConverterMap());
+                imports.addAll(converterMap.getImports());
             }
         }
     }

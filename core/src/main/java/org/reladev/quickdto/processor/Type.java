@@ -9,6 +9,7 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
 import org.reladev.quickdto.shared.QuickDto;
+import org.reladev.quickdto.shared.QuickDtoHelper;
 
 import static org.reladev.quickdto.processor.QuickDtoProcessor.processingEnv;
 
@@ -24,6 +25,7 @@ public class Type {
 
     private boolean isQuickDto;
     private boolean isQuickDtoList;
+    private boolean isQuickHelper;
 
     //transient
     private String primitiveBoxType;
@@ -81,6 +83,11 @@ public class Type {
                 qualifiedName = qualifiedName.substring(0, qualifiedName.length() - 3);
             }
 
+            QuickDtoHelper[] helperAnnotations = typeElement.getAnnotationsByType(QuickDtoHelper.class);
+            if (helperAnnotations.length > 0) {
+                isQuickHelper = true;
+            }
+
             if (qualifiedName.equals("java.util.List")) {
                 DeclaredType declaredType = (DeclaredType) typeMirror;
                 List<? extends TypeMirror> typeArguments = declaredType.getTypeArguments();
@@ -111,6 +118,10 @@ public class Type {
 
     public boolean isQuickDtoList() {
         return isQuickDtoList;
+    }
+
+    public boolean isQuickHelper() {
+        return isQuickHelper;
     }
 
     public boolean isPrimitive() {
