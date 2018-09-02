@@ -16,7 +16,9 @@ public class CopyMapping {
     private boolean isQuickDtoListConvert;
 
     public static CopyMapping build(Field getField, Field setField, ConverterMap converterMap) {
-        if (getField == null || setField == null || !getField.isGettable() || !setField.isSettable()) {
+        if (getField == null || setField == null || !(getField.isGettable() || getField.isPublic()) ||
+              !(setField.isSettable() || setField.isPublic())) {
+            // No valid mapping, so return null
             return null;
         }
 

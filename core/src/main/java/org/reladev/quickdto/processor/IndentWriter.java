@@ -49,10 +49,13 @@ public class IndentWriter {
     /**
      * Creates a blank line by adding '\n'
      * @return 'this' to allow for chaining.
-     * @throws IOException If any I/O error occurs
      */
-    public IndentWriter newLine() throws IOException {
-        writer.append(lineValue);
+    public IndentWriter newLine() {
+        try {
+            writer.append(lineValue);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         return this;
     }
 
@@ -61,9 +64,8 @@ public class IndentWriter {
      *
      * @param csq The text that should be added after the indents.
      * @return 'this' to allow for chaining.
-     * @throws IOException If any I/O error occurs
      */
-    public IndentWriter line(CharSequence csq) throws IOException {
+    public IndentWriter line(CharSequence csq) {
         return line(0, csq);
     }
 
@@ -73,20 +75,23 @@ public class IndentWriter {
      * @param indent the number of indent values to prepend only for this line.
      * @param csq    The text that should be added after the indents.
      * @return 'this' to allow for chaining.
-     * @throws IOException If any I/O error occurs
      */
-    public IndentWriter line(int indent, CharSequence csq) throws IOException {
-        if (listStarted && lineSuffix != null) {
-            writer.append(lineSuffix);
-        }
-        listStarted = true;
-        writer.append(lineValue);
+    public IndentWriter line(int indent, CharSequence csq) {
+        try {
+            if (listStarted && lineSuffix != null) {
+                writer.append(lineSuffix);
+            }
+            listStarted = true;
+            writer.append(lineValue);
 
-        int totalIndent = this.indent + indent;
-        for (int i = 0; i < totalIndent; i++) {
-            writer.append(indentValue);
+            int totalIndent = this.indent + indent;
+            for (int i = 0; i < totalIndent; i++) {
+                writer.append(indentValue);
+            }
+            writer.append(csq);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-        writer.append(csq);
         return this;
     }
 
@@ -95,10 +100,13 @@ public class IndentWriter {
      *
      * @param csq Text to append
      * @return 'this' to allow for chaining.
-     * @throws IOException If any I/O error occurs
      */
-    public IndentWriter append(CharSequence csq) throws IOException {
-        writer.append(csq);
+    public IndentWriter append(CharSequence csq) {
+        try {
+            writer.append(csq);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         return this;
     }
 
@@ -124,17 +132,23 @@ public class IndentWriter {
 
     /**
      * @see Writer#close()
-     * @throws IOException If any I/O error occurs
      */
-    public void flush() throws IOException {
-        writer.flush();
+    public void flush() {
+        try {
+            writer.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
      * @see Writer#flush()
-     * @throws IOException If any I/O error occurs
      */
-    public void close() throws IOException {
-        writer.close();
+    public void close() {
+        try {
+            writer.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

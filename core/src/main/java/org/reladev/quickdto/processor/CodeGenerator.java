@@ -137,7 +137,7 @@ public class CodeGenerator {
         }
     }
 
-    private void writeFieldsEnum(ClassDef classDef, IndentWriter bw) throws IOException {
+    private void writeFieldsEnum(ClassDef classDef, IndentWriter bw) {
         bw.line(0, "public static enum Fields {");
         bw.startLineList(",");
         for (Field field: classDef.getNameFieldMap().values()) {
@@ -167,7 +167,7 @@ public class CodeGenerator {
         bw.line(0, "}");
     }
 
-    private void writeFields(ClassDef classDef, boolean fieldAnnotationsOnGetter, IndentWriter bw) throws IOException {
+    private void writeFields(ClassDef classDef, boolean fieldAnnotationsOnGetter, IndentWriter bw) {
         for (Field field: classDef.getNameFieldMap().values()) {
             Type type = field.getType();
             if (!fieldAnnotationsOnGetter) {
@@ -242,7 +242,7 @@ public class CodeGenerator {
         }
     }
 
-    private void writeEqualsHash(ClassDef dtoDef, IndentWriter bw) throws IOException {
+    private void writeEqualsHash(ClassDef dtoDef, IndentWriter bw) {
         List<Field> equalsFields = new LinkedList<>();
         for (Field field: dtoDef.getNameFieldMap().values()) {
             if (field.getFlags().isEqualsHashCode()) {
@@ -344,7 +344,7 @@ public class CodeGenerator {
         }
     }
 
-    private void writeCopyToSource(CopyMap copyMap, ParsedDtoDef dtoDef, IndentWriter bw) throws IOException {
+    private void writeCopyToSource(CopyMap copyMap, ParsedDtoDef dtoDef, IndentWriter bw) {
         Type sourceType = copyMap.getSourceDef().getType();
         bw.line(0, "@GwtIncompatible");
         bw.line(0, "public void copyTo(").append(sourceType.getName()).append(" dest, Fields... fields) {");
@@ -365,18 +365,20 @@ public class CodeGenerator {
             // todo look at moving this to CopyMap
             if (!getField.getFlags().isCopyFrom()) {
                 bw.line(3, "case ").append(getField.getEnumName()).append(":");
-                bw.line(4, "dest.set").append(setField.getAccessorName()).append("(");
-                ConverterMethod converter = mapping.getConverterMethod();
-                if (converter != null) {
-                    bw.append(converter.getClassType().getOriginalName()).append(".convert(").append(getField.getName());
-                    if (converter.isExistingParam()) {
-                        bw.append(", dest.get").append(setField.getAccessorName()).append("()");
+                bw.line(4, "dest.");
+                writeSet(setField, bw, () -> {
+                    ConverterMethod converter = mapping.getConverterMethod();
+                    if (converter != null) {
+                        bw.append(converter.getClassType().getOriginalName()).append(".convert(").append(getField.getName());
+                        if (converter.isExistingParam()) {
+                            bw.append(", dest.").append(generateGet(setField));
+                        }
+                        bw.append(")");
+                    } else {
+                        bw.append(getField.getName());
                     }
-                    bw.append(")");
-                } else {
-                    bw.append(getField.getName());
-                }
-                bw.append(");");
+                });
+                bw.append(";");
                 bw.line(4, "break;");
             }
         }
@@ -386,7 +388,7 @@ public class CodeGenerator {
         bw.newLine();
     }
 
-    private void writeCopyFromSource(CopyMap copyMap, ParsedDtoDef dtoDef, IndentWriter bw) throws IOException {
+    private void writeCopyFromSource(CopyMap copyMap, ParsedDtoDef dtoDef, IndentWriter bw) {
         Type sourceType = copyMap.getSourceDef().getType();
         bw.line(0, "@GwtIncompatible");
         bw.line(0, "public void copyFrom(").append(sourceType.getName()).append(" source) {");
@@ -396,25 +398,33 @@ public class CodeGenerator {
             bw.line(1, setField.getName()).append(" = ");
             ConverterMethod converter = mapping.getConverterMethod();
             if (converter != null) {
-                bw.append("source.").append(getField.getFullGetAccessorName()).append("() == null ? null : ").append(
+                bw.append("source.").append(generateGet(getField)).append(" == null ? null : ").append(
                       converter.getClassType().getOriginalName()).append(".convert(");
-                bw.append("source.").append(getField.getFullGetAccessorName()).append("()");
+                bw.append("source.").append(generateGet(getField));
                 if (converter.isExistingParam()) {
                     bw.append(", ").append(setField.getName());
                 }
                 bw.append(");");
 
             } else if (mapping.isQuickDtoConvert()) {
-                bw.append("source.").append(getField.getFullGetAccessorName()).append("() == null ? null : new ").append(setField.getType().getName()).append("();");
+                bw.append("source.")
+                      .append(generateGet(getField))
+                      .append(" == null ? null : new ")
+                      .append(setField.getType().getName())
+                      .append("();");
                 bw.line(1, "if (").append(setField.getName()).append(" != null) {");
                 bw.line(2, setField.getName()).append(".copyFrom(");
-                bw.append("source.").append(getField.getFullGetAccessorName()).append("());");
+                bw.append("source.").append(generateGet(getField)).append(");");
                 bw.line(1, "}");
 
             } else if (mapping.isQuickDtoListConvert()) {
-                bw.append("source.").append(getField.getFullGetAccessorName()).append("() == null ? null : new java.util.ArrayList<>();");
+                bw.append("source.").append(generateGet(getField)).append(" == null ? null : new java.util.ArrayList<>();");
                 bw.line(1, "if (").append(setField.getName()).append(" != null) {");
-                bw.line(2, "for (").append(getField.getType().getListType().getName()).append(" _i_: source.").append(getField.getFullGetAccessorName()).append("()) {");
+                bw.line(2, "for (")
+                      .append(getField.getType().getListType().getName())
+                      .append(" _i_: source.")
+                      .append(generateGet(getField))
+                      .append(") {");
                 bw.line(3, setField.getType().getListType().getName()).append(" _d_ = _i_ == null ? null : new ").append(setField.getType().getListType().getName()).append("();");
                 bw.line(3, setField.getName()).append(".add(_d_);");
                 bw.line(3, "if (_d_ != null) {");
@@ -424,7 +434,7 @@ public class CodeGenerator {
                 bw.line(1, "}");
 
             } else {
-                bw.append("source.").append(getField.getFullGetAccessorName()).append("();");
+                bw.append("source.").append(generateGet(getField)).append(";");
             }
         }
 
@@ -432,7 +442,7 @@ public class CodeGenerator {
         bw.newLine();
     }
 
-    private void writeHelperCopyMethods(ParsedHelperDef helperDef, IndentWriter bw) throws IOException {
+    private void writeHelperCopyMethods(ParsedHelperDef helperDef, IndentWriter bw) {
         if (!helperDef.getCopyMaps().isEmpty()) {
             for (CopyMap copyMap: helperDef.getCopyMaps()) {
                 writeHelperCopy(copyMap.getSourceDef(), copyMap.getTargetDef(), copyMap.getSourceToTargetMappings(), bw);
@@ -452,7 +462,6 @@ public class CodeGenerator {
     }
 
     private void writeHelperCopy(ClassDef sourceDef, ClassDef targetDef, HashMap<String, CopyMapping> sourceToTargetMappings, IndentWriter bw)
-          throws IOException
     {
         bw.line(0, "@GwtIncompatible");
         bw.line(0, "public static void copy(").append(sourceDef.getType().getName()).append(" source, ");
@@ -474,28 +483,28 @@ public class CodeGenerator {
             Field setField = mapping.getSetField();
 
             bw.line(3, "case ").append(getField.getEnumName()).append(":");
-            //if (mapping.getConverterMethod() != null) {
-            //    bw.append(dtoDef.qualifiedName).append("Def.convert(source.").append(field.getGetAccessorName()).append("())");
-            //} else {
-            //    bw.append("source.").append(field.getGetAccessorName()).append("()");
-            //}
             ConverterMethod converter = mapping.getConverterMethod();
             if (converter != null) {
-                bw.line(4, "dest.set").append(setField.getAccessorName()).append("(");
-                bw.append("source.").append(getField.getFullGetAccessorName()).append("() == null ? null : ").append(
-                      converter.getClassType().getOriginalName()).append(".convert(");
-                bw.append("source.").append(getField.getFullGetAccessorName()).append("()");
-                if (converter.isExistingParam()) {
-                    bw.append(", dest.").append(setField.getFullGetAccessorName()).append("()");
-                }
-                bw.append("));");
+                bw.line(4, "dest.");
+                writeSet(setField, bw, () -> {
+                    bw.append("source.").append(generateGet(getField)).append(" == null ? null : ");
+                    bw.append(converter.getClassType().getOriginalName()).append(".convert(");
+                    bw.append("source.").append(generateGet(getField));
+                    if (converter.isExistingParam()) {
+                        bw.append(", dest.").append(generateGet(setField));
+                    }
+                    bw.append(")");
+                });
+                bw.append(";");
                 bw.line(4, "break;");
 
             } else if (mapping.isQuickDtoConvert()) {
                 bw.append(" {");
-                bw.line(4, setField.getType().getName()).append(" _d_ = source.").append(getField.getFullGetAccessorName()).append(
-                      "() == null ? null : new ").append(setField.getType().getName()).append("();");
-                bw.line(4, "dest.set").append(setField.getAccessorName()).append("(_d_);");
+                bw.line(4, setField.getType().getName()).append(" _d_ = source.").append(generateGet(getField));
+                bw.append(" == null ? null : new ").append(setField.getType().getName()).append("();");
+                bw.line(4, "dest.");
+                writeSet(setField, bw, () -> bw.append("_d_"));
+                bw.append(";");
                 bw.line(4, "if (_d_ != null) {");
 
                 String helperType = "Missing";
@@ -504,12 +513,8 @@ public class CodeGenerator {
                 } else if (setField.getType().isQuickHelper()) {
                     helperType = setField.getType().getName();
                 }
-                bw.line(5, helperType)
-                      .append(HelperSuffix)
-                      .append(".copy(")
-                      .append("source.")
-                      .append(getField.getFullGetAccessorName())
-                      .append("(), _d_);");
+                bw.line(5, helperType).append(HelperSuffix).append(".copy(").append("source.");
+                bw.append(generateGet(getField)).append(", _d_);");
                 bw.line(4, "}");
                 bw.line(4, "break;");
                 bw.line(3, "}");
@@ -518,14 +523,16 @@ public class CodeGenerator {
                 bw.line(4, "java.util.List<")
                       .append(setField.getType().getListType().getName())
                       .append("> _a_ = source.")
-                      .append(getField.getFullGetAccessorName())
-                      .append("() == null ? null : new java.util.ArrayList<>();");
-                bw.line(4, "dest.set").append(setField.getAccessorName()).append("(_a_);");
+                      .append(generateGet(getField))
+                      .append(" == null ? null : new java.util.ArrayList<>();");
+                bw.line(4, "dest.");
+                writeSet(setField, bw, () -> bw.append("_a_"));
+                bw.append(";");
                 bw.line(4, "if (_a_ != null) {");
-                bw.line(5, "for (").append(getField.getType().getListType().getName()).append(" _i_: source.").append(
-                      getField.getFullGetAccessorName()).append("()) {");
-                bw.line(6, setField.getType().getListType().getName()).append(" _d_ = _i_ == null ? null : new ").append(
-                      setField.getType().getListType().getName()).append("();");
+                bw.line(5, "for (").append(getField.getType().getListType().getName()).append(" _i_: source.");
+                bw.append(generateGet(getField)).append(") {");
+                bw.line(6, setField.getType().getListType().getName()).append(" _d_ = _i_ == null ? null : new ");
+                bw.append(setField.getType().getListType().getName()).append("();");
                 bw.line(6, "_a_.add(_d_);");
                 bw.line(6, "if (_d_ != null) {");
                 String helperType = "Missing";
@@ -541,8 +548,9 @@ public class CodeGenerator {
                 bw.line(4, "break;");
 
             } else {
-                bw.line(4, "dest.set").append(setField.getAccessorName()).append("(");
-                bw.append("source.").append(getField.getFullGetAccessorName()).append("());");
+                bw.line(4, "dest.");
+                writeSet(setField, bw, () -> bw.append("source.").append(generateGet(getField)));
+                bw.append(";");
                 bw.line(4, "break;");
             }
 
@@ -553,24 +561,24 @@ public class CodeGenerator {
         bw.newLine();
     }
 
-    //private void writeHelperCopyFrom(CopyMap2 source, ParsedHelperDef dtoDef, IndentWriter bw) throws IOException {
-    //    bw.line(0, "@GwtIncompatible");
-    //    bw.line(0, "public static void copy(").append(source.sourceDef.type).append(" source, ");
-    //    bw.append(dtoDef.name).append(" dest) {");
-    //    for (MappedAccessor getter : source.mappedGetters.values()) {
-    //        Field field = getter.field;
-    //        bw.line(1, "dest.set").append(field.getAccessorName()).append("(");
-    //        if (getter.converterMethod != null) {
-    //            bw.append(dtoDef.qualifiedName).append("Def.convert(");
-    //        }
-    //        bw.append("source.").append(field.getGetAccessorName()).append("()");
-    //        if (getter.converterMethod != null) {
-    //            bw.append(")");
-    //        }
-    //        bw.append(");");
-    //    }
-    //
-    //    bw.line(0, "}");
-    //    bw.newLine();
-    //}
+    private String generateGet(Field getField) {
+        if (getField.isGettable()) {
+            return getField.getFullGetAccessorName() + "()";
+
+        } else { //isPublic
+            return getField.getName();
+        }
+    }
+
+    private void writeSet(Field setField, IndentWriter bw, Runnable setValue) {
+        if (setField.isSettable()) {
+            bw.append("set").append(setField.getAccessorName()).append("(");
+            setValue.run();
+            bw.append(")");
+
+        } else { //isPublic
+            bw.append(setField.getName()).append(" = ");
+            setValue.run();
+        }
+    }
 }

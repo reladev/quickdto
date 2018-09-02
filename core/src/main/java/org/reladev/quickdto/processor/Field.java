@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.TypeKind;
@@ -25,19 +26,14 @@ public class Field {
     private List<String> fieldAnnotations = new LinkedList<>();
     private QuickDtoFlags flags = new QuickDtoFlags();
 
-
-    //Transient fields
-
-
-    private boolean sourceMapped;
-
     public static Field build(VariableElement variableElement, boolean isQuickDto) {
         Field field = new Field(variableElement.toString(), variableElement.asType());
         if (isQuickDto) {
-            //todo add support to fix this
             field.isGettable = true;
             field.isSettable = true;
         }
+        field.isPublic = variableElement.getModifiers().contains(Modifier.PUBLIC);
+
         return field;
     }
 
