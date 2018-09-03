@@ -10,6 +10,7 @@ import java.util.Map;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.element.VariableElement;
@@ -20,6 +21,7 @@ import javax.lang.model.type.TypeMirror;
 public class ClassDef {
     private Type type;
     private ClassDef superClassDef;
+    private boolean isConstructable;
 
     private LinkedHashMap<String, Field> nameFieldMap = new LinkedHashMap<>();
     private ConverterMap converterMap = new ConverterMap();
@@ -50,6 +52,11 @@ public class ClassDef {
                     if (converter != null) {
                         converterMap.add(converter);
                     }
+                }
+            } else if (subElement.getKind() == ElementKind.CONSTRUCTOR) {
+                ExecutableElement executableElement = (ExecutableElement) subElement;
+                if (executableElement.getModifiers().contains(Modifier.PUBLIC) && executableElement.getParameters().isEmpty()) {
+                    isConstructable = true;
                 }
             }
         }
@@ -95,6 +102,10 @@ public class ClassDef {
 
     public ClassDef getSuperClassDef() {
         return superClassDef;
+    }
+
+    public boolean isConstructable() {
+        return isConstructable;
     }
 
     public LinkedHashMap<String, Field> getNameFieldMap() {

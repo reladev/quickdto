@@ -17,6 +17,17 @@ public class ClassDefTest extends QuickDtoTest {
 
         assertThat(classDef.getConverterMap().getMap()).hasSize(2)
               .containsKeys(new Type(BasicTypesImpl.class), new Type(List.class, BasicTypesImpl.class));
+
+        assertThat(classDef.isConstructable()).isTrue();
+    }
+
+    @Test
+    public void verifyNotConstructable() {
+        ClassDef classDef = new ClassDef(elementBasicConvertImpl);
+        assertThat(classDef.isConstructable()).isFalse();
+
+        classDef = new ClassDef(elementBasicTypesImpl);
+        assertThat(classDef.isConstructable()).isFalse();
     }
 
 
@@ -27,6 +38,8 @@ public class ClassDefTest extends QuickDtoTest {
         assertThat(classDef.getGenericsMap()).hasSize(2)
               .contains(new SimpleEntry<>(new Type("", "T"), new Type(String.class)))
               .contains(new SimpleEntry<>(new Type("", "K"), new Type(Integer.class)));
+
+        assertThat(classDef.isConstructable()).isTrue();
     }
 
 }

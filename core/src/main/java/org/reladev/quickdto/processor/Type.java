@@ -3,6 +3,10 @@ package org.reladev.quickdto.processor;
 import java.util.List;
 import java.util.Objects;
 
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
@@ -27,6 +31,7 @@ public class Type {
     private boolean isQuickDto;
     private boolean isQuickDtoList;
     private boolean isQuickHelper;
+    private boolean isConstructable;
 
     //transient
     private String primitiveBoxType;
@@ -85,6 +90,8 @@ public class Type {
                 isQuickHelper = true;
             }
 
+            isConstructable = checkConstructable(typeElement);
+
             if (qualifiedName.equals("java.util.List")) {
                 DeclaredType declaredType = (DeclaredType) typeMirror;
                 List<? extends TypeMirror> typeArguments = declaredType.getTypeArguments();
@@ -104,6 +111,18 @@ public class Type {
             packageString = "";
             qualifiedName = name;
         }
+    }
+
+    private boolean checkConstructable(TypeElement typeElement) {
+        for (Element subElement: typeElement.getEnclosedElements()) {
+            if (subElement.getKind() == ElementKind.CONSTRUCTOR) {
+                ExecutableElement executableElement = (ExecutableElement) subElement;
+                if (executableElement.getModifiers().contains(Modifier.PUBLIC) && executableElement.getParameters().isEmpty()) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public boolean isQuickDto() {
@@ -159,6 +178,10 @@ public class Type {
         } else {
             return "get";
         }
+    }
+
+    public boolean isConstructable() {
+        return isConstructable;
     }
 
     public boolean isImportable() {

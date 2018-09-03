@@ -14,6 +14,7 @@ public class CopyMapping {
     private ConverterMethod converterMethod;
     private boolean isQuickDtoConvert;
     private boolean isQuickDtoListConvert;
+    private boolean isHelperConvert;
 
     public static CopyMapping build(Field getField, Field setField, ConverterMap converterMap) {
         if (getField == null || setField == null || !(getField.isGettable() || getField.isPublic()) ||
@@ -43,6 +44,10 @@ public class CopyMapping {
 
             } else if (setField.getType().isQuickDtoList()) {
                 copyMapping.isQuickDtoListConvert = true;
+                map = true;
+
+            } else if (setField.getType().isConstructable() && (setField.getType().isQuickHelper() || getField.getType().isQuickHelper())) {
+                copyMapping.isHelperConvert = true;
                 map = true;
 
             } else {
@@ -91,6 +96,10 @@ public class CopyMapping {
 
     public boolean isQuickDtoListConvert() {
         return isQuickDtoListConvert;
+    }
+
+    public boolean isHelperConvert() {
+        return isHelperConvert;
     }
 
     @Override

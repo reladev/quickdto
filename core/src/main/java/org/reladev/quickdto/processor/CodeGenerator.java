@@ -498,7 +498,7 @@ public class CodeGenerator {
                 bw.append(";");
                 bw.line(4, "break;");
 
-            } else if (mapping.isQuickDtoConvert()) {
+            } else if (mapping.isQuickDtoConvert() || mapping.isHelperConvert()) {
                 bw.append(" {");
                 bw.line(4, setField.getType().getName()).append(" _d_ = source.").append(generateGet(getField));
                 bw.append(" == null ? null : new ").append(setField.getType().getName()).append("();");

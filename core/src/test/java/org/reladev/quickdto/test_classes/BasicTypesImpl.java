@@ -21,6 +21,9 @@ public class BasicTypesImpl {
     Boolean objBoolean;
     String myString;
 
+    protected BasicTypesImpl() {
+    }
+
     public byte getMyByte() {
         return myByte;
     }

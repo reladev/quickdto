@@ -12,6 +12,10 @@ public class BasicConvertImpl {
     Object noConvert;
     List<Object> noConvertList;
 
+    public BasicConvertImpl(BasicTypesImpl basic) {
+        this.basic = basic;
+    }
+
     public BasicTypesImpl getBasic() {
         return basic;
     }
