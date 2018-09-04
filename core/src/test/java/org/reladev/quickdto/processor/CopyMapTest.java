@@ -45,4 +45,21 @@ public class CopyMapTest extends QuickDtoTest {
                                                 .doesNotContainKeys("toTargetOnly", "noConvert", "noConvertList"));
     }
 
+    @Test
+    public void verifyAnnotationMaps() {
+        ClassDef targetDef = new ClassDef(elementAnnotationDtoDef);
+        ClassDef sourceDef = new ClassDef(elementAnnotationImpl);
+        ConverterMap converterMap = new ConverterMap();
+
+        CopyMap copyMap = new CopyMap(sourceDef, targetDef, converterMap);
+
+        SoftAssertions.assertSoftly(soft -> soft.assertThat(copyMap.getSourceToTargetMappings())
+              .hasSize(4)
+              .containsKeys("equalsHash", "readOnly", "readOnlyWithSetter", "result"));
+
+        SoftAssertions.assertSoftly(soft -> soft.assertThat(copyMap.getTargetToSourceMappings())
+              .hasSize(3)
+              .containsKeys("equalsHash", "writeOnly", "result"));
+    }
+
 }

@@ -28,6 +28,25 @@ public class BasicTypesSourceDtoTest {
         assertEquals(false, dto.isMyBoolean());
         assertEquals(null, dto.getObjBoolean());
         assertEquals(null, dto.getMyString());
+
+        BasicTypesImpl impl = new BasicTypesImpl();
+        dto.copyTo(impl);
+
+        assertEquals(0, impl.getMyInt());
+        assertEquals(null, impl.getObjInteger());
+        assertEquals(0, impl.getMyLong());
+        assertEquals(null, impl.getObjLong());
+        assertEquals(0, impl.getMyShort());
+        assertEquals(null, impl.getObjShort());
+        assertEquals(0, impl.getMyByte());
+        assertEquals(null, impl.getObjByte());
+        assertEquals(0, impl.getMyDouble(), 0);
+        assertEquals(null, impl.getObjDouble());
+        assertEquals(0, impl.getMyFloat(), 0);
+        assertEquals(null, impl.getObjFloat());
+        assertEquals(false, impl.isMyBoolean());
+        assertEquals(null, impl.getObjBoolean());
+        assertEquals(null, impl.getMyString());
     }
 
     @Test

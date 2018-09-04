@@ -219,7 +219,7 @@ public class CodeGenerator {
 
             bw.line("}");
             bw.newLine();
-            if (!field.getFlags().isExcludeSetter()) {
+            if (!field.isExcludeSetter()) {
                 // todo double check if this is still needed
                 //for (String annotation : field.getSetterAnnotations()) {
                 //    bw.line("").append(annotation).append("");
@@ -245,7 +245,7 @@ public class CodeGenerator {
     private void writeEqualsHash(ClassDef dtoDef, IndentWriter bw) {
         List<Field> equalsFields = new LinkedList<>();
         for (Field field: dtoDef.getNameFieldMap().values()) {
-            if (field.getFlags().isEqualsHashCode()) {
+            if (field.isEqualsHashCode()) {
                 equalsFields.add(field);
             }
         }
@@ -362,25 +362,27 @@ public class CodeGenerator {
         for (CopyMapping mapping : copyMap.getTargetToSourceMappings().values()) {
             Field getField = mapping.getGetField();
             Field setField = mapping.getSetField();
-            // todo look at moving this to CopyMap
-            if (!getField.getFlags().isCopyFrom()) {
-                bw.line(3, "case ").append(getField.getEnumName()).append(":");
-                bw.line(4, "dest.");
-                writeSet(setField, bw, () -> {
-                    ConverterMethod converter = mapping.getConverterMethod();
-                    if (converter != null) {
-                        bw.append(converter.getClassType().getOriginalName()).append(".convert(").append(getField.getName());
-                        if (converter.isExistingParam()) {
-                            bw.append(", dest.").append(generateGet(setField));
-                        }
-                        bw.append(")");
-                    } else {
-                        bw.append(getField.getName());
+            bw.line(3, "case ").append(getField.getEnumName()).append(":");
+            bw.line(4, "dest.");
+            writeSet(setField, bw, () -> {
+                ConverterMethod converter = mapping.getConverterMethod();
+                if (converter != null) {
+                    bw.append(converter.getClassType().getOriginalName()).append(".convert(").append(getField.getName());
+                    if (converter.isExistingParam()) {
+                        bw.append(", dest.").append(generateGet(setField));
                     }
-                });
-                bw.append(";");
-                bw.line(4, "break;");
-            }
+                    bw.append(")");
+
+                } else if (getField.getType().isPrimitive()) {
+                    bw.append(getField.getName()).append(" != null ? ").append(getField.getName()).append(" : ").append(getField.getType()
+                          .getDefaultPrimitiveValue());
+
+                } else {
+                    bw.append(getField.getName());
+                }
+            });
+            bw.append(";");
+            bw.line(4, "break;");
         }
         bw.line(2, "}");
         bw.line(1, "}");

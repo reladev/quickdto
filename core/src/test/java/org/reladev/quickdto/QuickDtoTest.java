@@ -12,7 +12,9 @@ import org.reladev.quickdto.processor.QuickDtoProcessor;
 
 public class QuickDtoTest {
 
-    public String[] testClasses = {"src/test/java/org/reladev/quickdto/test_classes/BasicConvertDtoDef.java",
+    public String[] testClasses = {"src/test/java/org/reladev/quickdto/test_classes/AnnotationDtoDef.java",
+          "src/test/java/org/reladev/quickdto/test_classes/AnnotationImpl.java",
+          "src/test/java/org/reladev/quickdto/test_classes/BasicConvertDtoDef.java",
           "src/test/java/org/reladev/quickdto/test_classes/BasicConvertImpl.java",
           "src/test/java/org/reladev/quickdto/test_classes/BasicTypesDtoDef.java",
           "src/test/java/org/reladev/quickdto/test_classes/BasicTypesImpl.java",
@@ -24,6 +26,8 @@ public class QuickDtoTest {
     @Rule
     public final AvatarRule rule = AvatarRule.builder().withSourcesAt(testClasses).build();
 
+    public TypeElement elementAnnotationDtoDef;
+    public TypeElement elementAnnotationImpl;
     public TypeElement elementBasicConvertDtoDef;
     public TypeElement elementBasicConvertImpl;
     public TypeElement elementBasicTypesDtoDef;
@@ -41,6 +45,12 @@ public class QuickDtoTest {
         Set<Element> elements = rule.getRootElements();
         for (Element element : elements) {
             switch (element.toString()) {
+                case "org.reladev.quickdto.test_classes.AnnotationDtoDef":
+                    elementAnnotationDtoDef = (TypeElement) element;
+                    break;
+                case "org.reladev.quickdto.test_classes.AnnotationImpl":
+                    elementAnnotationImpl = (TypeElement) element;
+                    break;
                 case "org.reladev.quickdto.test_classes.BasicConvertDtoDef":
                     elementBasicConvertDtoDef = (TypeElement) element;
                     break;

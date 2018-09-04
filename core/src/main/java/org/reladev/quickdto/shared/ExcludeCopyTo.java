@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  */
 @Target({ElementType.FIELD, ElementType.METHOD})
 @Retention(RetentionPolicy.CLASS)
-public @interface CopyFromOnly {
+public @interface ExcludeCopyTo {
 	/**
 	 * @return whether the setter method should be generated in the DTO.
 	 * <p>

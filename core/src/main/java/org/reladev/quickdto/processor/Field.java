@@ -4,12 +4,18 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+
+import org.reladev.quickdto.shared.EqualsHashCode;
+import org.reladev.quickdto.shared.ExcludeCopyFrom;
+import org.reladev.quickdto.shared.ExcludeCopyTo;
 
 @SuppressWarnings("WeakerAccess")
 public class Field {
@@ -21,10 +27,13 @@ public class Field {
     private boolean isPublic;
     private boolean isGettable;
     private boolean isSettable;
+    private boolean excludeSetter;
+    private boolean excludeGetter;
+    private boolean equalsHashCode;
 
-    //todo populate the annotations
+
     private List<String> fieldAnnotations = new LinkedList<>();
-    private QuickDtoFlags flags = new QuickDtoFlags();
+    //private QuickDtoFlags flags = new QuickDtoFlags();
 
     public static Field build(VariableElement variableElement, boolean isQuickDto) {
         Field field = new Field(variableElement.toString(), variableElement.asType());
@@ -32,6 +41,7 @@ public class Field {
             field.isGettable = true;
             field.isSettable = true;
         }
+        populateAnnotations(variableElement, field);
         field.isPublic = variableElement.getModifiers().contains(Modifier.PUBLIC);
 
         return field;
@@ -44,18 +54,53 @@ public class Field {
         String accessorName = element.toString();
         if (accessorName.startsWith("get") && t.getReturnType().getKind() != TypeKind.VOID && t.getParameterTypes().size() == 0) {
             field = new Field(accessorName.substring(3, accessorName.indexOf('(')), t.getReturnType());
+            populateAnnotations(element, field);
             field.isGettable = true;
 
         } else if (accessorName.startsWith("is") && t.getReturnType().getKind() != TypeKind.VOID && t.getParameterTypes().size() == 0) {
             field = new Field(accessorName.substring(2, accessorName.indexOf('(')), t.getReturnType());
+            populateAnnotations(element, field);
             field.isGettable = true;
 
         } else if (accessorName.startsWith("set") && t.getReturnType().getKind() == TypeKind.VOID && t.getParameterTypes().size() == 1) {
             field = new Field(accessorName.substring(3, accessorName.indexOf('(')), t.getParameterTypes().get(0));
+            populateAnnotations(element, field);
             field.isSettable = true;
         }
 
         return field;
+    }
+
+    private static void populateAnnotations(Element subelement, Field field) {
+        List<? extends AnnotationMirror> annotationMirrors = subelement.getAnnotationMirrors();
+        for (AnnotationMirror am: annotationMirrors) {
+            if (!QuickDtoProcessor.isQuickDtoAnntoation(am)) {
+                field.fieldAnnotations.add(am.toString());
+            }
+        }
+
+        if (subelement.getAnnotation(EqualsHashCode.class) != null) {
+            field.equalsHashCode = true;
+        }
+        ExcludeCopyTo excludeCopyTo = subelement.getAnnotation(ExcludeCopyTo.class);
+        if (excludeCopyTo != null) {
+            field.isGettable = false;
+            if (!excludeCopyTo.setter()) {
+                field.excludeSetter = true;
+            }
+        }
+        ExcludeCopyFrom copyToOnly = subelement.getAnnotation(ExcludeCopyFrom.class);
+        if (copyToOnly != null) {
+            field.isSettable = false;
+            if (!copyToOnly.getter()) {
+                field.excludeGetter = true;
+            }
+        }
+        //todo handle strictCopy
+        //StrictCopy strictCopy = subelement.getAnnotation(StrictCopy.class);
+        //if (strictCopy != null) {
+        //    field.flags.setStrictCopy(strictCopy.value());
+        //}
     }
 
     private String getFieldName(String name) {
@@ -149,6 +194,18 @@ public class Field {
         return isSettable;
     }
 
+    public boolean isExcludeSetter() {
+        return excludeSetter;
+    }
+
+    public boolean isExcludeGetter() {
+        return excludeGetter;
+    }
+
+    public boolean isEqualsHashCode() {
+        return equalsHashCode;
+    }
+
     public String getGetterPrefix() {
         if ("boolean".equals(type.getName())) {
             return "is" + getAccessorName();
@@ -161,9 +218,9 @@ public class Field {
         return fieldAnnotations;
     }
 
-    public QuickDtoFlags getFlags() {
-        return flags;
-    }
+    //public QuickDtoFlags getFlags() {
+    //    return flags;
+    //}
 
     public String toString() {
         return type + " " + name;

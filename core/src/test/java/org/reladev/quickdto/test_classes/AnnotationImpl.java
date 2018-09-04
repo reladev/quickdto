@@ -1,4 +1,4 @@
-package org.reladev.quickdto.testharness.impl;
+package org.reladev.quickdto.test_classes;
 
 public class AnnotationImpl {
     private int equalsHash;
@@ -13,10 +13,6 @@ public class AnnotationImpl {
 
     public void setEqualsHash(int equalsHash) {
         this.equalsHash = equalsHash;
-    }
-
-    public int getWriteOnly() {
-        return writeOnly;
     }
 
     public int getReadOnly() {
@@ -35,12 +31,12 @@ public class AnnotationImpl {
         this.readOnlyWithSetter = readOnlyWithSetter;
     }
 
-    public void setWriteOnly(int writeOnly) {
-        this.writeOnly = writeOnly;
+    public int getWriteOnly() {
+        return writeOnly;
     }
 
-    public int checkWriteOnly() {
-        return writeOnly;
+    public void setWriteOnly(int writeOnly) {
+        this.writeOnly = writeOnly;
     }
 
     public String getResult() {
