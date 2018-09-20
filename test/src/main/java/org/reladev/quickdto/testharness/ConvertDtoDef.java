@@ -9,10 +9,17 @@ import org.reladev.quickdto.testharness.impl.ConvertExistingImpl;
 
 @QuickDto
 public class ConvertDtoDef {
-    ConvertChildSourceDtoDef child;
-    List<ConvertChildSourceDtoDef> childList;
-    ConvertExistingSourceDtoDef existing;
-    List<ConvertExistingSourceDtoDef> existingList;
+    ConvertChildDtoDef child;
+    List<ConvertChildDtoDef> childList;
+    ConvertExistingDtoDef existing;
+    List<ConvertExistingDtoDef> existingList;
+
+    // duplicates to test variables in copy
+    ConvertChildDtoDef child2;
+    List<ConvertChildDtoDef> childList2;
+    ConvertExistingDtoDef existing2;
+    List<ConvertExistingDtoDef> existingList2;
+
 
     //todo support automatic conversion for other common types
     //ConvertChildSourceDtoDef[] childArray;

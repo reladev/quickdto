@@ -466,8 +466,7 @@ public class CodeGenerator {
         }
     }
 
-    private void writeHelperCopy(ClassDef sourceDef, ClassDef targetDef, HashMap<String, CopyMapping> sourceToTargetMappings, IndentWriter bw)
-    {
+    private void writeHelperCopy(ClassDef sourceDef, ClassDef targetDef, HashMap<String, CopyMapping> sourceToTargetMappings, IndentWriter bw) {
         bw.line(0, "@GwtIncompatible");
         bw.line(0, "public static void copy(").append(sourceDef.getType().getName()).append(" source, ");
         bw.append(targetDef.getType().getName()).append(" dest, Fields... fields) {");
@@ -488,6 +487,9 @@ public class CodeGenerator {
             Field setField = mapping.getSetField();
 
             bw.line(3, "case ").append(getField.getEnumName()).append(":");
+            if (mapping.getErrorMessage() != null) {
+                bw.line(4, "// ").append(mapping.getErrorMessage());
+            }
             ConverterMethod converter = mapping.getConverterMethod();
             if (converter != null) {
                 bw.line(4, "dest.");
@@ -525,6 +527,7 @@ public class CodeGenerator {
                 bw.line(3, "}");
 
             } else if (mapping.isQuickDtoListConvert()) {
+                bw.append(" {");
                 bw.line(4, "java.util.List<")
                       .append(setField.getType().getListType().getName())
                       .append("> _a_ = source.")
@@ -551,6 +554,7 @@ public class CodeGenerator {
                 bw.line(5, "}");
                 bw.line(4, "}");
                 bw.line(4, "break;");
+                bw.line(3, "}");
 
             } else {
                 bw.line(4, "dest.");

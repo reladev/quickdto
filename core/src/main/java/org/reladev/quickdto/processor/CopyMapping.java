@@ -24,17 +24,17 @@ public class CopyMapping {
 
         if (getField == null) {
             this.getField = new Field(setField);
-            errorMessage = "Source property '" + name + "' is missing with type: '" + setField.getType() + "'. Add @ExcludeCopy to fix.";
+            errorMessage = "No matching property for '" + setField.getType() + " " + name + "'. Add @ExcludeCopy to fix.";
 
         } else if (setField == null) {
             this.setField = new Field(getField);
-            errorMessage = "Source property '" + name + "' is missing with type: '" + getField.getType() + "'. Add @ExcludeCopy to fix.";
+            errorMessage = "No matching property for '" + getField.getType() + " " + name + "'. Add @ExcludeCopy to fix.";
 
         } else if (!getField.isPublic() && !getField.hasGetter()) {
-            errorMessage = "Source property '" + name + "' doesn't have a getter or isn't public. Add @ExcludeCopy to fix.";
+            errorMessage = "Property '" + name + "' doesn't have a getter or isn't public. Add @ExcludeCopy to fix.";
 
         } else if (!setField.isPublic() && !setField.hasSetter()) {
-            errorMessage = "Source property '" + name + "' doesn't have a getter or isn't public. Add @ExcludeCopy to fix.";
+            errorMessage = "Property '" + name + "' doesn't have a getter or isn't public. Add @ExcludeCopy to fix.";
 
         } else {
             Type getType = getField.getType();

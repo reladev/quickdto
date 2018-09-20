@@ -4,7 +4,6 @@ import org.junit.Test;
 import org.reladev.quickdto.testharness.impl.AnnotationImpl;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Java6Assertions.fail;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -37,40 +36,11 @@ public class AnnotationDtoTest {
 
         assertThat(dto.getReadOnly()).isEqualTo(4);
 
-        try {
-            dto.getClass().getMethod("setReadOnly", int.class);
-            fail("setReadOnly() shouldn't exist.");
-        } catch (NoSuchMethodException ignore) {
-        }
-
         AnnotationImpl impl2 = new AnnotationImpl();
         impl2.setReadOnly(2);
         dto.copyTo(impl2);
 
         assertThat(impl2.getReadOnly()).isEqualTo(2);
-    }
-
-    @Test
-    public void testReadOnlyWithSetter() {
-        AnnotationImpl impl = new AnnotationImpl();
-        impl.setReadOnlyWithSetter(4);
-
-        AnnotationDto dto = new AnnotationDto();
-        dto.copyFrom(impl);
-
-        assertThat(dto.getReadOnlyWithSetter()).isEqualTo(4);
-
-        try {
-            dto.getClass().getMethod("setReadOnlyWithSetter", int.class);
-        } catch (NoSuchMethodException ignore) {
-            fail("setReadOnlyWithSetter() should exist.");
-        }
-
-        AnnotationImpl impl2 = new AnnotationImpl();
-        impl2.setReadOnlyWithSetter(2);
-        dto.copyTo(impl2);
-
-        assertThat(impl2.getReadOnlyWithSetter()).isEqualTo(2);
     }
 
     @Test

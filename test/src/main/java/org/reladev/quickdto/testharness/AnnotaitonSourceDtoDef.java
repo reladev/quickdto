@@ -10,8 +10,6 @@ public class AnnotaitonSourceDtoDef {
     int equalsHash;
     @ExcludeCopyFrom
     int readOnly;
-    @ExcludeCopyFrom(setter = true)
-    int readOnlyWithSetter;
     @ExcludeCopyTo
     int writeOnly;
 

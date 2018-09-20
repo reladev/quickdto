@@ -12,8 +12,6 @@ public class AnnotationDtoDef {
     int equalsHash;
     @ExcludeCopyFrom
     int readOnly;
-    @ExcludeCopyFrom(setter = true)
-    int readOnlyWithSetter;
     @ExcludeCopyTo
     int writeOnly;
     @ExcludeCopy

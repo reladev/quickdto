@@ -13,11 +13,4 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.CLASS)
 public @interface ExcludeCopyFrom {
     Class[] value() default {};
-
-	/**
-     * @return whether the setter method should be generated in the DTO.
-	 * <p>
-     * Defaults to false.
-	 */
-    boolean setter() default false;
 }

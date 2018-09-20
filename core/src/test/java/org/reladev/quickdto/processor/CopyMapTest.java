@@ -131,8 +131,8 @@ public class CopyMapTest extends QuickDtoTest {
         CopyMap copyMap = new CopyMap(sourceDef, targetDef, converterMap);
 
         SoftAssertions.assertSoftly(soft -> soft.assertThat(copyMap.getSourceToTargetMappings())
-              .hasSize(4)
-              .containsKeys("equalsHash", "readOnly", "readOnlyWithSetter", "result"));
+              .hasSize(3)
+              .containsKeys("equalsHash", "readOnly", "result"));
 
         SoftAssertions.assertSoftly(soft -> soft.assertThat(copyMap.getTargetToSourceMappings())
               .hasSize(3)

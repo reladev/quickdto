@@ -15,11 +15,18 @@ public class ConvertImpl {
     private ConvertChildImpl child;
     private List<ConvertChildImpl> childList;
     private ConvertExistingImpl existing;
-    List<ConvertExistingImpl> existingList;
+    private List<ConvertExistingImpl> existingList;
 
-    ConvertChildSourceDtoDef[] childArray;
-    Set<ConvertChildSourceDtoDef> childSet;
-    Map<String, ConvertChildSourceDtoDef> childMap;
+    // duplicates to test variables in copy
+    private ConvertChildImpl child2;
+    private List<ConvertChildImpl> childList2;
+    private ConvertExistingImpl existing2;
+    private List<ConvertExistingImpl> existingList2;
+
+    //future support
+    private ConvertChildSourceDtoDef[] childArray;
+    private Set<ConvertChildSourceDtoDef> childSet;
+    private Map<String, ConvertChildSourceDtoDef> childMap;
 
     public static ConvertExistingDto convert(ConvertExistingImpl source, ConvertExistingDto existing) {
         if (source == null) {
@@ -97,5 +104,37 @@ public class ConvertImpl {
 
     public void setChildMap(Map<String, ConvertChildSourceDtoDef> childMap) {
         this.childMap = childMap;
+    }
+
+    public ConvertChildImpl getChild2() {
+        return child2;
+    }
+
+    public void setChild2(ConvertChildImpl child2) {
+        this.child2 = child2;
+    }
+
+    public List<ConvertChildImpl> getChildList2() {
+        return childList2;
+    }
+
+    public void setChildList2(List<ConvertChildImpl> childList2) {
+        this.childList2 = childList2;
+    }
+
+    public ConvertExistingImpl getExisting2() {
+        return existing2;
+    }
+
+    public void setExisting2(ConvertExistingImpl existing2) {
+        this.existing2 = existing2;
+    }
+
+    public List<ConvertExistingImpl> getExistingList2() {
+        return existingList2;
+    }
+
+    public void setExistingList2(List<ConvertExistingImpl> existingList2) {
+        this.existingList2 = existingList2;
     }
 }
