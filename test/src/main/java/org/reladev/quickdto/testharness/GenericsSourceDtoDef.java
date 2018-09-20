@@ -8,5 +8,4 @@ public class GenericsSourceDtoDef {
     private String text;
     private String id;
     private Integer key;
-
 }

@@ -11,13 +11,11 @@ import java.lang.annotation.Target;
  */
 @Target({ElementType.FIELD, ElementType.METHOD})
 @Retention(RetentionPolicy.CLASS)
-public @interface ExcludeCopyTo {
-    Class[] value() default {};
-
-	/**
+public @interface ExcludeCopy {
+    /**
      * @return whether the getter method should be generated in the DTO.
-	 * <p>
+     * <p>
      * Defaults to true.
-	 */
-    boolean getter() default true;
+     */
+    Class[] value() default {};
 }

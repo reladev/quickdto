@@ -33,15 +33,6 @@ public @interface QuickDto {
 	Class[] source() default {};
 
 	/**
-	 * @return whether the QuickDto should enforce that all the fields in the
-	 * DTO are copied to at least one source.  If not copied, then a compile error is created.  This
-	 * is beneficial for ensuring that name refactoring doesn't break copy methods.
-	 *
-	 * Defaults to true.
-	 */
-	boolean strictCopy() default true;
-
-	/**
 	 * @return whether non QuickDto annotations on fields should be placed on the property or the getter method.
 	 *
 	 * Defaults to false.

@@ -10,11 +10,11 @@ import org.reladev.quickdto.testharness.impl.AnnotationImpl;
 public class AnnotationDtoDef {
     @EqualsHashCode
     int equalsHash;
-    @ExcludeCopyTo
-    int readOnly;
-    @ExcludeCopyTo(setter = true)
-    int readOnlyWithSetter;
     @ExcludeCopyFrom
+    int readOnly;
+    @ExcludeCopyFrom(setter = true)
+    int readOnlyWithSetter;
+    @ExcludeCopyTo
     int writeOnly;
 
     String result;

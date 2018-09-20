@@ -5,7 +5,7 @@ import org.reladev.quickdto.feature.DirtyFeature;
 import org.reladev.quickdto.shared.GwtIncompatible;
 import org.reladev.quickdto.shared.QuickDto;
 
-@QuickDto(source = BasicTypesImpl.class, strictCopy = false, feature = DirtyFeature.class)
+@QuickDto(source = BasicTypesImpl.class, feature = DirtyFeature.class)
 public class BasicTypesDtoDef {
     byte myByte;
     @GwtIncompatible

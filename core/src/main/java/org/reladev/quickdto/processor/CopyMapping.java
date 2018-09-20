@@ -1,11 +1,7 @@
 package org.reladev.quickdto.processor;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collection;
-
-import javax.tools.Diagnostic.Kind;
-
-import static org.reladev.quickdto.processor.QuickDtoProcessor.messager;
 
 public class CopyMapping {
     private String name;
@@ -14,59 +10,64 @@ public class CopyMapping {
     private ConverterMethod converterMethod;
     private boolean isQuickDtoConvert;
     private boolean isQuickDtoListConvert;
+    private String errorMessage;
 
-    public static CopyMapping build(Field getField, Field setField, ConverterMap converterMap) {
-        if (getField == null || setField == null || !(getField.isGettable() || getField.isPublic()) ||
-              !(setField.isSettable() || setField.isPublic())) {
-            // No valid mapping, so return null
-            return null;
-        }
-
-        CopyMapping copyMapping = new CopyMapping(getField, setField);
-
-        Type getType = getField.getType();
-        Type setType = setField.getType();
-
-        boolean map;
-        if (getType.equals(setType)) {
-            map = true;
-
-        } else { // try to find converter
-            ConverterMethod converter = converterMap.get(getType, setType);
-            if (converter != null) {
-                map = true;
-                copyMapping.converterMethod = converter;
-
-            } else if (setField.getType().isQuickDto()) {
-                copyMapping.isQuickDtoConvert = true;
-                map = true;
-
-            } else if (setField.getType().isQuickDtoList()) {
-                copyMapping.isQuickDtoListConvert = true;
-                map = true;
-
-            } else {
-                map = false;
-                messager.printMessage(Kind.WARNING, "Type Mismatch(" + setType + ":" + getType + ") for " + getField.getAccessorName());
-            }
-        }
-
-        if (map) {
-            return copyMapping;
-        } else {
-            return null;
-        }
-    }
-
-    public CopyMapping(Field getField, Field setField) {
+    public CopyMapping(Field getField, Field setField, ConverterMap converterMap) {
         this.getField = getField;
         this.setField = setField;
 
-        name = getField.getName();
+        if (getField != null) {
+            name = getField.getName();
+        } else {
+            name = setField.getName();
+        }
+
+        if (getField == null) {
+            this.getField = new Field(setField);
+            errorMessage = "Source property '" + name + "' is missing with type: '" + setField.getType() + "'. Add @ExcludeCopy to fix.";
+
+        } else if (setField == null) {
+            this.setField = new Field(getField);
+            errorMessage = "Source property '" + name + "' is missing with type: '" + getField.getType() + "'. Add @ExcludeCopy to fix.";
+
+        } else if (!getField.isPublic() && !getField.hasGetter()) {
+            errorMessage = "Source property '" + name + "' doesn't have a getter or isn't public. Add @ExcludeCopy to fix.";
+
+        } else if (!setField.isPublic() && !setField.hasSetter()) {
+            errorMessage = "Source property '" + name + "' doesn't have a getter or isn't public. Add @ExcludeCopy to fix.";
+
+        } else {
+            Type getType = getField.getType();
+            Type setType = setField.getType();
+
+            if (!getType.equals(setType)) {
+                // try to find converter
+                ConverterMethod converter = converterMap.get(getType, setType);
+                if (converter != null) {
+                    converterMethod = converter;
+
+                } else if (setField.getType().isQuickDto()) {
+                    isQuickDtoConvert = true;
+
+                } else if (setField.getType().isQuickDtoList()) {
+                    isQuickDtoListConvert = true;
+
+                } else {
+                    errorMessage = "Type Mismatch(" + setType + ":" + getType + ") for " + getField.getAccessorName() + ". Add @ExcludeCopy to fix.";
+                }
+            }
+        }
     }
 
     public Collection<Type> getImports() {
-        return Arrays.asList(getField.getType(), setField.getType());
+        ArrayList<Type> imports = new ArrayList<>();
+        if (getField != null) {
+            imports.add(getField.getType());
+        }
+        if (setField != null) {
+            imports.add(setField.getType());
+        }
+        return imports;
     }
 
     public String getName() {
@@ -91,6 +92,10 @@ public class CopyMapping {
 
     public boolean isQuickDtoListConvert() {
         return isQuickDtoListConvert;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
     }
 
     @Override

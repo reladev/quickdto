@@ -16,16 +16,19 @@ public class CopyMap {
         this.targetDef = targetDef;
         this.sourceDef = sourceDef;
 
-        for (Field sourceField: sourceDef.getNameFieldMap().values()) {
-            Field targetField = targetDef.getNameFieldMap().get(sourceField.getName());
-            CopyMapping sourceToTarget = CopyMapping.build(sourceField, targetField, converterMap);
-            if (sourceToTarget != null) {
-                sourceToTargetMappings.put(sourceField.getName(), sourceToTarget);
+        for (Field targetField: targetDef.getNameFieldMap().values()) {
+            String name = targetField.getName();
+            Field sourceField = sourceDef.getNameFieldMap().get(name);
+
+            if (targetField.isCopySettable(sourceDef) && (sourceField == null || sourceField.isCopyGettable(targetDef))) {
+                CopyMapping sourceToTarget = new CopyMapping(sourceField, targetField, converterMap);
+                sourceToTargetMappings.put(sourceToTarget.getName(), sourceToTarget);
                 imports.addAll(sourceToTarget.getImports());
             }
-            CopyMapping targetToSource = CopyMapping.build(targetField, sourceField, converterMap);
-            if (targetToSource != null) {
-                targetToSourceMappings.put(sourceField.getName(), targetToSource);
+
+            if (targetField.isCopyGettable(sourceDef) && (sourceField == null || sourceField.isCopySettable(targetDef))) {
+                CopyMapping targetToSource = new CopyMapping(targetField, sourceField, converterMap);
+                targetToSourceMappings.put(targetToSource.getName(), targetToSource);
                 imports.addAll(targetToSource.getImports());
             }
         }

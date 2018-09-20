@@ -31,12 +31,12 @@ public class ClassDef {
 
         for (Element subElement : typeElement.getEnclosedElements()) {
             if (subElement.getKind() == ElementKind.FIELD) {
-                Field field = Field.build((VariableElement) subElement, type.isQuickDto());
+                Field field = Field.build((VariableElement) subElement, this);
                 nameFieldMap.put(field.getName(), field);
 
             } else if (subElement.getKind() == ElementKind.METHOD) {
                 ExecutableElement execElement = (ExecutableElement) subElement;
-                Field field = Field.build(execElement);
+                Field field = Field.build(execElement, this);
                 if (field != null) {
                     Field existing = nameFieldMap.get(field.getName());
                     if (existing != null) {

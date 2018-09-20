@@ -5,12 +5,9 @@ import java.util.List;
 
 //@QuickDtoHelper(copyClass = BasicTypesDtoDef.class)
 public class BasicConvertImpl {
-    BasicTypesImpl basic;
-    List<BasicTypesImpl> basicList;
-    Integer value;
-    Integer toTargetOnly;
-    Object noConvert;
-    List<Object> noConvertList;
+    private BasicTypesImpl basic;
+    private List<BasicTypesImpl> basicList;
+    private Integer value;
 
     public BasicTypesImpl getBasic() {
         return basic;
@@ -28,31 +25,11 @@ public class BasicConvertImpl {
         this.basicList = basicList;
     }
 
-    public Object getNoConvert() {
-        return noConvert;
-    }
-
-    public void setNoConvert(Object noConvert) {
-        this.noConvert = noConvert;
-    }
-
     public Integer getValue() {
         return value;
     }
 
     public void setValue(Integer value) {
         this.value = value;
-    }
-
-    public Integer getToTargetOnly() {
-        return toTargetOnly;
-    }
-
-    public List<Object> getNoConvertList() {
-        return noConvertList;
-    }
-
-    public void setNoConvertList(List<Object> noConvertList) {
-        this.noConvertList = noConvertList;
     }
 }

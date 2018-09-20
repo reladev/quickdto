@@ -363,6 +363,9 @@ public class CodeGenerator {
             Field getField = mapping.getGetField();
             Field setField = mapping.getSetField();
             bw.line(3, "case ").append(getField.getEnumName()).append(":");
+            if (mapping.getErrorMessage() != null) {
+                bw.line(4, "// ").append(mapping.getErrorMessage());
+            }
             bw.line(4, "dest.");
             writeSet(setField, bw, () -> {
                 ConverterMethod converter = mapping.getConverterMethod();
@@ -564,7 +567,7 @@ public class CodeGenerator {
     }
 
     private String generateGet(Field getField) {
-        if (getField.isGettable()) {
+        if (getField.hasGetter()) {
             return getField.getFullGetAccessorName() + "()";
 
         } else { //isPublic
@@ -573,7 +576,7 @@ public class CodeGenerator {
     }
 
     private void writeSet(Field setField, IndentWriter bw, Runnable setValue) {
-        if (setField.isSettable()) {
+        if (setField.hasSetter()) {
             bw.append("set").append(setField.getAccessorName()).append("(");
             setValue.run();
             bw.append(")");

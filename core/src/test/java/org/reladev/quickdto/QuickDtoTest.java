@@ -20,6 +20,8 @@ public class QuickDtoTest {
           "src/test/java/org/reladev/quickdto/test_classes/BasicTypesImpl.java",
           "src/test/java/org/reladev/quickdto/test_classes/GenericsBaseImpl.java",
           "src/test/java/org/reladev/quickdto/test_classes/GenericsImpl.java",
+          "src/test/java/org/reladev/quickdto/test_classes/MappingErrorsDtoDef.java",
+          "src/test/java/org/reladev/quickdto/test_classes/MappingErrorsImpl.java",
           "src/test/java/org/reladev/quickdto/test_classes/TestClassDtoDef.java",
           "src/test/java/org/reladev/quickdto/test_classes/TestClassImpl.java",};
 
@@ -34,6 +36,8 @@ public class QuickDtoTest {
     public TypeElement elementBasicTypesImpl;
     public TypeElement elementGenericsBaseImpl;
     public TypeElement elementGenericsImpl;
+    public TypeElement elementMappingErrorsDtoDef;
+    public TypeElement elementMappingErrorsImpl;
     public TypeElement elementTestClassDtoDef;
     public TypeElement elementTestClassImpl;
 
@@ -69,6 +73,12 @@ public class QuickDtoTest {
                 case "org.reladev.quickdto.test_classes.GenericsImpl":
                     elementGenericsImpl = (TypeElement) element;
                     break;
+                case "org.reladev.quickdto.test_classes.MappingErrorsDtoDef":
+                    elementMappingErrorsDtoDef = (TypeElement) element;
+                    break;
+                case "org.reladev.quickdto.test_classes.MappingErrorsImpl":
+                    elementMappingErrorsImpl = (TypeElement) element;
+                    break;
                 case "org.reladev.quickdto.test_classes.TestClassDtoDef":
                     elementTestClassDtoDef = (TypeElement) element;
                     break;
@@ -78,5 +88,4 @@ public class QuickDtoTest {
             }
         }
     }
-
 }

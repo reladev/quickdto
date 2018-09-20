@@ -16,6 +16,7 @@ import javax.tools.Diagnostic.Kind;
 import org.reladev.quickdto.feature.QuickDtoFeature;
 import org.reladev.quickdto.shared.QuickDtoHelper;
 
+import static org.reladev.quickdto.processor.AnnotationUtil.parseClassNameList;
 import static org.reladev.quickdto.processor.QuickDtoProcessor.*;
 
 public class ParsedHelperDef {
@@ -66,27 +67,6 @@ public class ParsedHelperDef {
                 }
             }
         }
-    }
-
-    private String parseClassName(AnnotationValue action) {
-        Object param = action.getValue();
-        return annotationParamToClassName(param);
-    }
-
-    private List<String> parseClassNameList(AnnotationValue action) {
-        ArrayList<String> classNames = new ArrayList<>();
-        List params = (List) action.getValue();
-        for (Object param: params) {
-            String className = annotationParamToClassName(param);
-            classNames.add(className);
-        }
-        return classNames;
-    }
-
-    private String annotationParamToClassName(Object source) {
-        String className = source.toString();
-        className = className.substring(0, className.length() - 6);
-        return className;
     }
 
     private void addClassAnnotations(TypeElement subelement) {
