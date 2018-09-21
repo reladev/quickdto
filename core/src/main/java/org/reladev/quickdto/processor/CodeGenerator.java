@@ -65,7 +65,7 @@ public class CodeGenerator {
             bw.indent();
 
             bw.newLine();
-            writeFields(dtoDef.getTargetDef(), dtoDef.isFieldAnnotationsOnGetter(), bw);
+            writeFields(dtoDef.getTargetDef(), dtoDef.isFieldAnnotationsOnGetter(), dtoDef, bw);
             for (QuickDtoFeature feature: dtoDef.getFeatures()) {
                 feature.writeFields(dtoDef, bw);
             }
@@ -167,7 +167,7 @@ public class CodeGenerator {
         bw.line(0, "}");
     }
 
-    private void writeFields(ClassDef classDef, boolean fieldAnnotationsOnGetter, IndentWriter bw) {
+    private void writeFields(ClassDef classDef, boolean fieldAnnotationsOnGetter, ParsedDtoDef dtoDef, IndentWriter bw) {
         for (Field field: classDef.getNameFieldMap().values()) {
             Type type = field.getType();
             if (!fieldAnnotationsOnGetter) {
@@ -178,7 +178,7 @@ public class CodeGenerator {
             if (type.isPrimitive()) {
                 bw.line(0, "private ").append(type.getPrimitiveBoxType()).append(" ").append(field.getName()).append(";");
             } else {
-                bw.line(0, "private ").append(type.getName()).append(" ").append(field.getName()).append(";");
+                bw.line(0, "private ").append(dtoDef.getImportSafeType(type)).append(" ").append(field.getName()).append(";");
             }
         }
     }
@@ -196,7 +196,7 @@ public class CodeGenerator {
             //for (String annotation : field.getGetterAnnotations()) {
             //    bw.line("").append(annotation).append("");
             //}
-            bw.line("public ").append(type.getName()).append(" ").append(field.getFullGetAccessorName()).append("() {");
+            bw.line("public ").append(parsedDtoDef.getImportSafeType(type)).append(" ").append(field.getFullGetAccessorName()).append("() {");
 
             bw.indent();
             for (QuickDtoFeature feature: parsedDtoDef.getFeatures()) {
@@ -224,7 +224,13 @@ public class CodeGenerator {
                 //for (String annotation : field.getSetterAnnotations()) {
                 //    bw.line("").append(annotation).append("");
                 //}
-                bw.line("public void set").append(field.getAccessorName()).append("(").append(type.getName()).append(" ").append(field.getName()).append(") {");
+                bw.line("public void set")
+                      .append(field.getAccessorName())
+                      .append("(")
+                      .append(parsedDtoDef.getImportSafeType(type))
+                      .append(" ")
+                      .append(field.getName())
+                      .append(") {");
 
                 bw.indent();
                 for (QuickDtoFeature feature: parsedDtoDef.getFeatures()) {
@@ -347,7 +353,7 @@ public class CodeGenerator {
     private void writeCopyToSource(CopyMap copyMap, ParsedDtoDef dtoDef, IndentWriter bw) {
         Type sourceType = copyMap.getSourceDef().getType();
         bw.line(0, "@GwtIncompatible");
-        bw.line(0, "public void copyTo(").append(sourceType.getName()).append(" dest, Fields... fields) {");
+        bw.line(0, "public void copyTo(").append(dtoDef.getImportSafeType(sourceType)).append(" dest, Fields... fields) {");
         bw.line(1, "if (fields.length > 0) {");
         bw.line(2, "copyTo(dest, Arrays.asList(fields));");
         bw.line(1, "} else {");
@@ -356,7 +362,7 @@ public class CodeGenerator {
         bw.line(0, "}");
         bw.newLine();
         bw.line(0, "@GwtIncompatible");
-        bw.line(0, "public void copyTo(").append(sourceType.getName()).append(" dest, Iterable<Fields> fields) {");
+        bw.line(0, "public void copyTo(").append(dtoDef.getImportSafeType(sourceType)).append(" dest, Iterable<Fields> fields) {");
         bw.line(1, "for (Fields field: fields) {");
         bw.line(2, "switch (field) {");
         for (CopyMapping mapping : copyMap.getTargetToSourceMappings().values()) {
@@ -366,26 +372,65 @@ public class CodeGenerator {
             if (mapping.getErrorMessage() != null) {
                 bw.line(4, "// ").append(mapping.getErrorMessage());
             }
-            bw.line(4, "dest.");
-            writeSet(setField, bw, () -> {
-                ConverterMethod converter = mapping.getConverterMethod();
-                if (converter != null) {
-                    bw.append(converter.getClassType().getOriginalName()).append(".convert(").append(getField.getName());
-                    if (converter.isExistingParam()) {
-                        bw.append(", dest.").append(generateGet(setField));
-                    }
-                    bw.append(")");
 
-                } else if (getField.getType().isPrimitive()) {
-                    bw.append(getField.getName()).append(" != null ? ").append(getField.getName()).append(" : ").append(getField.getType()
-                          .getDefaultPrimitiveValue());
+            ConverterMethod converter = mapping.getConverterMethod();
+            if (converter != null) {
+                if (mapping.isCollectionConvert()) {
+                    bw.append(" {");
+                    bw.line(4, dtoDef.getImportSafeType(setField.getType()))
+                          .append(" _l_ = ")
+                          .append(getField.getName())
+                          .append(" == null ? null : new java.util.ArrayList<>();");
+                    bw.line(4, "dest.");
+                    writeSet(setField, bw, () -> {
+                        bw.append("_l_");
+                    });
+                    bw.append(";");
+
+                    bw.line(4, "if (_l_ != null) {");
+                    bw.line(5, "for (").append(dtoDef.getImportSafeType(getField.getType().getListType()));
+                    bw.append(" _i_: ").append(getField.getName()).append(") {");
+                    bw.line(6, "_l_.add(")
+                          .append(converter.getClassType().getOriginalName())
+                          .append(".")
+                          .append(converter.getName())
+                          .append("(_i_));");
+                    bw.line(5, "}");
+                    bw.line(4, "}");
+                    bw.line(4, "break;");
+                    bw.line(3, "}");
 
                 } else {
-                    bw.append(getField.getName());
+                    bw.line(4, "dest.");
+                    writeSet(setField, bw, () -> {
+                        bw.append(converter.getClassType().getOriginalName())
+                              .append(".")
+                              .append(converter.getName())
+                              .append("(")
+                              .append(getField.getName());
+                        if (converter.isExistingParam()) {
+                            bw.append(", dest.").append(generateGet(setField));
+                        }
+                        bw.append(")");
+                    });
+                    bw.append(";");
+                    bw.line(4, "break;");
                 }
-            });
-            bw.append(";");
-            bw.line(4, "break;");
+
+            } else {
+                bw.line(4, "dest.");
+                writeSet(setField, bw, () -> {
+                    if (getField.getType().isPrimitive()) {
+                        bw.append(getField.getName()).append(" != null ? ").append(getField.getName()).append(" : ").append(getField.getType()
+                              .getDefaultPrimitiveValue());
+
+                    } else {
+                        bw.append(getField.getName());
+                    }
+                });
+                bw.append(";");
+                bw.line(4, "break;");
+            }
         }
         bw.line(2, "}");
         bw.line(1, "}");
@@ -396,15 +441,15 @@ public class CodeGenerator {
     private void writeCopyFromSource(CopyMap copyMap, ParsedDtoDef dtoDef, IndentWriter bw) {
         Type sourceType = copyMap.getSourceDef().getType();
         bw.line(0, "@GwtIncompatible");
-        bw.line(0, "public void copyFrom(").append(sourceType.getName()).append(" source) {");
+        bw.line(0, "public void copyFrom(").append(dtoDef.getImportSafeType(sourceType)).append(" source) {");
         for (CopyMapping mapping : copyMap.getSourceToTargetMappings().values()) {
             Field getField = mapping.getGetField();
             Field setField = mapping.getSetField();
             bw.line(1, setField.getName()).append(" = ");
             ConverterMethod converter = mapping.getConverterMethod();
             if (converter != null) {
-                bw.append("source.").append(generateGet(getField)).append(" == null ? null : ").append(
-                      converter.getClassType().getOriginalName()).append(".convert(");
+                bw.append("source.").append(generateGet(getField)).append(" == null ? null : ");
+                bw.append(converter.getClassType().getOriginalName()).append(".").append(converter.getName()).append("(");
                 bw.append("source.").append(generateGet(getField));
                 if (converter.isExistingParam()) {
                     bw.append(", ").append(setField.getName());
@@ -414,8 +459,7 @@ public class CodeGenerator {
             } else if (mapping.isQuickDtoConvert()) {
                 bw.append("source.")
                       .append(generateGet(getField))
-                      .append(" == null ? null : new ")
-                      .append(setField.getType().getName())
+                      .append(" == null ? null : new ").append(dtoDef.getImportSafeType(setField.getType()))
                       .append("();");
                 bw.line(1, "if (").append(setField.getName()).append(" != null) {");
                 bw.line(2, setField.getName()).append(".copyFrom(");
@@ -425,12 +469,14 @@ public class CodeGenerator {
             } else if (mapping.isQuickDtoListConvert()) {
                 bw.append("source.").append(generateGet(getField)).append(" == null ? null : new java.util.ArrayList<>();");
                 bw.line(1, "if (").append(setField.getName()).append(" != null) {");
-                bw.line(2, "for (")
-                      .append(getField.getType().getListType().getName())
+                bw.line(2, "for (").append(dtoDef.getImportSafeType(getField.getType().getListType()))
                       .append(" _i_: source.")
                       .append(generateGet(getField))
                       .append(") {");
-                bw.line(3, setField.getType().getListType().getName()).append(" _d_ = _i_ == null ? null : new ").append(setField.getType().getListType().getName()).append("();");
+                bw.line(3, dtoDef.getImportSafeType(setField.getType().getListType()))
+                      .append(" _d_ = _i_ == null ? null : new ")
+                      .append(dtoDef.getImportSafeType(setField.getType().getListType()))
+                      .append("();");
                 bw.line(3, setField.getName()).append(".add(_d_);");
                 bw.line(3, "if (_d_ != null) {");
                 bw.line(4, "_d_.copyFrom(_i_);");
@@ -450,8 +496,8 @@ public class CodeGenerator {
     private void writeHelperCopyMethods(ParsedHelperDef helperDef, IndentWriter bw) {
         if (!helperDef.getCopyMaps().isEmpty()) {
             for (CopyMap copyMap: helperDef.getCopyMaps()) {
-                writeHelperCopy(copyMap.getSourceDef(), copyMap.getTargetDef(), copyMap.getSourceToTargetMappings(), bw);
-                writeHelperCopy(copyMap.getTargetDef(), copyMap.getSourceDef(), copyMap.getTargetToSourceMappings(), bw);
+                writeHelperCopy(copyMap.getSourceDef(), copyMap.getTargetDef(), copyMap.getSourceToTargetMappings(), helperDef, bw);
+                writeHelperCopy(copyMap.getTargetDef(), copyMap.getSourceDef(), copyMap.getTargetToSourceMappings(), helperDef, bw);
 
                 //todo add feature stuff
                 //for (QuickDtoFeature feature : helperDef.features) {
@@ -466,10 +512,12 @@ public class CodeGenerator {
         }
     }
 
-    private void writeHelperCopy(ClassDef sourceDef, ClassDef targetDef, HashMap<String, CopyMapping> sourceToTargetMappings, IndentWriter bw) {
+    private void writeHelperCopy(ClassDef sourceDef, ClassDef targetDef, HashMap<String, CopyMapping> sourceToTargetMappings,
+          ParsedHelperDef helperDef, IndentWriter bw)
+    {
         bw.line(0, "@GwtIncompatible");
-        bw.line(0, "public static void copy(").append(sourceDef.getType().getName()).append(" source, ");
-        bw.append(targetDef.getType().getName()).append(" dest, Fields... fields) {");
+        bw.line(0, "public static void copy(").append(helperDef.getImportSafeType(sourceDef.getType())).append(" source, ");
+        bw.append(helperDef.getImportSafeType(targetDef.getType())).append(" dest, Fields... fields) {");
         bw.line(1, "if (fields.length > 0) {");
         bw.line(2, "copy(source, dest, Arrays.asList(fields));");
         bw.line(1, "} else {");
@@ -478,8 +526,8 @@ public class CodeGenerator {
         bw.line(0, "}");
         bw.newLine();
         bw.line(0, "@GwtIncompatible");
-        bw.line(0, "public static void copy(").append(sourceDef.getType().getName()).append(" source, ");
-        bw.append(targetDef.getType().getName()).append(" dest, Iterable<Fields> fields) {");
+        bw.line(0, "public static void copy(").append(helperDef.getImportSafeType(sourceDef.getType())).append(" source, ");
+        bw.append(helperDef.getImportSafeType(targetDef.getType())).append(" dest, Iterable<Fields> fields) {");
         bw.line(1, "for (Fields field: fields) {");
         bw.line(2, "switch (field) {");
         for (CopyMapping mapping: sourceToTargetMappings.values()) {
@@ -495,7 +543,7 @@ public class CodeGenerator {
                 bw.line(4, "dest.");
                 writeSet(setField, bw, () -> {
                     bw.append("source.").append(generateGet(getField)).append(" == null ? null : ");
-                    bw.append(converter.getClassType().getOriginalName()).append(".convert(");
+                    bw.append(converter.getClassType().getOriginalName()).append(".").append(converter.getName()).append("(");
                     bw.append("source.").append(generateGet(getField));
                     if (converter.isExistingParam()) {
                         bw.append(", dest.").append(generateGet(setField));
@@ -507,8 +555,8 @@ public class CodeGenerator {
 
             } else if (mapping.isQuickDtoConvert()) {
                 bw.append(" {");
-                bw.line(4, setField.getType().getName()).append(" _d_ = source.").append(generateGet(getField));
-                bw.append(" == null ? null : new ").append(setField.getType().getName()).append("();");
+                bw.line(4, helperDef.getImportSafeType(setField.getType())).append(" _d_ = source.").append(generateGet(getField));
+                bw.append(" == null ? null : new ").append(helperDef.getImportSafeType(setField.getType())).append("();");
                 bw.line(4, "dest.");
                 writeSet(setField, bw, () -> bw.append("_d_"));
                 bw.append(";");
@@ -516,9 +564,9 @@ public class CodeGenerator {
 
                 String helperType = "Missing";
                 if (getField.getType().isQuickHelper()) {
-                    helperType = getField.getType().getName();
+                    helperType = getField.getType().getQualifiedName();
                 } else if (setField.getType().isQuickHelper()) {
-                    helperType = setField.getType().getName();
+                    helperType = setField.getType().getQualifiedName();
                 }
                 bw.line(5, helperType).append(HelperSuffix).append(".copy(").append("source.");
                 bw.append(generateGet(getField)).append(", _d_);");
@@ -528,8 +576,7 @@ public class CodeGenerator {
 
             } else if (mapping.isQuickDtoListConvert()) {
                 bw.append(" {");
-                bw.line(4, "java.util.List<")
-                      .append(setField.getType().getListType().getName())
+                bw.line(4, "java.util.List<").append(helperDef.getImportSafeType(setField.getType().getListType()))
                       .append("> _a_ = source.")
                       .append(generateGet(getField))
                       .append(" == null ? null : new java.util.ArrayList<>();");
@@ -537,17 +584,17 @@ public class CodeGenerator {
                 writeSet(setField, bw, () -> bw.append("_a_"));
                 bw.append(";");
                 bw.line(4, "if (_a_ != null) {");
-                bw.line(5, "for (").append(getField.getType().getListType().getName()).append(" _i_: source.");
+                bw.line(5, "for (").append(helperDef.getImportSafeType(getField.getType().getListType())).append(" _i_: source.");
                 bw.append(generateGet(getField)).append(") {");
-                bw.line(6, setField.getType().getListType().getName()).append(" _d_ = _i_ == null ? null : new ");
-                bw.append(setField.getType().getListType().getName()).append("();");
+                bw.line(6, helperDef.getImportSafeType(setField.getType().getListType())).append(" _d_ = _i_ == null ? null : new ");
+                bw.append(helperDef.getImportSafeType(setField.getType().getListType())).append("();");
                 bw.line(6, "_a_.add(_d_);");
                 bw.line(6, "if (_d_ != null) {");
                 String helperType = "Missing";
                 if (getField.getType().getListType().isQuickHelper()) {
-                    helperType = getField.getType().getListType().getName();
+                    helperType = getField.getType().getListType().getQualifiedName();
                 } else if (setField.getType().getListType().isQuickHelper()) {
-                    helperType = setField.getType().getListType().getName();
+                    helperType = setField.getType().getListType().getQualifiedName();
                 }
                 bw.line(7, helperType).append(HelperSuffix).append(".copy(_i_, _d_);");
                 bw.line(6, "}");

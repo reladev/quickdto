@@ -5,6 +5,8 @@ import org.junit.Test;
 import org.reladev.quickdto.QuickDtoTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class CopyMapTest extends QuickDtoTest {
 
@@ -38,6 +40,9 @@ public class CopyMapTest extends QuickDtoTest {
               .hasSize(3)
               .containsKeys("basic", "basicList", "value"));
 
+        CopyMapping mapping = copyMap.getTargetToSourceMappings().get("basicList");
+        assertNotNull(mapping);
+        assertTrue(mapping.isCollectionConvert());
 
         SoftAssertions.assertSoftly(soft -> soft.assertThat(copyMap.getTargetToSourceMappings())
               .hasSize(3)

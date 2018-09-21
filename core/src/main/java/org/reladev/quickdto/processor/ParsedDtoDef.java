@@ -1,11 +1,9 @@
 package org.reladev.quickdto.processor;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
@@ -37,7 +35,7 @@ public class ParsedDtoDef {
     private List<CopyMap> copyMaps = new ArrayList<>();
     private ConverterMap converterMap = new ConverterMap();
     private List<QuickDtoFeature> features = new ArrayList<>();
-    private Set<Type> imports = new HashSet<>();
+    private ImportsList imports = new ImportsList();
 
     public ParsedDtoDef(TypeElement element) {
         messager.printMessage(Kind.NOTE, "QuickDto:" + element);
@@ -185,8 +183,12 @@ public class ParsedDtoDef {
         return features;
     }
 
-    public Set<Type> getImports() {
+    public ImportsList getImports() {
         return imports;
+    }
+
+    public String getImportSafeType(Type type) {
+        return imports.getImportSafeType(type);
     }
 
     public String toString() {

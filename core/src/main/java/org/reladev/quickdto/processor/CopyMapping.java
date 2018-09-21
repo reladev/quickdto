@@ -8,6 +8,7 @@ public class CopyMapping {
     private Field getField;
     private Field setField;
     private ConverterMethod converterMethod;
+    private boolean isCollectionConvert;
     private boolean isQuickDtoConvert;
     private boolean isQuickDtoListConvert;
     private String errorMessage;
@@ -34,7 +35,7 @@ public class CopyMapping {
             errorMessage = "Property '" + name + "' doesn't have a getter or isn't public. Add @ExcludeCopy to fix.";
 
         } else if (!setField.isPublic() && !setField.hasSetter()) {
-            errorMessage = "Property '" + name + "' doesn't have a getter or isn't public. Add @ExcludeCopy to fix.";
+            errorMessage = "Property '" + name + "' doesn't have a getter or isn't public. Either make public, add getter or @ExcludeCopy to fix.";
 
         } else {
             Type getType = getField.getType();
@@ -42,18 +43,24 @@ public class CopyMapping {
 
             if (!getType.equals(setType)) {
                 // try to find converter
-                ConverterMethod converter = converterMap.get(getType, setType);
-                if (converter != null) {
-                    converterMethod = converter;
+                converterMethod = converterMap.get(getType, setType);
+                if (converterMethod == null && getType.isCollection() && setType.isCollection()) {
+                    converterMethod = converterMap.get(getType.getListType(), setType.getListType());
+                    if (converterMethod != null) {
+                        isCollectionConvert = true;
+                    }
+                }
 
-                } else if (setField.getType().isQuickDto()) {
-                    isQuickDtoConvert = true;
+                if (converterMethod == null) {
+                    if (setField.getType().isQuickDto()) {
+                        isQuickDtoConvert = true;
 
-                } else if (setField.getType().isQuickDtoList()) {
-                    isQuickDtoListConvert = true;
+                    } else if (setField.getType().isQuickDtoList()) {
+                        isQuickDtoListConvert = true;
 
-                } else {
-                    errorMessage = "Type Mismatch(" + setType + ":" + getType + ") for " + getField.getAccessorName() + ". Add @ExcludeCopy to fix.";
+                    } else {
+                        errorMessage = "Type Mismatch(" + setType + ":" + getType + "). Either add Converter or @ExcludeCopy to fix.";
+                    }
                 }
             }
         }
@@ -84,6 +91,10 @@ public class CopyMapping {
 
     public ConverterMethod getConverterMethod() {
         return converterMethod;
+    }
+
+    public boolean isCollectionConvert() {
+        return isCollectionConvert;
     }
 
     public boolean isQuickDtoConvert() {

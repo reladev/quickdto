@@ -16,9 +16,10 @@ public class ConverterMethod {
     private Type fromType;
     private Type classType;
     private boolean existingParam;
+    private String name;
 
     public static ConverterMethod build(ExecutableElement execElement, Type classType) {
-        if (!execElement.toString().startsWith("convert(")) {
+        if (!execElement.toString().startsWith("convert")) {
             return null;
         }
 
@@ -27,6 +28,7 @@ public class ConverterMethod {
 
         ConverterMethod converter = new ConverterMethod();
         converter.classType = classType;
+        converter.name = execElement.getSimpleName().toString();
         converter.toType = new Type(t.getReturnType());
 
         List<? extends TypeMirror> parameterTypes = t.getParameterTypes();
@@ -83,6 +85,10 @@ public class ConverterMethod {
 
     public boolean isExistingParam() {
         return existingParam;
+    }
+
+    public String getName() {
+        return name;
     }
 
     @Override

@@ -15,9 +15,4 @@ public class BasicConvertDtoDef {
     public static BasicTypesImpl convert(BasicTypesDto convertChildDto) {
         throw new IllegalStateException("Testing only");
     }
-
-    public static List<BasicTypesImpl> convert(List<BasicTypesDto> convertChildDtoList, List<BasicTypesImpl> existing) {
-        throw new IllegalStateException("Testing only");
-    }
-
 }

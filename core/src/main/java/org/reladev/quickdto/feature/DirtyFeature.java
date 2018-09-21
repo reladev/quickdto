@@ -73,7 +73,7 @@ public class DirtyFeature extends QuickDtoFeature {
     @Override
     public void writeCopyTo(CopyMap copyMap, ParsedDtoDef dtoDef, IndentWriter bw) throws IOException {
         bw.line(0, "@GwtIncompatible");
-        bw.line(0, "public void copyDirtyTo(").append(copyMap.getSourceDef().getType().getName()).append(" dest) {");
+        bw.line(0, "public void copyDirtyTo(").append(dtoDef.getImportSafeType(copyMap.getSourceDef().getType())).append(" dest) {");
         bw.line(1, "copyTo(dest, listDirtyFields());");
         bw.line(0, "}");
         bw.newLine();

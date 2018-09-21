@@ -1,7 +1,5 @@
 package org.reladev.quickdto.processor;
 
-import java.util.List;
-
 import org.junit.Test;
 import org.reladev.quickdto.QuickDtoTest;
 import org.reladev.quickdto.test_classes.BasicTypesImpl;
@@ -17,12 +15,9 @@ public class ParsedDtoDefTest extends QuickDtoTest {
         assertEquals(1, parsedDtoDef.getCopyMaps()
                                     .size());
 
-        assertThat(parsedDtoDef.getConverterMap()
-                               .getMap()).hasSize(4)
+        assertThat(parsedDtoDef.getConverterMap().getMap()).hasSize(3)
                                          .containsKeys(new Type(String.class))
-                                         .containsKeys(new Type(Integer.class))
-                                         .containsKeys(new Type(BasicTypesImpl.class))
-                                         .containsKeys(new Type(List.class, BasicTypesImpl.class));
+                                         .containsKeys(new Type(Integer.class)).containsKeys(new Type(BasicTypesImpl.class));
 
         CopyMap copyMap = parsedDtoDef.getCopyMaps()
                                         .get(0);

@@ -114,6 +114,10 @@ public class Type {
         return isQuickDtoList;
     }
 
+    public boolean isCollection() {
+        return listType != null;
+    }
+
     public boolean isQuickHelper() {
         return isQuickHelper;
     }

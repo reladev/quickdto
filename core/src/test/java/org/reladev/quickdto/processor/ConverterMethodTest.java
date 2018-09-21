@@ -32,8 +32,6 @@ public class ConverterMethodTest extends QuickDtoTest {
         }
 
 
-        assertThat(converters).hasSize(2).contains(new ConverterMethod(BasicTypesDtoDef.class, BasicTypesImpl.class))
-                              .contains(
-                                    new ConverterMethod(new Type(List.class, BasicTypesDtoDef.class), new Type(List.class, BasicTypesImpl.class)));
+        assertThat(converters).hasSize(1).contains(new ConverterMethod(BasicTypesDtoDef.class, BasicTypesImpl.class));
     }
 }

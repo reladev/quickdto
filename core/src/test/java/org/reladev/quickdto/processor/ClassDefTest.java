@@ -1,7 +1,6 @@
 package org.reladev.quickdto.processor;
 
 import java.util.AbstractMap.SimpleEntry;
-import java.util.List;
 
 import org.junit.Test;
 import org.reladev.quickdto.QuickDtoTest;
@@ -15,8 +14,7 @@ public class ClassDefTest extends QuickDtoTest {
     public void verifyConvertMap() {
         ClassDef classDef = new ClassDef(elementBasicConvertDtoDef);
 
-        assertThat(classDef.getConverterMap().getMap()).hasSize(2)
-              .containsKeys(new Type(BasicTypesImpl.class), new Type(List.class, BasicTypesImpl.class));
+        assertThat(classDef.getConverterMap().getMap()).hasSize(1).containsKeys(new Type(BasicTypesImpl.class));
     }
 
 
