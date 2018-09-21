@@ -12,17 +12,16 @@ import org.reladev.quickdto.processor.QuickDtoProcessor;
 
 public class QuickDtoTest {
 
-    public String[] testClasses = {"src/test/java/org/reladev/quickdto/test_classes/AnnotationDtoDef.java",
+    public String[] testClasses = {"src/test/java/org/reladev/quickdto/test_dto/AnnotationDtoDef.java",
           "src/test/java/org/reladev/quickdto/test_classes/AnnotationImpl.java",
-          "src/test/java/org/reladev/quickdto/test_classes/BasicConvertDtoDef.java",
+          "src/test/java/org/reladev/quickdto/test_dto/BasicConvertDtoDef.java",
           "src/test/java/org/reladev/quickdto/test_classes/BasicConvertImpl.java",
-          "src/test/java/org/reladev/quickdto/test_classes/BasicTypesDtoDef.java",
+          "src/test/java/org/reladev/quickdto/test_dto/BasicTypesDtoDef.java",
           "src/test/java/org/reladev/quickdto/test_classes/BasicTypesImpl.java",
           "src/test/java/org/reladev/quickdto/test_classes/GenericsBaseImpl.java",
-          "src/test/java/org/reladev/quickdto/test_classes/GenericsImpl.java",
-          "src/test/java/org/reladev/quickdto/test_classes/MappingErrorsDtoDef.java",
+          "src/test/java/org/reladev/quickdto/test_classes/GenericsImpl.java", "src/test/java/org/reladev/quickdto/test_dto/MappingErrorsDtoDef.java",
           "src/test/java/org/reladev/quickdto/test_classes/MappingErrorsImpl.java",
-          "src/test/java/org/reladev/quickdto/test_classes/TestClassDtoDef.java",
+          "src/test/java/org/reladev/quickdto/test_dto/TestClassDtoDef.java",
           "src/test/java/org/reladev/quickdto/test_classes/TestClassImpl.java",};
 
     @Rule
@@ -49,19 +48,19 @@ public class QuickDtoTest {
         Set<Element> elements = rule.getRootElements();
         for (Element element : elements) {
             switch (element.toString()) {
-                case "org.reladev.quickdto.test_classes.AnnotationDtoDef":
+                case "org.reladev.quickdto.test_dto.AnnotationDtoDef":
                     elementAnnotationDtoDef = (TypeElement) element;
                     break;
                 case "org.reladev.quickdto.test_classes.AnnotationImpl":
                     elementAnnotationImpl = (TypeElement) element;
                     break;
-                case "org.reladev.quickdto.test_classes.BasicConvertDtoDef":
+                case "org.reladev.quickdto.test_dto.BasicConvertDtoDef":
                     elementBasicConvertDtoDef = (TypeElement) element;
                     break;
                 case "org.reladev.quickdto.test_classes.BasicConvertImpl":
                     elementBasicConvertImpl = (TypeElement) element;
                     break;
-                case "org.reladev.quickdto.test_classes.BasicTypesDtoDef":
+                case "org.reladev.quickdto.test_dto.BasicTypesDtoDef":
                     elementBasicTypesDtoDef = (TypeElement) element;
                     break;
                 case "org.reladev.quickdto.test_classes.BasicTypesImpl":
@@ -73,13 +72,13 @@ public class QuickDtoTest {
                 case "org.reladev.quickdto.test_classes.GenericsImpl":
                     elementGenericsImpl = (TypeElement) element;
                     break;
-                case "org.reladev.quickdto.test_classes.MappingErrorsDtoDef":
+                case "org.reladev.quickdto.test_dto.MappingErrorsDtoDef":
                     elementMappingErrorsDtoDef = (TypeElement) element;
                     break;
                 case "org.reladev.quickdto.test_classes.MappingErrorsImpl":
                     elementMappingErrorsImpl = (TypeElement) element;
                     break;
-                case "org.reladev.quickdto.test_classes.TestClassDtoDef":
+                case "org.reladev.quickdto.test_dto.TestClassDtoDef":
                     elementTestClassDtoDef = (TypeElement) element;
                     break;
                 case "org.reladev.quickdto.test_classes.TestClassImpl":

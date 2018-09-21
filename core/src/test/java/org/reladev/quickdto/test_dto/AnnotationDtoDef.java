@@ -1,10 +1,11 @@
-package org.reladev.quickdto.test_classes;
+package org.reladev.quickdto.test_dto;
 
 import org.reladev.quickdto.shared.EqualsHashCode;
 import org.reladev.quickdto.shared.ExcludeCopy;
 import org.reladev.quickdto.shared.ExcludeCopyFrom;
 import org.reladev.quickdto.shared.ExcludeCopyTo;
 import org.reladev.quickdto.shared.QuickDto;
+import org.reladev.quickdto.test_classes.AnnotationImpl;
 
 @QuickDto(source = AnnotationImpl.class)
 public class AnnotationDtoDef {

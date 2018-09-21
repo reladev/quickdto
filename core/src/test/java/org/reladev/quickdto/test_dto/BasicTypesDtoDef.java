@@ -1,9 +1,10 @@
-package org.reladev.quickdto.test_classes;
+package org.reladev.quickdto.test_dto;
 
 
 import org.reladev.quickdto.feature.DirtyFeature;
 import org.reladev.quickdto.shared.GwtIncompatible;
 import org.reladev.quickdto.shared.QuickDto;
+import org.reladev.quickdto.test_classes.BasicTypesImpl;
 
 @QuickDto(source = BasicTypesImpl.class, feature = DirtyFeature.class)
 public class BasicTypesDtoDef {

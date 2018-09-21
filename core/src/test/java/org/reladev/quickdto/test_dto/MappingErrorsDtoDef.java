@@ -1,4 +1,4 @@
-package org.reladev.quickdto.test_classes;
+package org.reladev.quickdto.test_dto;
 
 
 import java.util.List;

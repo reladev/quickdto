@@ -10,9 +10,9 @@ import javax.lang.model.element.ExecutableElement;
 
 import org.junit.Test;
 import org.reladev.quickdto.QuickDtoTest;
-import org.reladev.quickdto.test_classes.BasicConvertDtoDef;
-import org.reladev.quickdto.test_classes.BasicTypesDtoDef;
 import org.reladev.quickdto.test_classes.BasicTypesImpl;
+import org.reladev.quickdto.test_dto.BasicConvertDtoDef;
+import org.reladev.quickdto.test_dto.BasicTypesDtoDef;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
