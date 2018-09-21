@@ -93,6 +93,16 @@ public class CopyMapTest extends QuickDtoTest {
         mapping = copyMap.getTargetToSourceMappings().get("sourceNoSetter");
         assertThat(mapping.getErrorMessage()).isNotNull();
 
+    }
+
+    @Test
+    public void verifyAnnotationMaps() {
+        ClassDef targetDef = new ClassDef(elementAnnotationDtoDef);
+        ClassDef sourceDef = new ClassDef(elementAnnotationImpl);
+        ConverterMap converterMap = new ConverterMap();
+
+        CopyMap copyMap = new CopyMap(sourceDef, targetDef, converterMap);
+
         assertThat(copyMap.getSourceToTargetMappings().get("targetNoField")).isNull();
         assertThat(copyMap.getTargetToSourceMappings().get("targetNoField")).isNull();
 
@@ -125,23 +135,6 @@ public class CopyMapTest extends QuickDtoTest {
 
         assertThat(copyMap.getSourceToTargetMappings().get("sourceNoSetterSourceExcludeTo")).isNotNull();
         assertThat(copyMap.getTargetToSourceMappings().get("sourceNoSetterSourceExcludeTo")).isNull();
-    }
-
-    @Test
-    public void verifyAnnotationMaps() {
-        ClassDef targetDef = new ClassDef(elementAnnotationDtoDef);
-        ClassDef sourceDef = new ClassDef(elementAnnotationImpl);
-        ConverterMap converterMap = new ConverterMap();
-
-        CopyMap copyMap = new CopyMap(sourceDef, targetDef, converterMap);
-
-        SoftAssertions.assertSoftly(soft -> soft.assertThat(copyMap.getSourceToTargetMappings())
-              .hasSize(3)
-              .containsKeys("equalsHash", "readOnly", "result"));
-
-        SoftAssertions.assertSoftly(soft -> soft.assertThat(copyMap.getTargetToSourceMappings())
-              .hasSize(3)
-              .containsKeys("equalsHash", "writeOnly", "result"));
     }
 
 }

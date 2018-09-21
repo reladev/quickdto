@@ -39,7 +39,7 @@ public class FieldTest extends QuickDtoTest {
         ClassDef annotationDto = new ClassDef(elementAnnotationDtoDef);
         ClassDef annotationImpl = new ClassDef(elementAnnotationImpl);
 
-        Field excludeField = annotationDto.getNameFieldMap().get("exclude");
+        Field excludeField = annotationDto.getNameFieldMap().get("sourceNoFieldTargetExclude");
         assertThat(excludeField).isNotNull();
         assertFalse(excludeField.isCopyGettable(annotationDto));
         assertFalse(excludeField.isCopyGettable(annotationDto));
@@ -47,8 +47,6 @@ public class FieldTest extends QuickDtoTest {
         Field excludeFromImpl = annotationDto.getNameFieldMap().get("excludeFromImpl");
         assertThat(excludeFromImpl).isNotNull();
         assertTrue(excludeFromImpl.isCopyGettable(annotationDto));
-        assertTrue(excludeFromImpl.isCopyGettable(annotationDto));
-        assertFalse(excludeFromImpl.isCopyGettable(annotationImpl));
         assertFalse(excludeFromImpl.isCopyGettable(annotationImpl));
     }
 

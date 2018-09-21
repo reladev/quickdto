@@ -10,14 +10,28 @@ import org.reladev.quickdto.shared.QuickDto;
 public class AnnotationDtoDef {
     @EqualsHashCode
     int equalsHash;
-    @ExcludeCopyFrom
-    int readOnly;
-    @ExcludeCopyTo
-    int writeOnly;
-    @ExcludeCopy
-    int exclude;
+
     @ExcludeCopy(AnnotationImpl.class)
     int excludeFromImpl;
 
-    String result;
+    // Excludes Target
+    @ExcludeCopy
+    private String sourceNoFieldTargetExclude;
+    @ExcludeCopy
+    private String fieldTargetExclude;
+    @ExcludeCopyFrom
+    private String targetNoGetterTargetExcludeTo;
+    @ExcludeCopyTo
+    private String targetNoSetterTargetExcludeFrom;
+    @ExcludeCopyTo
+    private String sourceNoGetterTargetExcludeFrom;
+    @ExcludeCopyFrom
+    private String sourceNoSetterTargetExcludeTo;
+
+    // Excludes Source
+    private String fieldSourceExclude;
+    private String targetNoGetterSourceExcludeTo;
+    private String targetNoSetterSourceExcludeFrom;
+    private String sourceNoGetterSourceExcludeFrom;
+    private String sourceNoSetterSourceExcludeTo;
 }
