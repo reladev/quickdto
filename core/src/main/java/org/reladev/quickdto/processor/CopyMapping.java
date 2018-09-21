@@ -47,11 +47,18 @@ public class CopyMapping {
                 if (converterMethod == null && getType.isCollection() && setType.isCollection()) {
                     converterMethod = converterMap.get(getType.getListType(), setType.getListType());
                     if (converterMethod != null) {
-                        isCollectionConvert = true;
+                        if (!converterMethod.isExistingParam()) {
+                            isCollectionConvert = true;
+
+                        } else {
+                            errorMessage = converterMethod.getClassType().getName() + "." + converterMethod.getName() +
+                                  "() can't be used to convert list because it has an 'existing' parameter.";
+                            converterMethod = null;
+                        }
                     }
                 }
 
-                if (converterMethod == null) {
+                if (converterMethod == null && errorMessage == null) {
                     if (setField.getType().isQuickDto()) {
                         isQuickDtoConvert = true;
 

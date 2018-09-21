@@ -5,12 +5,12 @@ import java.util.Map;
 import java.util.Set;
 
 import org.reladev.quickdto.shared.QuickDtoHelper;
+import org.reladev.quickdto.testharness.ConvertChildDto;
 import org.reladev.quickdto.testharness.ConvertChildSourceDtoDef;
-import org.reladev.quickdto.testharness.ConvertDtoConverter;
 import org.reladev.quickdto.testharness.ConvertDtoDef;
-import org.reladev.quickdto.testharness.ConvertExistingDto;
+import org.reladev.quickdto.testharness.ConvertExistingImplConverter;
 
-@QuickDtoHelper(copyClass = ConvertDtoDef.class, converter = ConvertDtoConverter.class)
+@QuickDtoHelper(copyClass = ConvertDtoDef.class, converter = ConvertExistingImplConverter.class)
 public class ConvertPublicImpl {
     public ConvertChildImpl child;
     public List<ConvertChildImpl> childList;
@@ -28,26 +28,12 @@ public class ConvertPublicImpl {
     public Set<ConvertChildSourceDtoDef> childSet;
     public Map<String, ConvertChildSourceDtoDef> childMap;
 
-    public static ConvertExistingDto convert(ConvertExistingImpl source, ConvertExistingDto existing) {
+    public static ConvertChildImpl convert2ChildImpl(ConvertChildDto source) {
         if (source == null) {
             return null;
         }
-        if (existing == null) {
-            existing = new ConvertExistingDto();
-        }
-        ConvertExistingImplHelper.copy(source, existing);
-        return existing;
+        ConvertChildImpl convert = new ConvertChildImpl();
+        ConvertChildImplHelper.copy(source, convert);
+        return convert;
     }
-
-    public static ConvertExistingImpl convert(ConvertExistingDto source, ConvertExistingImpl existing) {
-        if (source == null) {
-            return null;
-        }
-        if (existing == null) {
-            existing = new ConvertExistingImpl();
-        }
-        ConvertExistingImplHelper.copy(source, existing);
-        return existing;
-    }
-
 }

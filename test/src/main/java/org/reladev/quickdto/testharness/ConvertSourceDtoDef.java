@@ -1,15 +1,13 @@
 package org.reladev.quickdto.testharness;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.reladev.quickdto.shared.QuickDto;
 import org.reladev.quickdto.testharness.impl.ConvertChildImpl;
-import org.reladev.quickdto.testharness.impl.ConvertExistingImpl;
 import org.reladev.quickdto.testharness.impl.ConvertImpl;
 import org.reladev.quickdto.testharness.impl.ConvertPublicImpl;
 
-@QuickDto(source = {ConvertImpl.class, ConvertPublicImpl.class}, converter = ConvertSourceDtoConverter.class)
+@QuickDto(source = {ConvertImpl.class, ConvertPublicImpl.class}, converter = ConvertExistingImplConverter.class)
 public class ConvertSourceDtoDef {
     ConvertChildSourceDtoDef child;
     List<ConvertChildSourceDtoDef> childList;
@@ -21,38 +19,12 @@ public class ConvertSourceDtoDef {
     //Set<ConvertChildSourceDtoDef> childSet;
     //Map<String, ConvertChildSourceDtoDef> childMap;
 
-    public static List<ConvertChildImpl> convert(List<ConvertChildSourceDto> convertChildDtoList, List<ConvertChildImpl> existing) {
-        if (convertChildDtoList == null) {
+    public static ConvertChildImpl convert2ChildImpl(ConvertChildSourceDto original) {
+        if (original == null) {
             return null;
         }
-        List<ConvertChildImpl> basicList = new ArrayList<>();
-        for (ConvertChildSourceDto convertChildDto: convertChildDtoList) {
-            ConvertChildImpl basic = new ConvertChildImpl();
-            convertChildDto.copyTo(basic);
-            basicList.add(basic);
-        }
-        return basicList;
-    }
-
-    public static ConvertExistingSourceDto convert(ConvertExistingImpl existingParam, ConvertExistingSourceDto existing) {
-        if (existingParam == null) {
-            return null;
-        }
-        if (existing == null) {
-            existing = new ConvertExistingSourceDto();
-        }
-        existing.copyFrom(existingParam);
-        return existing;
-    }
-
-    public static ConvertExistingImpl convert(ConvertExistingSourceDto existingParamDto, ConvertExistingImpl existing) {
-        if (existingParamDto == null) {
-            return null;
-        }
-        if (existing == null) {
-            existing = new ConvertExistingImpl();
-        }
-        existingParamDto.copyTo(existing);
-        return existing;
+        ConvertChildImpl convert = new ConvertChildImpl();
+        original.copyTo(convert);
+        return convert;
     }
 }

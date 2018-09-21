@@ -192,10 +192,6 @@ public class CodeGenerator {
                     bw.line("").append(annotation).append("");
                 }
             }
-            // todo double check if this is still needed
-            //for (String annotation : field.getGetterAnnotations()) {
-            //    bw.line("").append(annotation).append("");
-            //}
             bw.line("public ").append(parsedDtoDef.getImportSafeType(type)).append(" ").append(field.getFullGetAccessorName()).append("() {");
 
             bw.indent();
@@ -220,10 +216,6 @@ public class CodeGenerator {
             bw.line("}");
             bw.newLine();
             if (!field.isExcludeSetter()) {
-                // todo double check if this is still needed
-                //for (String annotation : field.getSetterAnnotations()) {
-                //    bw.line("").append(annotation).append("");
-                //}
                 bw.line("public void set")
                       .append(field.getAccessorName())
                       .append("(")
@@ -540,18 +532,45 @@ public class CodeGenerator {
             }
             ConverterMethod converter = mapping.getConverterMethod();
             if (converter != null) {
-                bw.line(4, "dest.");
-                writeSet(setField, bw, () -> {
-                    bw.append("source.").append(generateGet(getField)).append(" == null ? null : ");
-                    bw.append(converter.getClassType().getOriginalName()).append(".").append(converter.getName()).append("(");
-                    bw.append("source.").append(generateGet(getField));
-                    if (converter.isExistingParam()) {
-                        bw.append(", dest.").append(generateGet(setField));
-                    }
-                    bw.append(")");
-                });
-                bw.append(";");
-                bw.line(4, "break;");
+                if (mapping.isCollectionConvert()) {
+                    bw.append(" {");
+                    bw.line(4, helperDef.getImportSafeType(setField.getType()))
+                          .append(" _l_ = ")
+                          .append("source.")
+                          .append(generateGet(getField))
+                          .append(" == null ? null : new java.util.ArrayList<>();");
+                    bw.line(4, "dest.");
+                    writeSet(setField, bw, () -> {
+                        bw.append("_l_");
+                    });
+                    bw.append(";");
+                    bw.line(4, "if (_l_ != null) {");
+                    bw.line(5, "for (").append(helperDef.getImportSafeType(getField.getType().getListType()));
+                    bw.append(" _i_: ").append("source.").append(generateGet(getField)).append(") {");
+                    bw.line(6, "_l_.add(")
+                          .append(converter.getClassType().getOriginalName())
+                          .append(".")
+                          .append(converter.getName())
+                          .append("(_i_));");
+                    bw.line(5, "}");
+                    bw.line(4, "}");
+                    bw.line(4, "break;");
+                    bw.line(3, "}");
+
+                } else {
+                    bw.line(4, "dest.");
+                    writeSet(setField, bw, () -> {
+                        bw.append("source.").append(generateGet(getField)).append(" == null ? null : ");
+                        bw.append(converter.getClassType().getOriginalName()).append(".").append(converter.getName()).append("(");
+                        bw.append("source.").append(generateGet(getField));
+                        if (converter.isExistingParam()) {
+                            bw.append(", dest.").append(generateGet(setField));
+                        }
+                        bw.append(")");
+                    });
+                    bw.append(";");
+                    bw.line(4, "break;");
+                }
 
             } else if (mapping.isQuickDtoConvert()) {
                 bw.append(" {");
