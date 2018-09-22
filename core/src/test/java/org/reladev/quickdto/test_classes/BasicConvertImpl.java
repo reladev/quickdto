@@ -4,7 +4,7 @@ package org.reladev.quickdto.test_classes;
 import java.util.List;
 import java.util.Set;
 
-//@QuickDtoHelper(copyClass = BasicTypesDtoDef.class)
+//@QuickCopy(targets = BasicTypesDtoDef.class)
 public class BasicConvertImpl {
     private BasicTypesImpl basic;
     private List<BasicTypesImpl> basicList;

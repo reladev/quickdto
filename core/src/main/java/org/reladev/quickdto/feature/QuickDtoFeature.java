@@ -25,9 +25,7 @@ abstract public class QuickDtoFeature {
 
     abstract public void writeCopyFrom(CopyMap source, ParsedDtoDef dtoDef, IndentWriter bw) throws IOException;
 
-    abstract public void writeHelperCopyTo(CopyMap source, ParsedDtoDef dtoDef, IndentWriter bw) throws IOException;
-
-    abstract public void writeHelperCopyFrom(CopyMap source, ParsedDtoDef dtoDef, IndentWriter bw) throws IOException;
+    abstract public void writeCopy(CopyMap source, ParsedDtoDef dtoDef, IndentWriter bw) throws IOException;
 
     abstract public void writeInnerClasses(ParsedDtoDef dtoDef, IndentWriter bw) throws IOException;
 

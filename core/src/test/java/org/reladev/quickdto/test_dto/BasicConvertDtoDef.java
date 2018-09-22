@@ -10,7 +10,7 @@ import org.reladev.quickdto.test_classes.BasicConvertImpl;
 import org.reladev.quickdto.test_classes.BasicTypesImpl;
 import org.reladev.quickdto.test_classes.StringIntConverter;
 
-@QuickDto(source = BasicConvertImpl.class, feature = DirtyFeature.class, converter = StringIntConverter.class)
+@QuickDto(sources = BasicConvertImpl.class, features = DirtyFeature.class, converters = StringIntConverter.class)
 public class BasicConvertDtoDef {
     BasicTypesDtoDef basic;
     List<BasicTypesDtoDef> basicList;

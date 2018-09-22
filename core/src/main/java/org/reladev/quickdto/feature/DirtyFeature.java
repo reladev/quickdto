@@ -84,17 +84,13 @@ public class DirtyFeature extends QuickDtoFeature {
     }
 
     @Override
-    public void writeHelperCopyTo(CopyMap copyMap, ParsedDtoDef dtoDef, IndentWriter bw) {
+    public void writeCopy(CopyMap copyMap, ParsedDtoDef dtoDef, IndentWriter bw) {
         //bw.line(0, "@GwtIncompatible");
         //bw.line(0, "public static void copyDirtyTo(").append(dtoDef.name).append(" dto, ");
         //bw.append(source.sourceDef.type).append(" dest, ").append(dtoDef.name).append(".Fields... fields) {");
         //bw.line(1, "copyTo(dto, dest, dto.listDirtyFields());");
         //bw.line(0, "}");
         //bw.newLine();
-    }
-
-    @Override
-    public void writeHelperCopyFrom(CopyMap copyMap, ParsedDtoDef dtoDef, IndentWriter bw) {
     }
 
     @Override

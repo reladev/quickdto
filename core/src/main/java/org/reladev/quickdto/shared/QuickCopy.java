@@ -11,11 +11,11 @@ import java.lang.annotation.Target;
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.CLASS)
-public @interface QuickDtoHelper {
+public @interface QuickCopy {
     /**
      * @return the source class should be used in the copy methods.
      */
-    Class[] copyClass() default {};
+    Class[] targets() default {};
 
-    Class[] converter() default {};
+    Class[] converters() default {};
 }

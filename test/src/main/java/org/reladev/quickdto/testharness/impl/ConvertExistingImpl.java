@@ -1,9 +1,9 @@
 package org.reladev.quickdto.testharness.impl;
 
-import org.reladev.quickdto.shared.QuickDtoHelper;
+import org.reladev.quickdto.shared.QuickCopy;
 import org.reladev.quickdto.testharness.ConvertExistingDtoDef;
 
-@QuickDtoHelper(copyClass = ConvertExistingDtoDef.class)
+@QuickCopy(targets = ConvertExistingDtoDef.class)
 public class ConvertExistingImpl {
     private String text;
 

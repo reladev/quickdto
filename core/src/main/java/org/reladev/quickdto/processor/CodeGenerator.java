@@ -11,7 +11,7 @@ import javax.tools.JavaFileObject;
 
 import org.reladev.quickdto.feature.QuickDtoFeature;
 
-import static org.reladev.quickdto.processor.QuickDtoProcessor.HelperSuffix;
+import static org.reladev.quickdto.processor.QuickDtoProcessor.CopySuffix;
 import static org.reladev.quickdto.processor.QuickDtoProcessor.processingEnv;
 import static org.reladev.quickdto.processor.Reversed.reversed;
 
@@ -92,11 +92,11 @@ public class CodeGenerator {
         }
     }
 
-    public void writeHelper(ParsedHelperDef helperDef) {
+    public void writeCopyUtil(ParsedCopyDef copyDef) {
         try {
-            Type sourceType = helperDef.getSourceDef().getType();
+            Type sourceType = copyDef.getSourceDef().getType();
 
-            JavaFileObject jfo = processingEnv.getFiler().createSourceFile(sourceType.getPackageString() + "." + sourceType.getName() + HelperSuffix);
+            JavaFileObject jfo = processingEnv.getFiler().createSourceFile(sourceType.getPackageString() + "." + sourceType.getName() + CopySuffix);
 
             IndentWriter bw = new IndentWriter(new BufferedWriter(jfo.openWriter()), "\t");
             bw.append("package ").append(sourceType.getPackageString()).append(";");
@@ -109,22 +109,22 @@ public class CodeGenerator {
             bw.line("import java.util.Objects;");
             bw.line("import org.reladev.quickdto.shared.GwtIncompatible;");
             bw.newLine();
-            for (Type type: helperDef.getImports()) {
+            for (Type type: copyDef.getImports()) {
                 if (type.isImportable()) {
                     bw.line("import ").append(type.getQualifiedName()).append(";");
                 }
             }
 
             bw.newLine();
-            bw.line("public class ").append(sourceType.getName()).append(HelperSuffix).append(" {");
+            bw.line("public class ").append(sourceType.getName()).append(CopySuffix).append(" {");
             bw.indent();
             bw.newLine();
 
-            writeHelperCopyMethods(helperDef, bw);
+            writeCopyMethods(copyDef, bw);
 
             bw.newLine();
 
-            writeFieldsEnum(helperDef.getSourceDef(), bw);
+            writeFieldsEnum(copyDef.getSourceDef(), bw);
 
             bw.unindent();
             bw.line("}");
@@ -488,31 +488,31 @@ public class CodeGenerator {
         bw.newLine();
     }
 
-    private void writeHelperCopyMethods(ParsedHelperDef helperDef, IndentWriter bw) {
-        if (!helperDef.getCopyMaps().isEmpty()) {
-            for (CopyMap copyMap: helperDef.getCopyMaps()) {
-                writeHelperCopy(copyMap.getSourceDef(), copyMap.getTargetDef(), copyMap.getSourceToTargetMappings(), helperDef, bw);
-                writeHelperCopy(copyMap.getTargetDef(), copyMap.getSourceDef(), copyMap.getTargetToSourceMappings(), helperDef, bw);
+    private void writeCopyMethods(ParsedCopyDef copyDef, IndentWriter bw) {
+        if (!copyDef.getCopyMaps().isEmpty()) {
+            for (CopyMap copyMap: copyDef.getCopyMaps()) {
+                writeCopy(copyMap.getSourceDef(), copyMap.getTargetDef(), copyMap.getSourceToTargetMappings(), copyDef, bw);
+                writeCopy(copyMap.getTargetDef(), copyMap.getSourceDef(), copyMap.getTargetToSourceMappings(), copyDef, bw);
 
                 //todo add feature stuff
-                //for (QuickDtoFeature feature : helperDef.features) {
-                //    feature.writeHelperCopyTo(source, helperDef, bw);
+                //for (QuickDtoFeature feature : copyDef.features) {
+                //    feature.writeCopyTo(source, copyDef, bw);
                 //}
 
-                //writeHelperCopyFrom(source, helperDef, bw);
-                //for (QuickDtoFeature feature : helperDef.features) {
-                //    feature.writeHelperCopyFrom(source, helperDef, bw);
+                //writeCopyFrom(source, copyDef, bw);
+                //for (QuickDtoFeature feature : copyDef.features) {
+                //    feature.writeCopyFrom(source, copyDef, bw);
                 //}
             }
         }
     }
 
-    private void writeHelperCopy(ClassDef sourceDef, ClassDef targetDef, HashMap<String, CopyMapping> sourceToTargetMappings,
-          ParsedHelperDef helperDef, IndentWriter bw)
+    private void writeCopy(ClassDef sourceDef, ClassDef targetDef, HashMap<String, CopyMapping> sourceToTargetMappings, ParsedCopyDef copyDef,
+          IndentWriter bw)
     {
         bw.line(0, "@GwtIncompatible");
-        bw.line(0, "public static void copy(").append(helperDef.getImportSafeType(sourceDef.getType())).append(" source, ");
-        bw.append(helperDef.getImportSafeType(targetDef.getType())).append(" dest, Fields... fields) {");
+        bw.line(0, "public static void copy(").append(copyDef.getImportSafeType(sourceDef.getType())).append(" source, ");
+        bw.append(copyDef.getImportSafeType(targetDef.getType())).append(" dest, Fields... fields) {");
         bw.line(1, "if (fields.length > 0) {");
         bw.line(2, "copy(source, dest, Arrays.asList(fields));");
         bw.line(1, "} else {");
@@ -521,8 +521,8 @@ public class CodeGenerator {
         bw.line(0, "}");
         bw.newLine();
         bw.line(0, "@GwtIncompatible");
-        bw.line(0, "public static void copy(").append(helperDef.getImportSafeType(sourceDef.getType())).append(" source, ");
-        bw.append(helperDef.getImportSafeType(targetDef.getType())).append(" dest, Iterable<Fields> fields) {");
+        bw.line(0, "public static void copy(").append(copyDef.getImportSafeType(sourceDef.getType())).append(" source, ");
+        bw.append(copyDef.getImportSafeType(targetDef.getType())).append(" dest, Iterable<Fields> fields) {");
         bw.line(1, "for (Fields field: fields) {");
         bw.line(2, "switch (field) {");
         for (CopyMapping mapping: sourceToTargetMappings.values()) {
@@ -537,7 +537,7 @@ public class CodeGenerator {
             if (converter != null) {
                 if (mapping.isCollectionConvert()) {
                     bw.append(" {");
-                    bw.line(4, helperDef.getImportSafeType(setField.getType()))
+                    bw.line(4, copyDef.getImportSafeType(setField.getType()))
                           .append(" _l_ = ")
                           .append("source.")
                           .append(generateGet(getField))
@@ -548,7 +548,7 @@ public class CodeGenerator {
                     writeSet(setField, bw, () -> bw.append("_l_"));
                     bw.append(";");
                     bw.line(4, "if (_l_ != null) {");
-                    bw.line(5, "for (").append(helperDef.getImportSafeType(getField.getType().getCollectionType()));
+                    bw.line(5, "for (").append(copyDef.getImportSafeType(getField.getType().getCollectionType()));
                     bw.append(" _i_: ").append("source.").append(generateGet(getField)).append(") {");
                     bw.line(6, "_l_.add(")
                           .append(converter.getClassType().getOriginalName())
@@ -577,20 +577,20 @@ public class CodeGenerator {
 
             } else if (mapping.isQuickDtoConvert()) {
                 bw.append(" {");
-                bw.line(4, helperDef.getImportSafeType(setField.getType())).append(" _d_ = source.").append(generateGet(getField));
-                bw.append(" == null ? null : new ").append(helperDef.getImportSafeType(setField.getType())).append("();");
+                bw.line(4, copyDef.getImportSafeType(setField.getType())).append(" _d_ = source.").append(generateGet(getField));
+                bw.append(" == null ? null : new ").append(copyDef.getImportSafeType(setField.getType())).append("();");
                 bw.line(4, "dest.");
                 writeSet(setField, bw, () -> bw.append("_d_"));
                 bw.append(";");
                 bw.line(4, "if (_d_ != null) {");
 
-                String helperType = "Missing";
-                if (getField.getType().isQuickHelper()) {
-                    helperType = getField.getType().getQualifiedName();
-                } else if (setField.getType().isQuickHelper()) {
-                    helperType = setField.getType().getQualifiedName();
+                String copyType = "Missing";
+                if (getField.getType().isQuickCopy()) {
+                    copyType = getField.getType().getQualifiedName();
+                } else if (setField.getType().isQuickCopy()) {
+                    copyType = setField.getType().getQualifiedName();
                 }
-                bw.line(5, helperType).append(HelperSuffix).append(".copy(").append("source.");
+                bw.line(5, copyType).append(CopySuffix).append(".copy(").append("source.");
                 bw.append(generateGet(getField)).append(", _d_);");
                 bw.line(4, "}");
                 bw.line(4, "break;");
@@ -598,7 +598,7 @@ public class CodeGenerator {
 
             } else if (mapping.isQuickDtoListConvert()) {
                 bw.append(" {");
-                bw.line(4, helperDef.getImportSafeType(setField.getType()))
+                bw.line(4, copyDef.getImportSafeType(setField.getType()))
                       .append(" _a_ = source.")
                       .append(generateGet(getField))
                       .append(" == null ? null : new ")
@@ -608,19 +608,19 @@ public class CodeGenerator {
                 writeSet(setField, bw, () -> bw.append("_a_"));
                 bw.append(";");
                 bw.line(4, "if (_a_ != null) {");
-                bw.line(5, "for (").append(helperDef.getImportSafeType(getField.getType().getCollectionType())).append(" _i_: source.");
+                bw.line(5, "for (").append(copyDef.getImportSafeType(getField.getType().getCollectionType())).append(" _i_: source.");
                 bw.append(generateGet(getField)).append(") {");
-                bw.line(6, helperDef.getImportSafeType(setField.getType().getCollectionType())).append(" _d_ = _i_ == null ? null : new ");
-                bw.append(helperDef.getImportSafeType(setField.getType().getCollectionType())).append("();");
+                bw.line(6, copyDef.getImportSafeType(setField.getType().getCollectionType())).append(" _d_ = _i_ == null ? null : new ");
+                bw.append(copyDef.getImportSafeType(setField.getType().getCollectionType())).append("();");
                 bw.line(6, "_a_.add(_d_);");
                 bw.line(6, "if (_d_ != null) {");
-                String helperType = "Missing";
-                if (getField.getType().getCollectionType().isQuickHelper()) {
-                    helperType = getField.getType().getCollectionType().getQualifiedName();
-                } else if (setField.getType().getCollectionType().isQuickHelper()) {
-                    helperType = setField.getType().getCollectionType().getQualifiedName();
+                String copyType = "Missing";
+                if (getField.getType().getCollectionType().isQuickCopy()) {
+                    copyType = getField.getType().getCollectionType().getQualifiedName();
+                } else if (setField.getType().getCollectionType().isQuickCopy()) {
+                    copyType = setField.getType().getCollectionType().getQualifiedName();
                 }
-                bw.line(7, helperType).append(HelperSuffix).append(".copy(_i_, _d_);");
+                bw.line(7, copyType).append(CopySuffix).append(".copy(_i_, _d_);");
                 bw.line(6, "}");
                 bw.line(5, "}");
                 bw.line(4, "}");

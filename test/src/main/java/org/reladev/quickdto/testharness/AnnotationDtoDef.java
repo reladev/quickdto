@@ -6,7 +6,7 @@ import org.reladev.quickdto.shared.ExcludeCopyTo;
 import org.reladev.quickdto.shared.QuickDto;
 import org.reladev.quickdto.testharness.impl.AnnotationImpl;
 
-@QuickDto(source = AnnotationImpl.class)
+@QuickDto(sources = AnnotationImpl.class)
 public class AnnotationDtoDef {
     @EqualsHashCode
     int equalsHash;

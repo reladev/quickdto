@@ -8,7 +8,7 @@ import org.reladev.quickdto.testharness.impl.ConvertChildImpl;
 import org.reladev.quickdto.testharness.impl.ConvertImpl;
 import org.reladev.quickdto.testharness.impl.ConvertPublicImpl;
 
-@QuickDto(source = {ConvertImpl.class, ConvertPublicImpl.class}, converter = ConvertExistingImplConverter.class)
+@QuickDto(sources = {ConvertImpl.class, ConvertPublicImpl.class}, converters = ConvertExistingImplConverter.class)
 public class ConvertSourceDtoDef {
     ConvertChildSourceDtoDef child;
     List<ConvertChildSourceDtoDef> childList;

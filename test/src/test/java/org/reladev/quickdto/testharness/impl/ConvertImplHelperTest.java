@@ -12,7 +12,7 @@
 //import static org.junit.Assert.assertNotNull;
 //
 //
-//public class ConvertImplHelperTest {
+//public class ConvertImplCopyUtilTest {
 //    @Test
 //    public void testCopy() {
 //        ConvertImpl convert = new ConvertImpl();
@@ -23,7 +23,7 @@
 //        convert.setBasicList(Arrays.asList(basic));
 //
 //        ConvertDto convertDto = new ConvertDto();
-//        ConvertImplHelper.copy(convert, convertDto);
+//        ConvertImplCopyUtil.copy(convert, convertDto);
 //
 //        ConvertChildDto convertChildDto = convertDto.getBasic();
 //        assertEquals("basic", convertChildDto.getText());
@@ -33,7 +33,7 @@
 //        assertEquals("basic", basicList.get(0).getText());
 //
 //        ConvertImpl newConvert = new ConvertImpl();
-//        ConvertImplHelper.copy(convertDto, newConvert);
+//        ConvertImplCopyUtil.copy(convertDto, newConvert);
 //
 //        BasicImpl newBasic = newConvert.getBasic();
 //        assertNotNull(newBasic);
@@ -51,13 +51,13 @@
 //        convert.setBasic(basic);
 //
 //        ConvertDto convertDto = new ConvertDto();
-//        ConvertImplHelper.copy(convert, convertDto);
+//        ConvertImplCopyUtil.copy(convert, convertDto);
 //
 //        ConvertChildDto convertChildDto = convertDto.getBasic();
 //        assertEquals("foo", convertChildDto.getText());
 //
 //        ConvertImpl newConvert = new ConvertImpl();
-//        ConvertImplHelper.copy(convertDto, newConvert);
+//        ConvertImplCopyUtil.copy(convertDto, newConvert);
 //
 //        BasicImpl newBasic = newConvert.getBasic();
 //        assertNotNull(newBasic);
@@ -73,18 +73,18 @@
 //        convert.setExisting(existingParam);
 //
 //        ConvertDto convertDto = new ConvertDto();
-//        ConvertImplHelper.copy(convert, convertDto);
+//        ConvertImplCopyUtil.copy(convert, convertDto);
 //
 //        ExistingParamDto existingDto = convertDto.getExisting();
 //        assertEquals("existingParam", existingDto.getText());
 //
 //        existingParam.setText("changed");
-//        ConvertImplHelper.copy(convert, convertDto);
+//        ConvertImplCopyUtil.copy(convert, convertDto);
 //
 //        assertEquals("changed", existingDto.getText());
 //
 //        existingDto.setText("changed2");
-//        ConvertImplHelper.copy(convertDto, convert);
+//        ConvertImplCopyUtil.copy(convertDto, convert);
 //
 //        assertEquals("changed2", existingParam.getText());
 //    }

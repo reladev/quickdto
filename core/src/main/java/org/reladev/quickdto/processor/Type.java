@@ -9,11 +9,10 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
+import org.reladev.quickdto.shared.QuickCopy;
 import org.reladev.quickdto.shared.QuickDto;
-import org.reladev.quickdto.shared.QuickDtoHelper;
 
-import static org.reladev.quickdto.processor.QuickDtoProcessor.processingEnv;
-import static org.reladev.quickdto.processor.QuickDtoProcessor.processingType;
+import static org.reladev.quickdto.processor.QuickDtoProcessor.*;
 
 public class Type {
     private TypeMirror typeMirror;
@@ -28,7 +27,7 @@ public class Type {
 
     private boolean isQuickDto;
     private boolean isQuickDtoList;
-    private boolean isQuickHelper;
+    private boolean isQuickCopy;
 
     //transient
     private String primitiveBoxType;
@@ -79,13 +78,13 @@ public class Type {
             QuickDto[] annotations = typeElement.getAnnotationsByType(QuickDto.class);
             if (annotations.length > 0) {
                 isQuickDto = true;
-                name = name.substring(0, name.length() - 3);
-                qualifiedName = qualifiedName.substring(0, qualifiedName.length() - 3);
+                name = name.substring(0, name.length() - DefSuffix.length());
+                qualifiedName = qualifiedName.substring(0, qualifiedName.length() - DefSuffix.length());
             }
 
-            QuickDtoHelper[] helperAnnotations = typeElement.getAnnotationsByType(QuickDtoHelper.class);
-            if (helperAnnotations.length > 0) {
-                isQuickHelper = true;
+            QuickCopy[] copyAnnotations = typeElement.getAnnotationsByType(QuickCopy.class);
+            if (copyAnnotations.length > 0) {
+                isQuickCopy = true;
             }
 
             List<? extends TypeMirror> typeArguments = declaredType.getTypeArguments();
@@ -137,8 +136,8 @@ public class Type {
         return qualifiedName.equals("java.util.Collection") || qualifiedName.equals("java.util.Set") || qualifiedName.equals("java.util.List");
     }
 
-    public boolean isQuickHelper() {
-        return isQuickHelper;
+    public boolean isQuickCopy() {
+        return isQuickCopy;
     }
 
     public boolean isPrimitive() {

@@ -6,7 +6,7 @@ import org.reladev.quickdto.testharness.BasicTypesDto;
 import static org.junit.Assert.assertEquals;
 
 
-public class BasicTypesHelperTest {
+public class BasicTypesCopyUtilTest {
 
     @Test
     public void testCopy() {
@@ -30,7 +30,7 @@ public class BasicTypesHelperTest {
         impl.myString = "2";
 
         BasicTypesDto dto = new BasicTypesDto();
-        BasicTypesImplHelper.copy(impl, dto);
+        BasicTypesImplCopyUtil.copy(impl, dto);
 
         assertEquals(2, dto.getMyByte());
         assertEquals(new Byte((byte) 2), dto.getObjByte());
@@ -69,7 +69,7 @@ public class BasicTypesHelperTest {
         impl.objBoolean = false;
         impl.myString = "3";
 
-        BasicTypesImplHelper.copy(dto, impl);
+        BasicTypesImplCopyUtil.copy(dto, impl);
 
         assertEquals(2, impl.getMyByte());
         assertEquals(new Byte((byte) 2), impl.getObjByte());

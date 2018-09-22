@@ -6,7 +6,7 @@ import org.reladev.quickdto.shared.GwtIncompatible;
 import org.reladev.quickdto.shared.QuickDto;
 import org.reladev.quickdto.testharness.impl.BasicTypesImpl;
 
-@QuickDto(source = BasicTypesImpl.class, feature = DirtyFeature.class)
+@QuickDto(sources = BasicTypesImpl.class, features = DirtyFeature.class)
 public class BasicTypesDirtySourceDtoDef {
     byte myByte;
     @GwtIncompatible

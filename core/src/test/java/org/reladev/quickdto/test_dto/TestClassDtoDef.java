@@ -5,7 +5,7 @@ import java.util.List;
 import org.reladev.quickdto.shared.QuickDto;
 import org.reladev.quickdto.test_classes.TestClassImpl;
 
-@QuickDto(source = TestClassImpl.class, converter = TestClassImpl.class)
+@QuickDto(sources = TestClassImpl.class, converters = TestClassImpl.class)
 public class TestClassDtoDef {
 
     private int primitive;

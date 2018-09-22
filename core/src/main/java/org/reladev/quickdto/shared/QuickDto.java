@@ -30,7 +30,7 @@ public @interface QuickDto {
 	/**
 	 * @return the source class should be used in the copy methods.
 	 */
-	Class[] source() default {};
+    Class[] sources() default {};
 
 	/**
 	 * @return whether non QuickDto annotations on fields should be placed on the property or the getter method.
@@ -49,7 +49,7 @@ public @interface QuickDto {
 	 */
 	boolean copyMethods() default false;
 
-    Class[] converter() default {};
+    Class[] converters() default {};
 
-    Class<? extends QuickDtoFeature>[] feature() default {};
+    Class<? extends QuickDtoFeature>[] features() default {};
 }

@@ -8,7 +8,7 @@ import java.util.Set;
 import org.reladev.quickdto.shared.QuickDto;
 import org.reladev.quickdto.testharness.impl.CollectionsImpl;
 
-@QuickDto(source = CollectionsImpl.class)
+@QuickDto(sources = CollectionsImpl.class)
 public class CollectionsDirtySourceDtoDef {
     int[] intArray;
     float[] floatArray;

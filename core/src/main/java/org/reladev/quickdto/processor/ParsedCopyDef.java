@@ -9,15 +9,15 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
-import javax.tools.Diagnostic.Kind;
 
 import org.reladev.quickdto.feature.QuickDtoFeature;
-import org.reladev.quickdto.shared.QuickDtoHelper;
+import org.reladev.quickdto.shared.QuickCopy;
 
 import static org.reladev.quickdto.processor.AnnotationUtil.parseClassNameList;
-import static org.reladev.quickdto.processor.QuickDtoProcessor.*;
+import static org.reladev.quickdto.processor.QuickDtoProcessor.isQuickDtoAnntoation;
+import static org.reladev.quickdto.processor.QuickDtoProcessor.processingEnv;
 
-public class ParsedHelperDef {
+public class ParsedCopyDef {
     // QuickDto Params
     private boolean fieldAnnotationsOnGetter = false;
     private List<String> targetClassNames = new ArrayList<>();
@@ -32,18 +32,18 @@ public class ParsedHelperDef {
     private List<QuickDtoFeature> features = new ArrayList<>();
     private ImportsList imports = new ImportsList();
 
-    public ParsedHelperDef(TypeElement element) {
+    public ParsedCopyDef(TypeElement element) {
         sourceDef = new ClassDef(element);
         parseQuickDtoParams(element);
 
         addClassAnnotations(element);
         createConverterMap();
         createCopyMaps(converterMap);
-        createFeatures();
+        features = AnnotationUtil.createFeatures(featureClassNames);
     }
 
     private void parseQuickDtoParams(TypeElement element) {
-        final String annotationName = QuickDtoHelper.class.getName();
+        final String annotationName = QuickCopy.class.getName();
         element.getAnnotationMirrors();
         for (AnnotationMirror am: element.getAnnotationMirrors()) {
             AnnotationValue action;
@@ -53,13 +53,13 @@ public class ParsedHelperDef {
                         action = entry.getValue();
                         fieldAnnotationsOnGetter = (boolean) action.getValue();
 
-                    } else if ("copyClass".equals(entry.getKey().getSimpleName().toString())) {
+                    } else if ("targets".equals(entry.getKey().getSimpleName().toString())) {
                         targetClassNames = parseClassNameList(entry.getValue());
 
-                    } else if ("converter".equals(entry.getKey().getSimpleName().toString())) {
+                    } else if ("converters".equals(entry.getKey().getSimpleName().toString())) {
                         converterClassNames = parseClassNameList(entry.getValue());
 
-                    } else if ("feature".equals(entry.getKey().getSimpleName().toString())) {
+                    } else if ("features".equals(entry.getKey().getSimpleName().toString())) {
                         featureClassNames = parseClassNameList(entry.getValue());
                     }
                 }
@@ -98,20 +98,6 @@ public class ParsedHelperDef {
                 ClassDef classDef = new ClassDef(typeElement);
                 converterMap.addAll(classDef.getConverterMap());
                 imports.addAll(converterMap.getImports());
-            }
-        }
-    }
-
-    private void createFeatures() {
-        for (String className: featureClassNames) {
-            try {
-                Class featureClass = Class.forName(className);
-                QuickDtoFeature feature = (QuickDtoFeature) featureClass.newInstance();
-                if (!features.contains(feature)) {
-                    features.add(feature);
-                }
-            } catch (Exception e) {
-                messager.printMessage(Kind.WARNING, "Can't create feature:" + className);
             }
         }
     }

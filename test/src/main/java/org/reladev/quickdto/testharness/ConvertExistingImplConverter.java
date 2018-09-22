@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.reladev.quickdto.testharness.impl.ConvertExistingImpl;
+import org.reladev.quickdto.testharness.impl.ConvertExistingImplCopyUtil;
 
 public class ConvertExistingImplConverter {
     public static ConvertExistingImpl convert2ExistingImpl(ConvertExistingSourceDto original, ConvertExistingImpl existing) {
@@ -39,7 +40,7 @@ public class ConvertExistingImplConverter {
         if (existing == null) {
             existing = new ConvertExistingImpl();
         }
-        //ConvertExistingImplHelper.copy(original, existing);
+        ConvertExistingImplCopyUtil.copy(original, existing);
         return existing;
     }
 
@@ -50,7 +51,7 @@ public class ConvertExistingImplConverter {
         List<ConvertExistingImpl> impls = new ArrayList<>();
         for (ConvertExistingDto dto: original) {
             ConvertExistingImpl impl = new ConvertExistingImpl();
-            //ConvertExistingImplHelper.copy(dto, impl);
+            ConvertExistingImplCopyUtil.copy(dto, impl);
             impls.add(impl);
         }
         return impls;

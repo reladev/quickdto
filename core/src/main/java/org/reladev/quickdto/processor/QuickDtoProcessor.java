@@ -1,7 +1,10 @@
 package org.reladev.quickdto.processor;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -11,24 +14,30 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic.Kind;
 
+import org.reladev.quickdto.shared.QuickCopy;
 import org.reladev.quickdto.shared.QuickDto;
-import org.reladev.quickdto.shared.QuickDtoHelper;
+import org.reladev.quickdto.shared.QuickDtoConfiguration;
 
-@SupportedAnnotationTypes({"org.reladev.quickdto.shared.QuickDto", "org.reladev.quickdto.shared.QuickDtoHelper"})
+import static org.reladev.quickdto.processor.AnnotationUtil.parseClassNameList;
+
+@SupportedAnnotationTypes({"org.reladev.quickdto.shared.QuickDto", "org.reladev.quickdto.shared.QuickCopy"})
 public class QuickDtoProcessor extends AbstractProcessor {
-    public static final String DefSuffix = "Def";
-    public static final String HelperSuffix = "Helper";
+    public static String DefSuffix = "Def";
+    public static String CopySuffix = "CopyUtil";
+    public static List<String> GlobalFeatureClassNames = new ArrayList<>();
 
     public static ProcessingEnvironment processingEnv;
     public static Messager messager;
     public static Type processingType;
 
     Set<Element> dtoElements;
-    Set<Element> helperElements;
+    Set<Element> copyElements;
     int round = 0;
 
     @Override
@@ -49,8 +58,18 @@ public class QuickDtoProcessor extends AbstractProcessor {
 
 
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment env) {
-        messager.printMessage(Kind.NOTE, "Starting round:" + round);
+        //messager.printMessage(Kind.NOTE, "Starting round:" + round);
         CodeGenerator generator = new CodeGenerator();
+
+        Set<? extends Element> configs = env.getElementsAnnotatedWith(QuickDtoConfiguration.class);
+        if (configs.size() > 1) {
+            messager.printMessage(Kind.ERROR, "More then one @QuickDtoConfiguration was found.  Only one is allowed.");
+
+        } else if (configs.size() == 1) {
+            Element config = configs.iterator().next();
+            parseQuickDtoConfiguration((TypeElement) config);
+        }
+
 
         if (dtoElements == null) {
             dtoElements = new HashSet<>();
@@ -69,36 +88,44 @@ public class QuickDtoProcessor extends AbstractProcessor {
             Element element = dtoIt.next();
             processingType = new Type(element.asType());
             try {
-                ParsedDtoDef parsedDtoDef = new ParsedDtoDef((TypeElement) element);
-                generator.writeDto(parsedDtoDef);
-                dtoIt.remove();
-            } catch (DelayParseException e) {
-                messager.printMessage(Kind.NOTE, "*****Delaying(" + element + "):" + e.getMessage());
+                if (!element.toString().endsWith(DefSuffix)) {
+                    messager.printMessage(Kind.ERROR, "QuickDto (" + element + ") definition must end with '" + DefSuffix +
+                          "'.  This can be changed with @QuickDtoConfiguration.");
+
+                } else {
+                    messager.printMessage(Kind.NOTE, "QuickDto:" + element);
+                    ParsedDtoDef parsedDtoDef = new ParsedDtoDef((TypeElement) element);
+                    generator.writeDto(parsedDtoDef);
+                    dtoIt.remove();
+                }
+            } catch (DelayParseException ignore) {
+                //messager.printMessage(Kind.NOTE, "*****Delaying(" + element + "):" + e.getMessage());
             }
         }
 
-        if (helperElements == null) {
-            helperElements = new HashSet<>();
-            helperElements.addAll(env.getElementsAnnotatedWith(QuickDtoHelper.class));
+        if (copyElements == null) {
+            copyElements = new HashSet<>();
+            copyElements.addAll(env.getElementsAnnotatedWith(QuickCopy.class));
         } else {
-            Set<Element> temp = helperElements;
-            helperElements = new HashSet<>();
+            Set<Element> temp = copyElements;
+            copyElements = new HashSet<>();
             for (Element e: temp) {
                 TypeElement typeElement = processingEnv.getElementUtils().getTypeElement(e.toString());
-                helperElements.add(typeElement);
+                copyElements.add(typeElement);
             }
         }
 
-        Iterator<? extends Element> helperIt = helperElements.iterator();
-        while (helperIt.hasNext()) {
-            Element element = helperIt.next();
+        Iterator<? extends Element> copyIt = copyElements.iterator();
+        while (copyIt.hasNext()) {
+            Element element = copyIt.next();
             processingType = new Type(element.asType());
             try {
-                ParsedHelperDef parsedHelperDef = new ParsedHelperDef((TypeElement) element);
-                generator.writeHelper(parsedHelperDef);
-                helperIt.remove();
-            } catch (DelayParseException e) {
-                messager.printMessage(Kind.NOTE, "*****Delaying(" + element + "):" + e.getMessage());
+                messager.printMessage(Kind.NOTE, "QuickCopy:" + element);
+                ParsedCopyDef parsedCopyDef = new ParsedCopyDef((TypeElement) element);
+                generator.writeCopyUtil(parsedCopyDef);
+                copyIt.remove();
+            } catch (DelayParseException ignore) {
+                //messager.printMessage(Kind.NOTE, "*****Delaying(" + element + "):" + e.getMessage());
             }
         }
 
@@ -106,4 +133,28 @@ public class QuickDtoProcessor extends AbstractProcessor {
 
         return true;
     }
+
+    private void parseQuickDtoConfiguration(TypeElement element) {
+        final String annotationName = QuickDtoConfiguration.class.getName();
+        element.getAnnotationMirrors();
+        for (AnnotationMirror am: element.getAnnotationMirrors()) {
+            AnnotationValue action;
+            if (annotationName.equals(am.getAnnotationType().toString())) {
+                for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry: am.getElementValues().entrySet()) {
+                    if ("quickDtoDefSuffix".equals(entry.getKey().getSimpleName().toString())) {
+                        action = entry.getValue();
+                        DefSuffix = (String) action.getValue();
+
+                    } else if ("quickCopySuffix".equals(entry.getKey().getSimpleName().toString())) {
+                        action = entry.getValue();
+                        DefSuffix = (String) action.getValue();
+
+                    } else if ("globalFeatures".equals(entry.getKey().getSimpleName().toString())) {
+                        GlobalFeatureClassNames = parseClassNameList(entry.getValue());
+                    }
+                }
+            }
+        }
+    }
+
 }

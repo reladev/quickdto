@@ -4,6 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.lang.model.element.AnnotationValue;
+import javax.tools.Diagnostic.Kind;
+
+import org.reladev.quickdto.feature.QuickDtoFeature;
+
+import static org.reladev.quickdto.processor.QuickDtoProcessor.messager;
 
 public class AnnotationUtil {
     static public String parseClassName(AnnotationValue action) {
@@ -26,5 +31,29 @@ public class AnnotationUtil {
         className = className.substring(0, className.length() - 6);
         return className;
     }
+
+    static public List<QuickDtoFeature> createFeatures(List<String> featureClassNames) {
+        List<QuickDtoFeature> features = new ArrayList<>();
+        for (String className: QuickDtoProcessor.GlobalFeatureClassNames) {
+            createFeature(features, className);
+        }
+        for (String className: featureClassNames) {
+            createFeature(features, className);
+        }
+        return features;
+    }
+
+    static private void createFeature(List<QuickDtoFeature> features, String className) {
+        try {
+            Class featureClass = Class.forName(className);
+            QuickDtoFeature feature = (QuickDtoFeature) featureClass.newInstance();
+            if (!features.contains(feature)) {
+                features.add(feature);
+            }
+        } catch (Exception e) {
+            messager.printMessage(Kind.WARNING, "Can't create feature:" + className);
+        }
+    }
+
 
 }
