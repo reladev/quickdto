@@ -2,11 +2,13 @@ package org.reladev.quickdto.test_classes;
 
 
 import java.util.List;
+import java.util.Set;
 
 //@QuickDtoHelper(copyClass = BasicTypesDtoDef.class)
 public class BasicConvertImpl {
     private BasicTypesImpl basic;
     private List<BasicTypesImpl> basicList;
+    private Set<BasicTypesImpl> basicSet;
     private Integer value;
 
     public BasicTypesImpl getBasic() {
@@ -23,6 +25,14 @@ public class BasicConvertImpl {
 
     public void setBasicList(List<BasicTypesImpl> basicList) {
         this.basicList = basicList;
+    }
+
+    public Set<BasicTypesImpl> getBasicSet() {
+        return basicSet;
+    }
+
+    public void setBasicSet(Set<BasicTypesImpl> basicSet) {
+        this.basicSet = basicSet;
     }
 
     public Integer getValue() {

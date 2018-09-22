@@ -37,16 +37,16 @@ public class CopyMapTest extends QuickDtoTest {
         CopyMap copyMap = new CopyMap(sourceDef, targetDef, converterMap);
 
         SoftAssertions.assertSoftly(soft -> soft.assertThat(copyMap.getSourceToTargetMappings())
-              .hasSize(3)
-              .containsKeys("basic", "basicList", "value"));
+              .hasSize(4)
+              .containsKeys("basic", "basicList", "basicSet", "value"));
 
         CopyMapping mapping = copyMap.getTargetToSourceMappings().get("basicList");
         assertNotNull(mapping);
         assertTrue(mapping.isCollectionConvert());
 
         SoftAssertions.assertSoftly(soft -> soft.assertThat(copyMap.getTargetToSourceMappings())
-              .hasSize(3)
-              .containsKeys("basic", "basicList", "value"));
+              .hasSize(4)
+              .containsKeys("basic", "basicList", "basicSet", "value"));
     }
 
     @Test

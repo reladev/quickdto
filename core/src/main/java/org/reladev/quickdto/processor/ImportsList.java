@@ -35,8 +35,8 @@ public class ImportsList implements Iterable<Type> {
             typeString = type.getName();
         }
 
-        if (type.getListType() != null) {
-            typeString += "<" + getImportSafeType(type.getListType()) + ">";
+        if (type.getCollectionType() != null) {
+            typeString += "<" + getImportSafeType(type.getCollectionType()) + ">";
         }
 
         return typeString;

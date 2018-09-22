@@ -6,7 +6,6 @@ import java.util.Set;
 
 import org.reladev.quickdto.shared.QuickDtoHelper;
 import org.reladev.quickdto.testharness.ConvertChildDto;
-import org.reladev.quickdto.testharness.ConvertChildSourceDtoDef;
 import org.reladev.quickdto.testharness.ConvertDtoDef;
 import org.reladev.quickdto.testharness.ConvertExistingImplConverter;
 
@@ -24,9 +23,9 @@ public class ConvertImpl {
     private List<ConvertExistingImpl> existingList2;
 
     //future support
-    private ConvertChildSourceDtoDef[] childArray;
-    private Set<ConvertChildSourceDtoDef> childSet;
-    private Map<String, ConvertChildSourceDtoDef> childMap;
+    private ConvertChildImpl[] childArray;
+    private Set<ConvertChildImpl> childSet;
+    private Map<String, ConvertChildImpl> childMap;
 
     public static ConvertChildImpl convert2ChildImpl(ConvertChildDto source) {
         if (source == null) {
@@ -69,27 +68,27 @@ public class ConvertImpl {
         this.existingList = existingList;
     }
 
-    public ConvertChildSourceDtoDef[] getChildArray() {
+    public ConvertChildImpl[] getChildArray() {
         return childArray;
     }
 
-    public void setChildArray(ConvertChildSourceDtoDef[] childArray) {
+    public void setChildArray(ConvertChildImpl[] childArray) {
         this.childArray = childArray;
     }
 
-    public Set<ConvertChildSourceDtoDef> getChildSet() {
+    public Set<ConvertChildImpl> getChildSet() {
         return childSet;
     }
 
-    public void setChildSet(Set<ConvertChildSourceDtoDef> childSet) {
+    public void setChildSet(Set<ConvertChildImpl> childSet) {
         this.childSet = childSet;
     }
 
-    public Map<String, ConvertChildSourceDtoDef> getChildMap() {
+    public Map<String, ConvertChildImpl> getChildMap() {
         return childMap;
     }
 
-    public void setChildMap(Map<String, ConvertChildSourceDtoDef> childMap) {
+    public void setChildMap(Map<String, ConvertChildImpl> childMap) {
         this.childMap = childMap;
     }
 

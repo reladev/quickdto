@@ -45,7 +45,7 @@ public class CopyMapping {
                 // try to find converter
                 converterMethod = converterMap.get(getType, setType);
                 if (converterMethod == null && getType.isCollection() && setType.isCollection()) {
-                    converterMethod = converterMap.get(getType.getListType(), setType.getListType());
+                    converterMethod = converterMap.get(getType.getCollectionType(), setType.getCollectionType());
                     if (converterMethod != null) {
                         if (!converterMethod.isExistingParam()) {
                             isCollectionConvert = true;

@@ -17,7 +17,7 @@ import static org.reladev.quickdto.processor.QuickDtoProcessor.processingType;
 public class Type {
     private TypeMirror typeMirror;
     private TypeKind typeKind;
-    private Type listType;
+    private Type collectionType;
 
     private String originalName;
     private String name;
@@ -59,7 +59,7 @@ public class Type {
             qualifiedName = qualifiedName.substring(0, qualifiedName.length() - 3);
         }
 
-        this.listType = new Type(listType);
+        this.collectionType = new Type(listType);
     }
 
     public Type(TypeMirror typeMirror) {
@@ -85,12 +85,12 @@ public class Type {
                 isQuickHelper = true;
             }
 
-            if (qualifiedName.equals("java.util.List")) {
+            if (isCollection()) {
                 DeclaredType declaredType = (DeclaredType) typeMirror;
                 List<? extends TypeMirror> typeArguments = declaredType.getTypeArguments();
                 if (typeArguments.size() == 1) {
-                    listType = new Type(typeArguments.get(0));
-                    if (this.listType.isQuickDto()) {
+                    collectionType = new Type(typeArguments.get(0));
+                    if (this.collectionType.isQuickDto()) {
                         isQuickDtoList = true;
                     }
                 }
@@ -106,6 +106,18 @@ public class Type {
         }
     }
 
+    public String getConcreteCollection() {
+        switch (qualifiedName) {
+            case "java.util.Set":
+                return "java.util.HashSet";
+            case "java.util.Collection":
+            case "java.util.List":
+                return "java.util.ArrayList";
+            default:
+                return "UnknownCollection";
+        }
+    }
+
     public boolean isQuickDto() {
         return isQuickDto;
     }
@@ -115,7 +127,7 @@ public class Type {
     }
 
     public boolean isCollection() {
-        return listType != null;
+        return qualifiedName.equals("java.util.Collection") || qualifiedName.equals("java.util.Set") || qualifiedName.equals("java.util.List");
     }
 
     public boolean isQuickHelper() {
@@ -173,12 +185,8 @@ public class Type {
         return "boolean".equals(name) || "Boolean".equals(name);
     }
 
-    public boolean isList() {
-        return false;
-    }
-
-    public Type getListType() {
-        return listType;
+    public Type getCollectionType() {
+        return collectionType;
     }
 
     public String getOriginalName() {
@@ -214,7 +222,8 @@ public class Type {
             return false;
         }
         Type type = (Type) o;
-        return Objects.equals(packageString, type.packageString) && Objects.equals(name, type.name) && Objects.equals(listType, type.listType);
+        return Objects.equals(packageString, type.packageString) && Objects.equals(name, type.name) &&
+              Objects.equals(collectionType, type.collectionType);
     }
 
     @Override
@@ -224,8 +233,8 @@ public class Type {
 
     @Override
     public String toString() {
-        if (listType != null) {
-            return name + "<" + listType + ">";
+        if (collectionType != null) {
+            return name + "<" + collectionType + ">";
         }
         return name;
     }

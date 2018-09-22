@@ -2,6 +2,7 @@ package org.reladev.quickdto.test_dto;
 
 
 import java.util.List;
+import java.util.Set;
 
 import org.reladev.quickdto.feature.DirtyFeature;
 import org.reladev.quickdto.shared.QuickDto;
@@ -13,6 +14,7 @@ import org.reladev.quickdto.test_classes.StringIntConverter;
 public class BasicConvertDtoDef {
     BasicTypesDtoDef basic;
     List<BasicTypesDtoDef> basicList;
+    Set<BasicTypesDtoDef> basicSet;
     String value;
 
     public static BasicTypesImpl convert(BasicTypesDto convertChildDto) {

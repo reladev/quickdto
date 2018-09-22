@@ -372,15 +372,15 @@ public class CodeGenerator {
                     bw.line(4, dtoDef.getImportSafeType(setField.getType()))
                           .append(" _l_ = ")
                           .append(getField.getName())
-                          .append(" == null ? null : new java.util.ArrayList<>();");
+                          .append(" == null ? null : new ")
+                          .append(setField.getType().getConcreteCollection())
+                          .append("<>();");
                     bw.line(4, "dest.");
-                    writeSet(setField, bw, () -> {
-                        bw.append("_l_");
-                    });
+                    writeSet(setField, bw, () -> bw.append("_l_"));
                     bw.append(";");
 
                     bw.line(4, "if (_l_ != null) {");
-                    bw.line(5, "for (").append(dtoDef.getImportSafeType(getField.getType().getListType()));
+                    bw.line(5, "for (").append(dtoDef.getImportSafeType(getField.getType().getCollectionType()));
                     bw.append(" _i_: ").append(getField.getName()).append(") {");
                     bw.line(6, "_l_.add(")
                           .append(converter.getClassType().getOriginalName())
@@ -459,15 +459,18 @@ public class CodeGenerator {
                 bw.line(1, "}");
 
             } else if (mapping.isQuickDtoListConvert()) {
-                bw.append("source.").append(generateGet(getField)).append(" == null ? null : new java.util.ArrayList<>();");
+                bw.append("source.")
+                      .append(generateGet(getField))
+                      .append(" == null ? null : new ")
+                      .append(setField.getType().getConcreteCollection())
+                      .append("<>();");
                 bw.line(1, "if (").append(setField.getName()).append(" != null) {");
-                bw.line(2, "for (").append(dtoDef.getImportSafeType(getField.getType().getListType()))
+                bw.line(2, "for (").append(dtoDef.getImportSafeType(getField.getType().getCollectionType()))
                       .append(" _i_: source.")
                       .append(generateGet(getField))
                       .append(") {");
-                bw.line(3, dtoDef.getImportSafeType(setField.getType().getListType()))
-                      .append(" _d_ = _i_ == null ? null : new ")
-                      .append(dtoDef.getImportSafeType(setField.getType().getListType()))
+                bw.line(3, dtoDef.getImportSafeType(setField.getType().getCollectionType()))
+                      .append(" _d_ = _i_ == null ? null : new ").append(dtoDef.getImportSafeType(setField.getType().getCollectionType()))
                       .append("();");
                 bw.line(3, setField.getName()).append(".add(_d_);");
                 bw.line(3, "if (_d_ != null) {");
@@ -538,14 +541,14 @@ public class CodeGenerator {
                           .append(" _l_ = ")
                           .append("source.")
                           .append(generateGet(getField))
-                          .append(" == null ? null : new java.util.ArrayList<>();");
+                          .append(" == null ? null : new ")
+                          .append(setField.getType().getConcreteCollection())
+                          .append("<>();");
                     bw.line(4, "dest.");
-                    writeSet(setField, bw, () -> {
-                        bw.append("_l_");
-                    });
+                    writeSet(setField, bw, () -> bw.append("_l_"));
                     bw.append(";");
                     bw.line(4, "if (_l_ != null) {");
-                    bw.line(5, "for (").append(helperDef.getImportSafeType(getField.getType().getListType()));
+                    bw.line(5, "for (").append(helperDef.getImportSafeType(getField.getType().getCollectionType()));
                     bw.append(" _i_: ").append("source.").append(generateGet(getField)).append(") {");
                     bw.line(6, "_l_.add(")
                           .append(converter.getClassType().getOriginalName())
@@ -595,25 +598,27 @@ public class CodeGenerator {
 
             } else if (mapping.isQuickDtoListConvert()) {
                 bw.append(" {");
-                bw.line(4, "java.util.List<").append(helperDef.getImportSafeType(setField.getType().getListType()))
-                      .append("> _a_ = source.")
+                bw.line(4, helperDef.getImportSafeType(setField.getType()))
+                      .append(" _a_ = source.")
                       .append(generateGet(getField))
-                      .append(" == null ? null : new java.util.ArrayList<>();");
+                      .append(" == null ? null : new ")
+                      .append(setField.getType().getConcreteCollection())
+                      .append("<>();");
                 bw.line(4, "dest.");
                 writeSet(setField, bw, () -> bw.append("_a_"));
                 bw.append(";");
                 bw.line(4, "if (_a_ != null) {");
-                bw.line(5, "for (").append(helperDef.getImportSafeType(getField.getType().getListType())).append(" _i_: source.");
+                bw.line(5, "for (").append(helperDef.getImportSafeType(getField.getType().getCollectionType())).append(" _i_: source.");
                 bw.append(generateGet(getField)).append(") {");
-                bw.line(6, helperDef.getImportSafeType(setField.getType().getListType())).append(" _d_ = _i_ == null ? null : new ");
-                bw.append(helperDef.getImportSafeType(setField.getType().getListType())).append("();");
+                bw.line(6, helperDef.getImportSafeType(setField.getType().getCollectionType())).append(" _d_ = _i_ == null ? null : new ");
+                bw.append(helperDef.getImportSafeType(setField.getType().getCollectionType())).append("();");
                 bw.line(6, "_a_.add(_d_);");
                 bw.line(6, "if (_d_ != null) {");
                 String helperType = "Missing";
-                if (getField.getType().getListType().isQuickHelper()) {
-                    helperType = getField.getType().getListType().getQualifiedName();
-                } else if (setField.getType().getListType().isQuickHelper()) {
-                    helperType = setField.getType().getListType().getQualifiedName();
+                if (getField.getType().getCollectionType().isQuickHelper()) {
+                    helperType = getField.getType().getCollectionType().getQualifiedName();
+                } else if (setField.getType().getCollectionType().isQuickHelper()) {
+                    helperType = setField.getType().getCollectionType().getQualifiedName();
                 }
                 bw.line(7, helperType).append(HelperSuffix).append(".copy(_i_, _d_);");
                 bw.line(6, "}");

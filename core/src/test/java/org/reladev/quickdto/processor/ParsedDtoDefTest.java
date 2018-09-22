@@ -21,9 +21,9 @@ public class ParsedDtoDefTest extends QuickDtoTest {
 
         CopyMap copyMap = parsedDtoDef.getCopyMaps()
                                         .get(0);
-        assertEquals(3, copyMap.getSourceToTargetMappings()
+        assertEquals(4, copyMap.getSourceToTargetMappings()
                                 .size());
-        assertEquals(3, copyMap.getTargetToSourceMappings()
+        assertEquals(4, copyMap.getTargetToSourceMappings()
                                 .size());
 
         System.out.println();

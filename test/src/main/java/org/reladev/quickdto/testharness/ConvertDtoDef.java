@@ -1,6 +1,7 @@
 package org.reladev.quickdto.testharness;
 
 import java.util.List;
+import java.util.Set;
 
 import org.reladev.quickdto.shared.QuickDto;
 
@@ -19,8 +20,8 @@ public class ConvertDtoDef {
 
 
     //todo support automatic conversion for other common types
-    //ConvertChildSourceDtoDef[] childArray;
-    //Set<ConvertChildSourceDtoDef> childSet;
-    //Map<String, ConvertChildSourceDtoDef> childMap;
+    //ConvertChildDtoDef[] childArray;
+    Set<ConvertChildDtoDef> childSet;
+    //Map<String, ConvertChildDtoDef> childMap;
 
 }

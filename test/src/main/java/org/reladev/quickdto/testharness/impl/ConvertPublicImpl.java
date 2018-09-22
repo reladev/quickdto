@@ -6,7 +6,6 @@ import java.util.Set;
 
 import org.reladev.quickdto.shared.QuickDtoHelper;
 import org.reladev.quickdto.testharness.ConvertChildDto;
-import org.reladev.quickdto.testharness.ConvertChildSourceDtoDef;
 import org.reladev.quickdto.testharness.ConvertDtoDef;
 import org.reladev.quickdto.testharness.ConvertExistingImplConverter;
 
@@ -24,9 +23,9 @@ public class ConvertPublicImpl {
     public List<ConvertExistingImpl> existingList2;
 
     //future support
-    public ConvertChildSourceDtoDef[] childArray;
-    public Set<ConvertChildSourceDtoDef> childSet;
-    public Map<String, ConvertChildSourceDtoDef> childMap;
+    public ConvertChildImpl[] childArray;
+    public Set<ConvertChildImpl> childSet;
+    public Map<String, ConvertChildImpl> childMap;
 
     public static ConvertChildImpl convert2ChildImpl(ConvertChildDto source) {
         if (source == null) {
