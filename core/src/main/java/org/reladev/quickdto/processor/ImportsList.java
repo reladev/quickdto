@@ -17,6 +17,12 @@ public class ImportsList implements Iterable<Type> {
         } else {
             imports.put(type.getName(), null);
         }
+
+        if (type.getGenericTypes() != null) {
+            for (Type genericType: type.getGenericTypes()) {
+                add(genericType);
+            }
+        }
     }
 
     public void addAll(Iterable<Type> types) {
@@ -35,8 +41,9 @@ public class ImportsList implements Iterable<Type> {
             typeString = type.getName();
         }
 
-        if (type.getCollectionType() != null) {
-            typeString += "<" + getImportSafeType(type.getCollectionType()) + ">";
+        if (type.getGenericTypes() != null) {
+            String generics = type.getGenericTypes().stream().map(this::getImportSafeType).collect(Collectors.joining(","));
+            typeString += "<" + generics + ">";
         }
 
         return typeString;

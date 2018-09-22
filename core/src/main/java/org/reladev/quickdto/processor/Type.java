@@ -1,5 +1,6 @@
 package org.reladev.quickdto.processor;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -18,6 +19,7 @@ public class Type {
     private TypeMirror typeMirror;
     private TypeKind typeKind;
     private Type collectionType;
+    private ArrayList<Type> genericTypes;
 
     private String originalName;
     private String name;
@@ -67,6 +69,7 @@ public class Type {
         typeKind = typeMirror.getKind();
 
         if (typeKind == TypeKind.DECLARED) {
+            DeclaredType declaredType = (DeclaredType) typeMirror;
             TypeElement typeElement = (TypeElement) processingEnv.getTypeUtils().asElement(typeMirror);
             originalName = typeElement.getSimpleName().toString();
             name = typeElement.getSimpleName().toString();
@@ -85,15 +88,19 @@ public class Type {
                 isQuickHelper = true;
             }
 
-            if (isCollection()) {
-                DeclaredType declaredType = (DeclaredType) typeMirror;
-                List<? extends TypeMirror> typeArguments = declaredType.getTypeArguments();
-                if (typeArguments.size() == 1) {
-                    collectionType = new Type(typeArguments.get(0));
-                    if (this.collectionType.isQuickDto()) {
-                        isQuickDtoList = true;
-                    }
+            List<? extends TypeMirror> typeArguments = declaredType.getTypeArguments();
+            if (typeArguments.size() > 0) {
+                genericTypes = new ArrayList<>();
+                for (TypeMirror genericMirror: typeArguments) {
+                    genericTypes.add(new Type(genericMirror));
                 }
+                collectionType = new Type(typeArguments.get(0));
+                if (this.collectionType.isQuickDto()) {
+                    isQuickDtoList = true;
+                }
+            }
+            if (isCollection()) {
+                collectionType = genericTypes.get(0);
             }
 
         } else if (typeKind == TypeKind.ERROR && !processingType.name.equals(typeMirror.toString())) {
@@ -187,6 +194,10 @@ public class Type {
 
     public Type getCollectionType() {
         return collectionType;
+    }
+
+    public ArrayList<Type> getGenericTypes() {
+        return genericTypes;
     }
 
     public String getOriginalName() {
