@@ -32,6 +32,16 @@ public @interface QuickDto {
 	 */
     Class[] sources() default {};
 
+    /**
+     * @return the list of converter classes that should be used for any type mismatches.
+     */
+    Class[] converters() default {};
+
+    /**
+     * @return the list of features that should be included in when generating the DTO.
+     */
+    Class<? extends QuickDtoFeature>[] features() default {};
+
 	/**
 	 * @return whether non QuickDto annotations on fields should be placed on the property or the getter method.
 	 *
@@ -49,7 +59,4 @@ public @interface QuickDto {
 	 */
 	boolean copyMethods() default false;
 
-    Class[] converters() default {};
-
-    Class<? extends QuickDtoFeature>[] features() default {};
 }

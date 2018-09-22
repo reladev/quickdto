@@ -13,9 +13,12 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.CLASS)
 public @interface QuickCopy {
     /**
-     * @return the source class should be used in the copy methods.
+     * @return the list of classes that should have copy to and from methods.
      */
     Class[] targets() default {};
 
+    /**
+     * @return the list of converter classes that should be used for any type mismatches.
+     */
     Class[] converters() default {};
 }
