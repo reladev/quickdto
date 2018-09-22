@@ -1,4 +1,7 @@
 package org.reladev.quickdto.jartest;
 
-//@QuickDtoConfiguration(globalFeatures = DirtyFeature.class)
+import org.reladev.quickdto.feature.DirtyFeature;
+import org.reladev.quickdto.shared.QuickDtoConfiguration;
+
+@QuickDtoConfiguration(globalFeatures = DirtyFeature.class)
 public class QuickDtoConfig {}
