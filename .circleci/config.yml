@@ -24,8 +24,8 @@ jobs:
     steps:
     - checkout
     - run:
-      name: envSetup
-      command: ls
+        name: envSetup
+        command: ls
 
     # Download and cache dependencies
     - restore_cache:
