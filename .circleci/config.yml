@@ -25,7 +25,7 @@ jobs:
     - checkout
     - run:
         name: envSetup
-        command: ls
+        command: ls .circleci
 
     # Download and cache dependencies
     - restore_cache:
