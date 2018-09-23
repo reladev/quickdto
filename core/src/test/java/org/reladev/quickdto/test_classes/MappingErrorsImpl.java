@@ -12,6 +12,7 @@ public class MappingErrorsImpl {
     private String targetNoSetter;
     private String sourceNoGetter;
     private String sourceNoSetter;
+    private Integer convertMethodStatic;
 
     public Integer getTypeMismatch() {
         return typeMismatch;
@@ -60,4 +61,13 @@ public class MappingErrorsImpl {
     //public void setSourceNoSetter(String sourceNoSetter) {
     //    this.sourceNoSetter = sourceNoSetter;
     //}
+
+
+    public Integer getConvertMethodStatic() {
+        return convertMethodStatic;
+    }
+
+    public void setConvertMethodStatic(Integer convertMethodStatic) {
+        this.convertMethodStatic = convertMethodStatic;
+    }
 }

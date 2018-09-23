@@ -16,6 +16,7 @@ public class ConverterMethod {
     private Type fromType;
     private Type classType;
     private boolean existingParam;
+    private boolean isStatic;
     private String name;
 
     public static ConverterMethod build(ExecutableElement execElement, Type classType) {
@@ -50,9 +51,8 @@ public class ConverterMethod {
             }
         }
 
-        if (!execElement.getModifiers().contains(Modifier.STATIC)) {
-            messager.printMessage(Kind.WARNING, "IGNORING (" + execElement + ") to be converter, must be static.");
-            isValid = false;
+        if (execElement.getModifiers().contains(Modifier.STATIC)) {
+            converter.isStatic = true;
         }
 
         return isValid ? converter : null;
@@ -62,13 +62,21 @@ public class ConverterMethod {
     }
 
     protected ConverterMethod(Type fromType, Type toType) {
+        this.classType = new Type(ConverterMethod.class);
         this.toType = toType;
         this.fromType = fromType;
+        isStatic = true;
     }
 
     protected ConverterMethod(Class fromType, Class toType) {
+        this(fromType, toType, true);
+    }
+
+    protected ConverterMethod(Class fromType, Class toType, boolean isStatic) {
+        this.classType = new Type(ConverterMethod.class);
         this.toType = new Type(toType);
         this.fromType = new Type(fromType);
+        this.isStatic = isStatic;
     }
 
     public Type getToType() {
@@ -85,6 +93,10 @@ public class ConverterMethod {
 
     public boolean isExistingParam() {
         return existingParam;
+    }
+
+    public boolean isStatic() {
+        return isStatic;
     }
 
     public String getName() {

@@ -54,6 +54,8 @@ public class CopyMapTest extends QuickDtoTest {
         ClassDef targetDef = new ClassDef(elementMappingErrorsDtoDef);
         ClassDef sourceDef = new ClassDef(elementMappingErrorsImpl);
         ConverterMap converterMap = new ConverterMap();
+        converterMap.add(new ConverterMethod(Integer.class, Float.class, false));
+        converterMap.add(new ConverterMethod(Float.class, Integer.class));
 
         CopyMap copyMap = new CopyMap(sourceDef, targetDef, converterMap);
         CopyMapping mapping;
@@ -92,6 +94,11 @@ public class CopyMapTest extends QuickDtoTest {
         assertThat(mapping.getErrorMessage()).isNull();
         mapping = copyMap.getTargetToSourceMappings().get("sourceNoSetter");
         assertThat(mapping.getErrorMessage()).isNotNull();
+
+        mapping = copyMap.getSourceToTargetMappings().get("convertMethodStatic");
+        assertThat(mapping.getErrorMessage()).isNotNull();
+        mapping = copyMap.getTargetToSourceMappings().get("convertMethodStatic");
+        assertThat(mapping.getErrorMessage()).isNull();
 
     }
 

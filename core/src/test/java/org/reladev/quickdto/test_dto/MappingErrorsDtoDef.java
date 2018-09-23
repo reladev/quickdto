@@ -13,6 +13,7 @@ public class MappingErrorsDtoDef {
     private String targetNoSetter;
     private String sourceNoGetter;
     private String sourceNoSetter;
+    private Float convertMethodStatic;
 
     public String getSourceNoField() {
         return sourceNoField;
@@ -68,5 +69,13 @@ public class MappingErrorsDtoDef {
 
     public void setSourceNoSetter(String sourceNoSetter) {
         this.sourceNoSetter = sourceNoSetter;
+    }
+
+    public Float getConvertMethodStatic() {
+        return convertMethodStatic;
+    }
+
+    public void setConvertMethodStatic(Float convertMethodStatic) {
+        this.convertMethodStatic = convertMethodStatic;
     }
 }

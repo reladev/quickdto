@@ -58,6 +58,11 @@ public class CopyMapping {
                     }
                 }
 
+                if (converterMethod != null && !converterMethod.isStatic()) {
+                    errorMessage = converterMethod.getClassType().getName() + "." + converterMethod.getName() +
+                          "() needs to be marked static to be used as a converter method.";
+                }
+
                 if (converterMethod == null && errorMessage == null) {
                     if (setField.getType().isQuickDto()) {
                         isQuickDtoConvert = true;
