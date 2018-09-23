@@ -24,7 +24,7 @@ jobs:
     steps:
     - checkout
     - run:
-      name: Check Scripts
+      name: envSetup
       command: ls
 
     # Download and cache dependencies
