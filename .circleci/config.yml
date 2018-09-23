@@ -25,9 +25,7 @@ jobs:
     - checkout
     - run:
       name: Check Scripts
-      command: |
-        find . -type f -name '*.sh' | wc -l
-        find . -type f -name '*.sh' | xargs shellcheck --external-sources
+      command: ls
 
     # Download and cache dependencies
     - restore_cache:
