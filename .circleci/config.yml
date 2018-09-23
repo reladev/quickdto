@@ -23,9 +23,9 @@ jobs:
 
     steps:
     - checkout
-    - run:
-        name: envSetup
-        command: sh .circleci/envSetup.sh
+    #    - run:
+    #        name: envSetup
+    #        command: sh .circleci/envSetup.sh
 
     # Download and cache dependencies
     - restore_cache:
