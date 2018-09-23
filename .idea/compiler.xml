@@ -12,11 +12,14 @@
       <entry name="!?*.clj" />
     </wildcardResourcePatterns>
     <annotationProcessing>
-      <profile default="true" name="Default" enabled="true">
+      <profile default="true" name="Default">
         <sourceOutputDir name="build/generated/source/apt/main" />
         <sourceTestOutputDir name="build/generated/source/apt/tests" />
         <outputRelativeToContentRoot value="true" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="core" target="8" />
+    </bytecodeTargetLevel>
   </component>
 </project>

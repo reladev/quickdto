@@ -1,23 +1,39 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url "https://plugins.gradle.org/m2/" }
+    }
+    dependencies {
+        classpath "net.ltgt.gradle:gradle-apt-plugin:0.9"
+    }
+}
+
 apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'signing'
 apply plugin: 'idea'
+apply plugin: 'net.ltgt.apt'
 
 archivesBaseName = 'quickdto'
 group = 'org.reladev.quickdto'
-version = '0.7.0'
+version = '1.0.0_RC1-SNAPSHOT'
 
 repositories {
     mavenCentral()
+    jcenter()
 }
 
 dependencies {
     compile files("${System.properties['java.home']}/../lib/tools.jar")
+
     testCompile group: 'junit', name: 'junit', version: '4.10'
+    testCompile group: 'com.matthew-tamlin', name: 'avatar', version: '2.1.0'
+    testCompile group: 'org.mockito', name: 'mockito-core', version: '2.21.0'
+    testCompile group: 'org.assertj', name: 'assertj-core', version: '3.11.0'
 }
 
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 jar {
    from sourceSets.main.allJava

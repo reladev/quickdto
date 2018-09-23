@@ -3,9 +3,8 @@ package org.reladev.quickdto.testharness;
 
 import org.reladev.quickdto.shared.GwtIncompatible;
 import org.reladev.quickdto.shared.QuickDto;
-import org.reladev.quickdto.testharness.impl.TestImpl;
 
-@QuickDto(source = {TestImpl.class, CollectionsDtoDef.class}, strictCopy = false)
+@QuickDto
 public class BasicTypesDtoDef {
     byte myByte;
     @GwtIncompatible

@@ -1,35 +1,27 @@
 package org.reladev.quickdto.testharness;
 
+import java.util.List;
+import java.util.Set;
+
 import org.reladev.quickdto.shared.QuickDto;
-import org.reladev.quickdto.shared.StrictCopy;
-import org.reladev.quickdto.testharness.impl.Convert;
-import org.reladev.quickdto.testharness.impl.Simple;
 
-@QuickDto(source = Convert.class)
-@StrictCopy(false)
+@QuickDto
 public class ConvertDtoDef {
-	int normal;
-	SimpleDtoDef simple;
-	//List<SimpleDtoDef> simpleList;
-    boolean bool;
+    ConvertChildDtoDef child;
+    List<ConvertChildDtoDef> childList;
+    ConvertExistingDtoDef existing;
+    List<ConvertExistingDtoDef> existingList;
 
-	public static SimpleDto convert(Simple simple) {
-		SimpleDto simpleDto = new SimpleDto();
-		simpleDto.copyFrom(simple);
-		return simpleDto;
-	}
+    // duplicates to test variables in copy
+    ConvertChildDtoDef child2;
+    List<ConvertChildDtoDef> childList2;
+    ConvertExistingDtoDef existing2;
+    List<ConvertExistingDtoDef> existingList2;
 
-	public static Simple convert(SimpleDto simpleDto) {
-		Simple simple = new Simple();
-		simpleDto.copyTo(simple);
-		return simple;
-	}
 
-    public static Integer convert(int i) {
-        return i;
-    }
+    //todo support automatic conversion for other common types
+    //ConvertChildDtoDef[] childArray;
+    Set<ConvertChildDtoDef> childSet;
+    //Map<String, ConvertChildDtoDef> childMap;
 
-    public static int convert(Integer i) {
-        return i == null ? 0 : i;
-    }
 }
