@@ -61,6 +61,7 @@ public class UserDtoDef {
 	String lastName;
 }
 ```
+
 ##Create a CopyUtil
 To create a CopyUtil, just add the QuickCopy annotation to any class, and provide
 target classes that QuickCopy should copy to and from.  QuickCopy will generate a 
@@ -145,8 +146,14 @@ fields as dirty, and copy methods to only copy fields that are dirty.
 
 The dirty feature is create for handling partial objects that are sent in Restful APIs that use PATCH.
  
-###Methods
-TBD
+###Addtional Methods
+* __boolean checkDirty()__ - checks to see if any of the fields are dirty.
+* __boolean checkDirty(Fields field)__ - checks if the specified field is dirty.
+* __List<Fields> listDirtyFields()__ - lists all the dirty fields.
+* __resetDirty()__ - resets all the dirty fields, so checkDirty() is false.
+* __copyDirtyTo({source})__ - a copying method that copies the dirty fields from 
+the dto to the passed source.
+
 
 FAQ
 =======

@@ -48,15 +48,4 @@ public @interface QuickDto {
 	 * Defaults to false.
 	 */
 	boolean fieldAnnotationsOnGetter() default false;
-
-	/**
-	 * @return whether QuickDto should copy methods defined in the DtoDef
-	 * into the DTO class.  This functionality uses JDK classes that are not guaranteed to exist in
-	 * all JDKs, so it isn't included by default. This is a compile time dependency, so if the copy
-	 * is successful, then it can be used on any JVM.
-	 *
-	 * Defaults to false.
-	 */
-	boolean copyMethods() default false;
-
 }

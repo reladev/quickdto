@@ -6,11 +6,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Used on fields that should only be copied from the DTO to the source.  This
- * is useful for password fields that are sent in, but never sent out.
+ * Used on fields that should be excluded from coping from this field to another destination.
  */
 @Target({ElementType.FIELD, ElementType.METHOD})
 @Retention(RetentionPolicy.CLASS)
 public @interface ExcludeCopyFrom {
+    /**
+     * @return list of classes that the exclude applies to.  If a copy class is not in the list, exclude
+     * won't apply unless the list is blank, then the excluded will be applied to all targets/sources.
+     */
     Class[] value() default {};
 }

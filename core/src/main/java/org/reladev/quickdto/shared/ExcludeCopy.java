@@ -6,16 +6,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Used on fields that should only be copied from the source to the DTO.  This
- * is useful for ID fields that are created on the server and need to be sent out.
+ * Used on fields that should be excluded from all copy methods.
  */
 @Target({ElementType.FIELD, ElementType.METHOD})
 @Retention(RetentionPolicy.CLASS)
 public @interface ExcludeCopy {
     /**
-     * @return whether the getter method should be generated in the DTO.
-     * <p>
-     * Defaults to true.
+     * @return list of classes that the exclude applies to.  If a copy class is not in the list, exclude
+     * won't apply unless the list is blank, then the excluded will be applied to all targets/sources.
      */
     Class[] value() default {};
 }
