@@ -14,7 +14,9 @@ public class CopyMap {
 
     public CopyMap(ClassDef sourceDef, ClassDef targetDef, ConverterMap converterMap) {
         this.targetDef = targetDef;
+        imports.add(targetDef.getType());
         this.sourceDef = sourceDef;
+        imports.add(sourceDef.getType());
 
         for (Field targetField: targetDef.getNameFieldMap().values()) {
             String name = targetField.getName();

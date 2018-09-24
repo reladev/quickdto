@@ -144,4 +144,11 @@ public class CopyMapTest extends QuickDtoTest {
         assertThat(copyMap.getTargetToSourceMappings().get("sourceNoSetterSourceExcludeTo")).isNull();
     }
 
+    @Test
+    public void verifySameNameCopyMaps() {
+        ClassDef targetDef = new ClassDef(elementSameNameDto);
+        ClassDef sourceDef = new ClassDef(elementSameNameTest);
+
+        CopyMap copyMap = new CopyMap(sourceDef, targetDef, new ConverterMap());
+    }
 }

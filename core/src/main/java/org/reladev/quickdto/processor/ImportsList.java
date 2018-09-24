@@ -9,13 +9,17 @@ public class ImportsList implements Iterable<Type> {
     private HashMap<String, Type> imports = new HashMap<>();
 
     public void add(Type type) {
-        Type importType = imports.get(type.getName());
-
-        if (importType == null || importType.getQualifiedName().equals(type.getQualifiedName())) {
+        if (!imports.containsKey(type.getName())) {
             imports.put(type.getName(), type);
 
         } else {
-            imports.put(type.getName(), null);
+            Type importType = imports.get(type.getName());
+            if (importType != null && importType.getQualifiedName().equals(type.getQualifiedName())) {
+                imports.put(type.getName(), type);
+
+            } else {
+                imports.put(type.getName(), null);
+            }
         }
 
         if (type.getGenericTypes() != null) {

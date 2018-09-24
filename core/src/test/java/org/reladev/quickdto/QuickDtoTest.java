@@ -20,7 +20,8 @@ public class QuickDtoTest {
           "src/test/java/org/reladev/quickdto/test_classes/BasicTypesImpl.java",
           "src/test/java/org/reladev/quickdto/test_classes/GenericsBaseImpl.java",
           "src/test/java/org/reladev/quickdto/test_classes/GenericsImpl.java", "src/test/java/org/reladev/quickdto/test_dto/MappingErrorsDtoDef.java",
-          "src/test/java/org/reladev/quickdto/test_classes/MappingErrorsImpl.java",
+          "src/test/java/org/reladev/quickdto/test_classes/MappingErrorsImpl.java", "src/test/java/org/reladev/quickdto/test_dto/SameNameCopy.java",
+          "src/test/java/org/reladev/quickdto/test_classes/SameNameCopy.java",
           "src/test/java/org/reladev/quickdto/test_dto/TestClassDtoDef.java",
           "src/test/java/org/reladev/quickdto/test_classes/TestClassImpl.java",};
 
@@ -37,6 +38,8 @@ public class QuickDtoTest {
     public TypeElement elementGenericsImpl;
     public TypeElement elementMappingErrorsDtoDef;
     public TypeElement elementMappingErrorsImpl;
+    public TypeElement elementSameNameDto;
+    public TypeElement elementSameNameTest;
     public TypeElement elementTestClassDtoDef;
     public TypeElement elementTestClassImpl;
 
@@ -77,6 +80,12 @@ public class QuickDtoTest {
                     break;
                 case "org.reladev.quickdto.test_classes.MappingErrorsImpl":
                     elementMappingErrorsImpl = (TypeElement) element;
+                    break;
+                case "org.reladev.quickdto.test_dto.SameNameCopy":
+                    elementSameNameDto = (TypeElement) element;
+                    break;
+                case "org.reladev.quickdto.test_classes.SameNameCopy":
+                    elementSameNameTest = (TypeElement) element;
                     break;
                 case "org.reladev.quickdto.test_dto.TestClassDtoDef":
                     elementTestClassDtoDef = (TypeElement) element;
