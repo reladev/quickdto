@@ -40,7 +40,7 @@ Here are a list of links to setup APT:
 How
 =======
 
-##Create DTO
+## Create DTO
 QuickDto generates DTOs based on a definition object.  Create POJO with the
 DTO name plus the suffix "Def".  Add @QuickDto to the class, and fill the 
 POJO with fields.  Modifiers don't matter, and no need to generate getters or
@@ -62,7 +62,7 @@ public class UserDtoDef {
 }
 ```
 
-##Create a CopyUtil
+## Create a CopyUtil
 To create a CopyUtil, just add the QuickCopy annotation to any class, and provide
 target classes that QuickCopy should copy to and from.  QuickCopy will generate a 
 new class with the same package and name with "CopyUtil" append.  QuickCopy will use the
@@ -81,9 +81,9 @@ public class User {
 }
 ```
 
-#Annotations
+# Annotations
 
-##@QuickDto
+## @QuickDto
 Used on the class to signify that it is a DtoDef, and is required for APT processing.
 
 * `extend` - defines the class the DTO should extend.
@@ -98,13 +98,13 @@ into the DTO class.  This functionality uses JDK classes that are not guaranteed
 all JDKs, so it isn't included by default. This is a compile time dependency, so if the copy 
 is successful, then it can be used on any JVM.
 
-##@QuickCopy
+## @QuickCopy
 Used on the class to signify that a CopyUtil should be created to help coping to the specified targets.
 
 * `targets` - 
 * `converters` - 
 
-##@QuickDtoConfiguration
+## @QuickDtoConfiguration
 Used on the class to signify that a CopyUtil should be created to help coping to the specified targets.
 
 * `quickDtoDefSuffix` ["Def"] - The suffix for all QuickDto Definitions.  The suffix will be removed 
@@ -113,40 +113,40 @@ to for the Dto's name.
 form the QuickCopy class.
 * `globalFeatures` - Features that should be included on every QuickDto/QuickCopy.
 
-##@EqualsHashCode
+## @EqualsHashCode
 Used on fields that should be included in the `equals` and `hashCode` methods.  Only fields
 with this annotation will be included, but if no field have the annotation, then all the 
 fields are included in the `equals` and `hashCode` methods.
 
-##@ExcludeCopy
+## @ExcludeCopy
 Used on fields that should not be included in copy methods.
 
 * `values` - Specifies which Classes the exclude should apply to.  If blank then it applies to all classes.
 
-##@ExcludeCopyFrom
+## @ExcludeCopyFrom
 Used on fields that should not be included in copy methods that copy this field to another field.
 
 * `values` - Specifies which Classes the exclude should apply to.  If blank then it applies to all classes.
 
-##@ExcludeCopyTo
+## @ExcludeCopyTo
 Used on fields that should not be included in copy methods that copy another field into this field.
 
 * `values` - Specifies which Classes the exclude should apply to.  If blank then it applies to all classes.
 
-#Features
+# Features
 QuickDto allows for extensions to be made to add logic to DTOs.  To create a feature, just extend 
 QuickDtoFeature and implement the methods to add logic to DTO getter, setters, or extra methods.  To use 
 a feature, just add the feature class to any @QuickDto, or the @QuickDtoConfiguration to apply to the 
 feature to all DTOs.
 
-##DirtyFeature
+## DirtyFeature
 This feature adds dirty tracking to DTOs. If a field changes, it is marked dirty.  Additional methods are 
 added to provide checking if overall object is dirty or if specific fields are dirty, marking/resetting 
 fields as dirty, and copy methods to only copy fields that are dirty.
 
 The dirty feature is create for handling partial objects that are sent in Restful APIs that use PATCH.
  
-###Addtional Methods
+### Addtional Methods
 * __boolean checkDirty()__ - checks to see if any of the fields are dirty.
 * __boolean checkDirty(Fields field)__ - checks if the specified field is dirty.
 * __List<Fields> listDirtyFields()__ - lists all the dirty fields.
